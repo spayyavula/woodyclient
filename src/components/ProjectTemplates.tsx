@@ -112,3 +112,8 @@ impl NeuralNetwork {
     pub fn train(&mut self, data: &[(Tensor, Tensor)], epochs: usize, learning_rate: f64) -> Result<()> {
         for epoch in 0..epochs {
             let mut total_loss =
+        }
+      }
+    }
+  ]
+}
