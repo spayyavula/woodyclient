@@ -14,10 +14,15 @@ import {
   Monitor,
   Tablet,
   Users,
-  ShoppingCart
+  ShoppingCart,
+  User,
+  CreditCard
 } from 'lucide-react';
 
 interface ToolbarProps {
+  user?: any;
+  onShowPricing: () => void;
+  onShowProfile: () => void;
   onToggleTerminal: () => void;
   onToggleCollaboration: () => void;
   onToggleMarketplace: () => void;
@@ -27,6 +32,9 @@ interface ToolbarProps {
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({ 
+  user,
+  onShowPricing,
+  onShowProfile,
   onToggleTerminal, 
   onToggleCollaboration, 
   onToggleMarketplace,
@@ -104,6 +112,24 @@ const Toolbar: React.FC<ToolbarProps> = ({
       </div>
 
       <div className="flex items-center space-x-1">
+        {user && (
+          <>
+            <button 
+              onClick={onShowPricing}
+              className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors"
+              title="Pricing & Plans"
+            >
+              <CreditCard className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={onShowProfile}
+              className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors"
+              title="User Profile"
+            >
+              <User className="w-4 h-4" />
+            </button>
+          </>
+        )}
         <button className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors">
           <Search className="w-4 h-4" />
         </button>

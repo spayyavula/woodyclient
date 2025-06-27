@@ -1,4 +1,11 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { supabase } from './lib/supabase';
+import LoginPage from './components/auth/LoginPage';
+import SignupPage from './components/auth/SignupPage';
+import PricingPage from './components/PricingPage';
+import SuccessPage from './components/SuccessPage';
+import UserProfile from './components/UserProfile';
 import FileExplorer from './components/FileExplorer';
 import TabBar from './components/TabBar';
 import CodeEditor from './components/CodeEditor';
@@ -9,6 +16,7 @@ import ProjectTemplates from './components/ProjectTemplates';
 import DemoMode from './components/DemoMode';
 import CollaborationPanel from './components/CollaborationPanel';
 import DeveloperMarketplace from './components/DeveloperMarketplace';
+import { User, CreditCard } from 'lucide-react';
 
 interface Tab {
   id: string;
@@ -19,6 +27,13 @@ interface Tab {
 }
 
 function App() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [showPricing, setShowPricing] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  
   const [tabs, setTabs] = useState<Tab[]>([
     {
       id: 'main.rs',
@@ -63,6 +78,73 @@ function App() {
       color: '#10B981'
     }
   ]);
+
+  useEffect(() => {
+    // Check if we're on the success page
+    if (window.location.pathname === '/success') {
+      setShowSuccess(true);
+    }
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleAuthSuccess = () => {
+    // Auth state will be updated by the listener
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setShowProfile(false);
+  };
+
+  const handleSuccessContinue = () => {
+    setShowSuccess(false);
+    // Clear the success URL
+    window.history.replaceState({}, '', '/');
+  };
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🦀</div>
+          <div className="w-8 h-8 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (showSuccess) {
+    return <SuccessPage onContinue={handleSuccessContinue} />;
+  }
+
+  if (!user) {
+    if (authMode === 'signup') {
+      return (
+        <SignupPage
+          onSuccess={handleAuthSuccess}
+          onSwitchToLogin={() => setAuthMode('login')}
+        />
+      );
+    }
+    return (
+      <LoginPage
+        onSuccess={handleAuthSuccess}
+        onSwitchToSignup={() => setAuthMode('signup')}
+      />
+    );
+  }
 
   const fileTemplates: Record<string, { content: string; language: string }> = {
     'main.rs': {
@@ -1093,6 +1175,9 @@ ios:
     <div className="h-screen flex flex-col bg-gray-900 text-white">
       {/* Toolbar */}
       <Toolbar
+        user={user}
+        onShowPricing={() => setShowPricing(true)}
+        onShowProfile={() => setShowProfile(true)}
         onToggleTerminal={() => setTerminalVisible(!terminalVisible)}
         onToggleCollaboration={() => setCollaborationVisible(!collaborationVisible)}
         onToggleMarketplace={() => setMarketplaceVisible(!marketplaceVisible)}
@@ -1195,6 +1280,20 @@ ios:
         onClose={() => setTemplatesVisible(false)}
         onSelectTemplate={handleSelectTemplate}
       />
+
+      {/* Pricing Modal */}
+      {showPricing && (
+        <PricingPage onClose={() => setShowPricing(false)} />
+      )}
+
+      {/* User Profile Modal */}
+      {showProfile && (
+        <UserProfile
+          user={user}
+          onClose={() => setShowProfile(false)}
+          onLogout={handleLogout}
+        />
+      )}
 
       {/* Demo Mode */}
       <DemoMode
