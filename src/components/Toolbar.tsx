@@ -16,7 +16,8 @@ import {
   Users,
   ShoppingCart,
   User,
-  CreditCard
+  CreditCard,
+  Eye
 } from 'lucide-react';
 
 interface ToolbarProps {
@@ -29,6 +30,7 @@ interface ToolbarProps {
   onSave: () => void;
   onRun: () => void;
   onShowTemplates: () => void;
+  onShowMobilePreview: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({ 
@@ -40,7 +42,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onToggleMarketplace,
   onSave, 
   onRun, 
-  onShowTemplates 
+  onShowTemplates,
+  onShowMobilePreview
 }) => {
   const [selectedPlatform, setSelectedPlatform] = React.useState('android');
 
@@ -107,6 +110,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
           </button>
           <button className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors">
             <Bug className="w-4 h-4" />
+          </button>
+          <button 
+            onClick={onShowMobilePreview}
+            className="flex items-center px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded text-white text-sm font-medium transition-colors"
+            title="Preview Mobile App"
+          >
+            <Eye className="w-4 h-4 mr-1" />
+            Preview
           </button>
         </div>
       </div>

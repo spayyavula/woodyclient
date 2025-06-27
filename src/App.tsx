@@ -16,6 +16,7 @@ import ProjectTemplates from './components/ProjectTemplates';
 import DemoMode from './components/DemoMode';
 import CollaborationPanel from './components/CollaborationPanel';
 import DeveloperMarketplace from './components/DeveloperMarketplace';
+import MobilePreview from './components/MobilePreview';
 import { User, CreditCard } from 'lucide-react';
 
 interface Tab {
@@ -62,6 +63,7 @@ function App() {
   const [demoMode, setDemoMode] = useState(false);
   const [collaborationVisible, setCollaborationVisible] = useState(false);
   const [marketplaceVisible, setMarketplaceVisible] = useState(false);
+  const [mobilePreviewVisible, setMobilePreviewVisible] = useState(false);
   const [collaborators, setCollaborators] = useState([
     {
       userId: '2',
@@ -1153,6 +1155,7 @@ ios:
         onSave={handleSave}
         onRun={handleRun}
         onShowTemplates={() => setTemplatesVisible(true)}
+        onShowMobilePreview={() => setMobilePreviewVisible(true)}
       />
 
       {/* Main Content */}
@@ -1274,6 +1277,14 @@ ios:
       <DeveloperMarketplace
         isVisible={marketplaceVisible}
         onToggle={() => setMarketplaceVisible(!marketplaceVisible)}
+      />
+
+      {/* Mobile Preview */}
+      <MobilePreview
+        isVisible={mobilePreviewVisible}
+        onClose={() => setMobilePreviewVisible(false)}
+        currentCode={currentTab?.content || ''}
+        platform="android"
       />
     </div>
   );
