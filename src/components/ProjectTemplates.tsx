@@ -1761,7 +1761,7 @@ impl CryptoWallet {
                 let rate = self.exchange_rates.get(&account.currency).unwrap_or(&0.0);
                 total_usd += account.balance * rate;
                 
-                println!("  {} Balance: {:.8} {} (${:.2})", 
+                println!("  {} Balance: {:.8} {} (${{:.2}})", 
                     account.currency, account.balance, account.currency, account.balance * rate);
             }
             
