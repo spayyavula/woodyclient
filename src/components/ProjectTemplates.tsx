@@ -146,6 +146,354 @@ tokio = { version = "1.0", features = ["full"] }`,
         }
       }
     },
+    // Python AI/ML Templates
+    {
+      id: 'python-ai-research',
+      name: 'AI/ML Research Environment',
+      description: 'Comprehensive Python environment for AI research with PyTorch, TensorFlow, and advanced ML libraries',
+      category: 'AI/ML',
+      difficulty: 'Intermediate',
+      tags: ['Python', 'PyTorch', 'TensorFlow', 'Research', 'Deep Learning'],
+      icon: <Brain className="w-6 h-6 text-blue-400" />,
+      estimatedTime: '2-3 weeks',
+      useCase: 'Build and train state-of-the-art AI models for research and production',
+      techStack: ['Python', 'PyTorch', 'TensorFlow', 'Scikit-learn', 'Pandas'],
+      features: [
+        'Pre-configured ML environment',
+        'GPU acceleration support',
+        'Jupyter notebook integration',
+        'Experiment tracking with W&B',
+        'Model deployment ready'
+      ],
+      files: {
+        'main.py': {
+          content: `#!/usr/bin/env python3
+"""
+AI/ML Research Environment
+High-performance Python for machine learning and data science
+"""
+
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, Dataset
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
+import seaborn as sns
+
+class NeuralNetwork(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(NeuralNetwork, self).__init__()
+        self.layer1 = nn.Linear(input_size, hidden_size)
+        self.layer2 = nn.Linear(hidden_size, hidden_size)
+        self.layer3 = nn.Linear(hidden_size, output_size)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(0.2)
+        
+    def forward(self, x):
+        x = self.relu(self.layer1(x))
+        x = self.dropout(x)
+        x = self.relu(self.layer2(x))
+        x = self.dropout(x)
+        x = self.layer3(x)
+        return x
+
+def main():
+    print("🐍 Python AI/ML Research Environment")
+    print("=" * 50)
+    
+    # Set random seeds for reproducibility
+    torch.manual_seed(42)
+    np.random.seed(42)
+    
+    # Generate sample data
+    X = np.random.randn(1000, 10)
+    y = np.random.randint(0, 3, 1000)
+    
+    # Initialize model
+    model = NeuralNetwork(input_size=10, hidden_size=64, output_size=3)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    
+    print("✅ AI/ML environment ready!")
+    print("🚀 Start building amazing AI models!")
+
+if __name__ == "__main__":
+    main()`,
+          language: 'python',
+        },
+        'requirements.txt': {
+          content: `# Core ML/AI Libraries
+torch>=2.0.0
+torchvision>=0.15.0
+tensorflow>=2.13.0
+scikit-learn>=1.3.0
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Computer Vision
+opencv-python>=4.8.0
+Pillow>=10.0.0
+
+# NLP
+transformers>=4.30.0
+datasets>=2.13.0
+
+# Jupyter
+jupyter>=1.0.0
+ipykernel>=6.23.0`,
+          language: 'text',
+        }
+      }
+    },
+    {
+      id: 'python-computer-vision',
+      name: 'Computer Vision Pipeline',
+      description: 'Advanced computer vision with PyTorch, OpenCV, and state-of-the-art models',
+      category: 'AI/ML',
+      difficulty: 'Advanced',
+      tags: ['Computer Vision', 'PyTorch', 'OpenCV', 'Object Detection'],
+      icon: <Camera className="w-6 h-6 text-green-400" />,
+      estimatedTime: '3-4 weeks',
+      useCase: 'Build production-ready computer vision applications',
+      techStack: ['Python', 'PyTorch', 'OpenCV', 'YOLO', 'Transformers'],
+      features: [
+        'Object detection and tracking',
+        'Image classification',
+        'Face recognition',
+        'Real-time video processing',
+        'Model deployment'
+      ],
+      files: {
+        'computer_vision.py': {
+          content: `#!/usr/bin/env python3
+"""
+Computer Vision Pipeline
+Advanced computer vision with PyTorch and OpenCV
+"""
+
+import cv2
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+
+class ObjectDetector:
+    def __init__(self, model_name='yolov5s'):
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.model = torch.hub.load('ultralytics/yolov5', model_name, pretrained=True)
+        self.model.to(self.device)
+        
+    def detect(self, image, confidence=0.5):
+        results = self.model(image)
+        detections = []
+        
+        for *box, conf, cls in results.xyxy[0].cpu().numpy():
+            if conf > confidence:
+                detections.append({
+                    'bbox': box,
+                    'confidence': float(conf),
+                    'class': int(cls)
+                })
+        
+        return detections
+
+def main():
+    print("🔍 Computer Vision Pipeline")
+    print("=" * 40)
+    
+    detector = ObjectDetector()
+    print("✅ Models loaded successfully!")
+    print("🎯 Computer vision pipeline ready!")
+
+if __name__ == "__main__":
+    main()`,
+          language: 'python',
+        }
+      }
+    },
+    {
+      id: 'python-nlp-transformers',
+      name: 'NLP with Transformers',
+      description: 'Natural language processing using Hugging Face Transformers and advanced NLP techniques',
+      category: 'AI/ML',
+      difficulty: 'Advanced',
+      tags: ['NLP', 'Transformers', 'BERT', 'Text Analysis'],
+      icon: <FileText className="w-6 h-6 text-purple-400" />,
+      estimatedTime: '2-3 weeks',
+      useCase: 'Build intelligent text processing and understanding systems',
+      techStack: ['Python', 'Transformers', 'PyTorch', 'NLTK', 'spaCy'],
+      features: [
+        'Text classification',
+        'Named entity recognition',
+        'Question answering',
+        'Text summarization',
+        'Sentiment analysis'
+      ],
+      files: {
+        'nlp_transformer.py': {
+          content: `#!/usr/bin/env python3
+"""
+Natural Language Processing with Transformers
+Advanced NLP using Hugging Face Transformers
+"""
+
+import torch
+from transformers import (
+    AutoTokenizer, AutoModel, AutoModelForSequenceClassification,
+    pipeline
+)
+import numpy as np
+from typing import List, Dict
+
+class TextClassifier:
+    def __init__(self, model_name="bert-base-uncased", num_labels=2):
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            model_name, num_labels=num_labels
+        ).to(self.device)
+        
+    def predict(self, texts: List[str]) -> List[Dict]:
+        self.model.eval()
+        results = []
+        
+        for text in texts:
+            inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+            inputs = {k: v.to(self.device) for k, v in inputs.items()}
+            
+            with torch.no_grad():
+                outputs = self.model(**inputs)
+                predictions = torch.nn.functional.softmax(outputs.logits, dim=-1)
+                predicted_class = torch.argmax(predictions).item()
+                confidence = predictions[0][predicted_class].item()
+                
+                results.append({
+                    'text': text,
+                    'predicted_class': predicted_class,
+                    'confidence': confidence
+                })
+        
+        return results
+
+def main():
+    print("🤖 Advanced NLP with Transformers")
+    print("=" * 50)
+    
+    classifier = TextClassifier()
+    print("✅ Models loaded successfully!")
+    print("🎯 NLP pipeline ready!")
+
+if __name__ == "__main__":
+    main()`,
+          language: 'python',
+        }
+      }
+    },
+    {
+      id: 'python-data-science',
+      name: 'Data Science Pipeline',
+      description: 'Comprehensive data analysis and machine learning with pandas, scikit-learn, and visualization',
+      category: 'AI/ML',
+      difficulty: 'Intermediate',
+      tags: ['Data Science', 'Pandas', 'Scikit-learn', 'Visualization'],
+      icon: <BarChart3 className="w-6 h-6 text-orange-400" />,
+      estimatedTime: '2-3 weeks',
+      useCase: 'Perform end-to-end data analysis and build predictive models',
+      techStack: ['Python', 'Pandas', 'Scikit-learn', 'Matplotlib', 'Plotly'],
+      features: [
+        'Data preprocessing and cleaning',
+        'Exploratory data analysis',
+        'Machine learning models',
+        'Interactive visualizations',
+        'Statistical analysis'
+      ],
+      files: {
+        'data_science.py': {
+          content: `#!/usr/bin/env python3
+"""
+Data Science & Analytics Pipeline
+Comprehensive data analysis with pandas, numpy, and visualization
+"""
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+import warnings
+warnings.filterwarnings('ignore')
+
+class DataAnalyzer:
+    def __init__(self, data: pd.DataFrame):
+        self.data = data.copy()
+        self.numeric_columns = data.select_dtypes(include=[np.number]).columns.tolist()
+        self.categorical_columns = data.select_dtypes(include=['object']).columns.tolist()
+        
+    def basic_info(self):
+        return {
+            'shape': self.data.shape,
+            'columns': self.data.columns.tolist(),
+            'missing_values': self.data.isnull().sum().to_dict(),
+            'numeric_columns': self.numeric_columns,
+            'categorical_columns': self.categorical_columns
+        }
+    
+    def create_visualizations(self):
+        plt.figure(figsize=(15, 10))
+        
+        # Distribution plots
+        for i, col in enumerate(self.numeric_columns[:4]):
+            plt.subplot(2, 3, i + 1)
+            self.data[col].hist(bins=30, alpha=0.7)
+            plt.title(f'Distribution of {col}')
+        
+        # Correlation heatmap
+        if len(self.numeric_columns) > 1:
+            plt.subplot(2, 3, 5)
+            corr_matrix = self.data[self.numeric_columns].corr()
+            sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0)
+            plt.title('Correlation Matrix')
+        
+        plt.tight_layout()
+        plt.show()
+
+def main():
+    print("📊 Data Science & Analytics Pipeline")
+    print("=" * 50)
+    
+    # Generate sample data
+    np.random.seed(42)
+    data = {
+        'feature1': np.random.randn(1000),
+        'feature2': np.random.randn(1000),
+        'feature3': np.random.randn(1000),
+        'target': np.random.randint(0, 2, 1000)
+    }
+    df = pd.DataFrame(data)
+    
+    analyzer = DataAnalyzer(df)
+    info = analyzer.basic_info()
+    print(f"Dataset shape: {info['shape']}")
+    
+    analyzer.create_visualizations()
+    print("✅ Data science pipeline complete!")
+
+if __name__ == "__main__":
+    main()`,
+          language: 'python',
+        }
+      }
+    },
     // Mobile Development Templates
     {
       id: 'flutter-rust-mobile',

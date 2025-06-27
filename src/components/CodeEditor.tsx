@@ -164,6 +164,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         .replace(/(\/\/.*$)/gm, '<span style="color: #6A9955; font-style: italic;">$1</span>')
         .replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color: #6A9955; font-style: italic;">$1</span>')
         // Keywords (VS Code: #569CD6)
+        // Comments (VS Code: #6A9955)
+        .replace(/(\/\/.*$)/gm, '<span style="color: #6A9955; font-style: italic;">$1</span>')
+        .replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color: #6A9955; font-style: italic;">$1</span>')
+        // Keywords (VS Code: #569CD6)
         .replace(/\b(@interface|@implementation|@end|@property|@synthesize|@dynamic|@protocol|@optional|@required|@class|@import|#import|#include|if|else|for|while|do|switch|case|break|continue|return|static|const|extern|typedef|struct|enum|union)\b/g, '<span style="color: #569CD6; font-weight: 500;">$1</span>')
         // Types (VS Code: #4EC9B0)
         .replace(/\b(NSString|NSArray|NSDictionary|NSNumber|NSObject|UIView|UIViewController|UIApplication|UIWindow|BOOL|NSInteger|CGFloat|CGRect|CGPoint|CGSize|id|void|int|float|double|char|long|short)\b/g, '<span style="color: #4EC9B0;">$1</span>')
@@ -206,10 +210,37 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         // Strings (VS Code: #CE9178)
         .replace(/("(?:[^"\\]|\\.)*")\s*:/g, '<span style="color: #9CDCFE;">$1</span>:')
         .replace(/:\s*("(?:[^"\\]|\\.)*")/g, ': <span style="color: #CE9178;">$1</span>')
+        // Types (VS Code: #4EC9B0)
         // Numbers (VS Code: #B5CEA8)
+        // Strings (VS Code: #CE9178)
         .replace(/:\s*(\d+\.?\d*)/g, ': <span style="color: #B5CEA8;">$1</span>')
-        // Booleans (VS Code: #569CD6)
-        .replace(/:\s*(true|false|null)/g, ': <span style="color: #569CD6;">$1</span>');
+        // Numbers (VS Code: #B5CEA8)
+        .replace(/\b(\d+\.?\d*)\b/g, '<span style="color: #B5CEA8;">$1</span>')
+        // Function names (VS Code: #DCDCAA)
+        .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, '<span style="color: #DCDCAA;">$1</span>');
+    }
+    
+    if (language === 'python') {
+      return code
+        // Comments (VS Code: #6A9955)
+        .replace(/(#.*$)/gm, '<span style="color: #6A9955; font-style: italic;">$1</span>')
+        .replace(/("""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\')/g, '<span style="color: #6A9955; font-style: italic;">$1</span>')
+        // Keywords (VS Code: #569CD6)
+        .replace(/\b(def|class|import|from|as|if|elif|else|for|while|try|except|finally|with|lambda|return|yield|break|continue|pass|raise|assert|del|global|nonlocal|and|or|not|in|is|True|False|None)\b/g, '<span style="color: #569CD6; font-weight: 500;">$1</span>')
+        // Built-in functions and types (VS Code: #4EC9B0)
+        .replace(/\b(print|len|range|enumerate|zip|map|filter|sum|max|min|abs|round|sorted|reversed|list|dict|set|tuple|str|int|float|bool|type|isinstance|hasattr|getattr|setattr|super|property|staticmethod|classmethod)\b/g, '<span style="color: #4EC9B0;">$1</span>')
+        // Decorators (VS Code: #9CDCFE)
+        .replace(/(@\w+)/g, '<span style="color: #9CDCFE;">$1</span>')
+        // Strings (VS Code: #CE9178)
+        .replace(/(f?"(?:[^"\\]|\\.)*"|f?'(?:[^'\\]|\\.)*'|f?"""[\s\S]*?"""|f?\'\'\'[\s\S]*?\'\'\')/g, '<span style="color: #CE9178;">$1</span>')
+        // Numbers (VS Code: #B5CEA8)
+        .replace(/\b(\d+\.?\d*(?:[eE][+-]?\d+)?)\b/g, '<span style="color: #B5CEA8;">$1</span>')
+        // Function definitions (VS Code: #DCDCAA)
+        .replace(/\b(def\s+)([a-zA-Z_][a-zA-Z0-9_]*)/g, '$1<span style="color: #DCDCAA;">$2</span>')
+        // Class definitions (VS Code: #4EC9B0)
+        .replace(/\b(class\s+)([a-zA-Z_][a-zA-Z0-9_]*)/g, '$1<span style="color: #4EC9B0;">$2</span>')
+        // Function calls (VS Code: #DCDCAA)
+        .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, '<span style="color: #DCDCAA;">$1</span>');
     }
     
     return code;
