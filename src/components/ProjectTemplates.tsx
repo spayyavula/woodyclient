@@ -148,13 +148,13 @@ tokio = { version = "1.0", features = ["full"] }`,
     },
     // Python AI/ML Templates
     {
-      id: 'python-ai-research',
-      name: 'AI/ML Research Environment',
-      description: 'Comprehensive Python environment for AI research with PyTorch, TensorFlow, and advanced ML libraries',
+      id: 'python-ml-research',
+      name: 'Python AI/ML Research Lab',
+      description: 'Complete Python environment for cutting-edge AI research with PyTorch, TensorFlow, and latest ML libraries',
       category: 'AI/ML',
       difficulty: 'Intermediate',
       tags: ['Python', 'PyTorch', 'TensorFlow', 'Research', 'Deep Learning'],
-      icon: <Brain className="w-6 h-6 text-blue-400" />,
+      icon: <Brain className="w-6 h-6 text-purple-400" />,
       estimatedTime: '2-3 weeks',
       useCase: 'Build and train state-of-the-art AI models for research and production',
       techStack: ['Python', 'PyTorch', 'TensorFlow', 'Scikit-learn', 'Pandas'],
@@ -252,66 +252,194 @@ ipykernel>=6.23.0`,
       }
     },
     {
-      id: 'python-computer-vision',
-      name: 'Computer Vision Pipeline',
-      description: 'Advanced computer vision with PyTorch, OpenCV, and state-of-the-art models',
+      id: 'python-deep-learning',
+      name: 'Deep Learning with PyTorch',
+      description: 'Advanced deep learning models with PyTorch, including CNNs, RNNs, and Transformers',
       category: 'AI/ML',
       difficulty: 'Advanced',
-      tags: ['Computer Vision', 'PyTorch', 'OpenCV', 'Object Detection'],
+      tags: ['Deep Learning', 'PyTorch', 'Neural Networks', 'CNN', 'RNN'],
+      icon: <Zap className="w-6 h-6 text-yellow-400" />,
+      estimatedTime: '3-4 weeks',
+      useCase: 'Build advanced deep learning models for various AI applications',
+      techStack: ['Python', 'PyTorch', 'CUDA', 'TensorBoard', 'Weights & Biases'],
+      features: [
+        'Custom neural architectures',
+        'GPU acceleration',
+        'Experiment tracking',
+        'Model checkpointing',
+        'Distributed training'
+      ],
+      files: {
+        'deep_learning.py': {
+          content: `#!/usr/bin/env python3
+"""
+Deep Learning with PyTorch
+Advanced neural networks and deep learning models
+"""
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+from torch.utils.data import DataLoader, Dataset
+from torch.utils.tensorboard import SummaryWriter
+import numpy as np
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+
+class ConvNet(nn.Module):
+    def __init__(self, num_classes=10):
+        super(ConvNet, self).__init__()
+        self.conv1 = nn.Conv2d(3, 32, 3, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, 3, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, 3, padding=1)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.dropout = nn.Dropout(0.5)
+        self.fc1 = nn.Linear(128 * 4 * 4, 512)
+        self.fc2 = nn.Linear(512, num_classes)
+    
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = self.pool(F.relu(self.conv3(x)))
+        x = x.view(-1, 128 * 4 * 4)
+        x = self.dropout(F.relu(self.fc1(x)))
+        x = self.fc2(x)
+        return x
+
+class Trainer:
+    def __init__(self, model, device):
+        self.model = model.to(device)
+        self.device = device
+        self.writer = SummaryWriter()
+    
+    def train_epoch(self, dataloader, optimizer, criterion):
+        self.model.train()
+        total_loss = 0
+        correct = 0
+        total = 0
+        
+        for batch_idx, (data, target) in enumerate(tqdm(dataloader)):
+            data, target = data.to(self.device), target.to(self.device)
+            
+            optimizer.zero_grad()
+            output = self.model(data)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
+            
+            total_loss += loss.item()
+            pred = output.argmax(dim=1, keepdim=True)
+            correct += pred.eq(target.view_as(pred)).sum().item()
+            total += target.size(0)
+        
+        return total_loss / len(dataloader), 100. * correct / total
+
+def main():
+    print("🧠 Deep Learning with PyTorch")
+    print("=" * 50)
+    
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"🚀 Using device: {device}")
+    
+    model = ConvNet(num_classes=10)
+    trainer = Trainer(model, device)
+    
+    print("✅ Deep learning environment ready!")
+    print("🎯 Start training your neural networks!")
+
+if __name__ == "__main__":
+    main()`,
+          language: 'python',
+        }
+      }
+    },
+    {
+      id: 'python-computer-vision',
+      name: 'Computer Vision with OpenCV',
+      description: 'Advanced computer vision with OpenCV, YOLO, and real-time image processing',
+      category: 'AI/ML',
+      difficulty: 'Advanced',
+      tags: ['Computer Vision', 'OpenCV', 'YOLO', 'Object Detection'],
       icon: <Camera className="w-6 h-6 text-green-400" />,
       estimatedTime: '3-4 weeks',
       useCase: 'Build production-ready computer vision applications',
-      techStack: ['Python', 'PyTorch', 'OpenCV', 'YOLO', 'Transformers'],
+      techStack: ['Python', 'OpenCV', 'YOLO', 'PyTorch', 'Ultralytics'],
       features: [
         'Object detection and tracking',
+        'Real-time video processing',
         'Image classification',
         'Face recognition',
-        'Real-time video processing',
-        'Model deployment'
+        'Edge deployment'
       ],
       files: {
         'computer_vision.py': {
           content: `#!/usr/bin/env python3
 """
-Computer Vision Pipeline
-Advanced computer vision with PyTorch and OpenCV
+Computer Vision with OpenCV
+Advanced computer vision and object detection
 """
 
 import cv2
-import torch
-import torch.nn as nn
-import torchvision.transforms as transforms
 import numpy as np
-from PIL import Image
+import torch
+from ultralytics import YOLO
 import matplotlib.pyplot as plt
+from PIL import Image
 
 class ObjectDetector:
-    def __init__(self, model_name='yolov5s'):
+    def __init__(self, model_path='yolov8n.pt'):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model = torch.hub.load('ultralytics/yolov5', model_name, pretrained=True)
-        self.model.to(self.device)
-        
-    def detect(self, image, confidence=0.5):
-        results = self.model(image)
+        self.model = YOLO(model_path)
+        print(f"🎯 Model loaded on {self.device}")
+    
+    def detect_objects(self, image_path, conf_threshold=0.5):
+        results = self.model(image_path, conf=conf_threshold)
         detections = []
         
-        for *box, conf, cls in results.xyxy[0].cpu().numpy():
-            if conf > confidence:
-                detections.append({
-                    'bbox': box,
-                    'confidence': float(conf),
-                    'class': int(cls)
-                })
+        for result in results:
+            boxes = result.boxes
+            if boxes is not None:
+                for box in boxes:
+                    detection = {
+                        'bbox': box.xyxy[0].cpu().numpy(),
+                        'confidence': float(box.conf[0]),
+                        'class_id': int(box.cls[0]),
+                        'class_name': self.model.names[int(box.cls[0])]
+                    }
+                    detections.append(detection)
         
         return detections
+    
+    def process_video(self, video_path, output_path=None):
+        cap = cv2.VideoCapture(video_path)
+        frame_count = 0
+        
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            
+            results = self.model(frame)
+            annotated_frame = results[0].plot()
+            
+            cv2.imshow('Object Detection', annotated_frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+            
+            frame_count += 1
+        
+        cap.release()
+        cv2.destroyAllWindows()
+        print(f"📹 Processed {frame_count} frames")
 
 def main():
-    print("🔍 Computer Vision Pipeline")
-    print("=" * 40)
+    print("👁️ Computer Vision with OpenCV")
+    print("=" * 50)
     
     detector = ObjectDetector()
-    print("✅ Models loaded successfully!")
-    print("🎯 Computer vision pipeline ready!")
+    print("✅ Computer vision pipeline ready!")
+    print("🎯 Start detecting objects in images and videos!")
 
 if __name__ == "__main__":
     main()`,
@@ -322,39 +450,93 @@ if __name__ == "__main__":
     {
       id: 'python-nlp-transformers',
       name: 'NLP with Transformers',
-      description: 'Natural language processing using Hugging Face Transformers and advanced NLP techniques',
+      description: 'Natural language processing using Hugging Face Transformers and large language models',
       category: 'AI/ML',
       difficulty: 'Advanced',
-      tags: ['NLP', 'Transformers', 'BERT', 'Text Analysis'],
-      icon: <FileText className="w-6 h-6 text-purple-400" />,
+      tags: ['NLP', 'Transformers', 'BERT', 'GPT', 'LLM'],
+      icon: <FileText className="w-6 h-6 text-blue-400" />,
       estimatedTime: '2-3 weeks',
-      useCase: 'Build intelligent text processing and understanding systems',
-      techStack: ['Python', 'Transformers', 'PyTorch', 'NLTK', 'spaCy'],
+      useCase: 'Build intelligent text processing and language understanding systems',
+      techStack: ['Python', 'Transformers', 'PyTorch', 'Datasets', 'Tokenizers'],
       features: [
         'Text classification',
         'Named entity recognition',
         'Question answering',
-        'Text summarization',
+        'Text generation',
         'Sentiment analysis'
       ],
       files: {
-        'nlp_transformer.py': {
+        'nlp_transformers.py': {
           content: `#!/usr/bin/env python3
 """
-Natural Language Processing with Transformers
-Advanced NLP using Hugging Face Transformers
+NLP with Transformers
+Advanced natural language processing with Hugging Face
 """
 
 import torch
 from transformers import (
     AutoTokenizer, AutoModel, AutoModelForSequenceClassification,
-    pipeline
+    pipeline, AutoModelForQuestionAnswering, AutoModelForCausalLM
 )
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Optional
+
+class NLPPipeline:
+    def __init__(self):
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f"🚀 Using device: {self.device}")
+        
+        # Initialize different models for various tasks
+        self.sentiment_analyzer = pipeline(
+            "sentiment-analysis",
+            model="cardiffnlp/twitter-roberta-base-sentiment-latest",
+            device=0 if torch.cuda.is_available() else -1
+        )
+        
+        self.qa_pipeline = pipeline(
+            "question-answering",
+            model="distilbert-base-cased-distilled-squad",
+            device=0 if torch.cuda.is_available() else -1
+        )
+        
+        self.text_generator = pipeline(
+            "text-generation",
+            model="gpt2",
+            device=0 if torch.cuda.is_available() else -1
+        )
+    
+    def analyze_sentiment(self, texts: List[str]) -> List[Dict]:
+        results = []
+        for text in texts:
+            result = self.sentiment_analyzer(text)[0]
+            results.append({
+                'text': text,
+                'sentiment': result['label'],
+                'confidence': result['score']
+            })
+        return results
+    
+    def answer_question(self, context: str, question: str) -> Dict:
+        result = self.qa_pipeline(question=question, context=context)
+        return {
+            'question': question,
+            'answer': result['answer'],
+            'confidence': result['score'],
+            'start': result['start'],
+            'end': result['end']
+        }
+    
+    def generate_text(self, prompt: str, max_length: int = 100) -> str:
+        result = self.text_generator(
+            prompt, 
+            max_length=max_length, 
+            num_return_sequences=1,
+            temperature=0.7
+        )
+        return result[0]['generated_text']
 
 class TextClassifier:
-    def __init__(self, model_name="bert-base-uncased", num_labels=2):
+    def __init__(self, model_name: str = "bert-base-uncased", num_labels: int = 2):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForSequenceClassification.from_pretrained(
@@ -366,7 +548,13 @@ class TextClassifier:
         results = []
         
         for text in texts:
-            inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+            inputs = self.tokenizer(
+                text, 
+                return_tensors="pt", 
+                truncation=True, 
+                padding=True,
+                max_length=512
+            )
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
             
             with torch.no_grad():
@@ -384,12 +572,28 @@ class TextClassifier:
         return results
 
 def main():
-    print("🤖 Advanced NLP with Transformers")
+    print("🤖 NLP with Transformers")
     print("=" * 50)
     
-    classifier = TextClassifier()
-    print("✅ Models loaded successfully!")
-    print("🎯 NLP pipeline ready!")
+    # Initialize NLP pipeline
+    nlp = NLPPipeline()
+    
+    # Example usage
+    sample_texts = [
+        "I love this new AI model!",
+        "This is terrible and disappointing.",
+        "The weather is nice today."
+    ]
+    
+    print("📊 Analyzing sentiment...")
+    sentiments = nlp.analyze_sentiment(sample_texts)
+    for result in sentiments:
+        print(f"Text: {result['text']}")
+        print(f"Sentiment: {result['sentiment']} (confidence: {result['confidence']:.3f})")
+        print()
+    
+    print("✅ NLP pipeline ready!")
+    print("🎯 Start processing text with transformers!")
 
 if __name__ == "__main__":
     main()`,
@@ -398,95 +602,170 @@ if __name__ == "__main__":
       }
     },
     {
-      id: 'python-data-science',
-      name: 'Data Science Pipeline',
-      description: 'Comprehensive data analysis and machine learning with pandas, scikit-learn, and visualization',
+      id: 'python-reinforcement-learning',
+      name: 'Reinforcement Learning Lab',
+      description: 'Advanced RL algorithms with Stable-Baselines3, custom environments, and multi-agent systems',
       category: 'AI/ML',
-      difficulty: 'Intermediate',
-      tags: ['Data Science', 'Pandas', 'Scikit-learn', 'Visualization'],
-      icon: <BarChart3 className="w-6 h-6 text-orange-400" />,
-      estimatedTime: '2-3 weeks',
-      useCase: 'Perform end-to-end data analysis and build predictive models',
-      techStack: ['Python', 'Pandas', 'Scikit-learn', 'Matplotlib', 'Plotly'],
+      difficulty: 'Expert',
+      tags: ['Reinforcement Learning', 'RL', 'Stable-Baselines3', 'Gym', 'Multi-agent'],
+      icon: <Target className="w-6 h-6 text-red-400" />,
+      estimatedTime: '4-6 weeks',
+      useCase: 'Build intelligent agents for games, robotics, and decision-making systems',
+      techStack: ['Python', 'Stable-Baselines3', 'Gym', 'PyTorch', 'Ray'],
       features: [
-        'Data preprocessing and cleaning',
-        'Exploratory data analysis',
-        'Machine learning models',
-        'Interactive visualizations',
-        'Statistical analysis'
+        'Custom RL environments',
+        'Multi-agent training',
+        'Policy optimization',
+        'Distributed training',
+        'Real-time visualization'
       ],
       files: {
-        'data_science.py': {
+        'reinforcement_learning.py': {
           content: `#!/usr/bin/env python3
 """
-Data Science & Analytics Pipeline
-Comprehensive data analysis with pandas, numpy, and visualization
+Reinforcement Learning Lab
+Advanced RL with Stable-Baselines3 and custom environments
 """
 
-import pandas as pd
+import gym
 import numpy as np
+import torch
+from stable_baselines3 import PPO, DQN, A2C, SAC
+from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.monitor import Monitor
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
-import warnings
-warnings.filterwarnings('ignore')
+from typing import Dict, Any
 
-class DataAnalyzer:
-    def __init__(self, data: pd.DataFrame):
-        self.data = data.copy()
-        self.numeric_columns = data.select_dtypes(include=[np.number]).columns.tolist()
-        self.categorical_columns = data.select_dtypes(include=['object']).columns.tolist()
-        
-    def basic_info(self):
-        return {
-            'shape': self.data.shape,
-            'columns': self.data.columns.tolist(),
-            'missing_values': self.data.isnull().sum().to_dict(),
-            'numeric_columns': self.numeric_columns,
-            'categorical_columns': self.categorical_columns
-        }
+class CustomEnvironment(gym.Env):
+    """Custom RL environment for demonstration"""
     
-    def create_visualizations(self):
-        plt.figure(figsize=(15, 10))
+    def __init__(self):
+        super(CustomEnvironment, self).__init__()
         
-        # Distribution plots
-        for i, col in enumerate(self.numeric_columns[:4]):
-            plt.subplot(2, 3, i + 1)
-            self.data[col].hist(bins=30, alpha=0.7)
-            plt.title(f'Distribution of {col}')
+        # Define action and observation space
+        self.action_space = gym.spaces.Discrete(4)  # 4 possible actions
+        self.observation_space = gym.spaces.Box(
+            low=-np.inf, high=np.inf, shape=(4,), dtype=np.float32
+        )
         
-        # Correlation heatmap
-        if len(self.numeric_columns) > 1:
-            plt.subplot(2, 3, 5)
-            corr_matrix = self.data[self.numeric_columns].corr()
-            sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0)
-            plt.title('Correlation Matrix')
+        self.state = None
+        self.steps = 0
+        self.max_steps = 200
+    
+    def reset(self):
+        self.state = np.random.uniform(-1, 1, 4).astype(np.float32)
+        self.steps = 0
+        return self.state
+    
+    def step(self, action):
+        # Simple environment logic
+        self.state += np.random.normal(0, 0.1, 4)
+        self.steps += 1
         
-        plt.tight_layout()
-        plt.show()
+        # Calculate reward
+        reward = -np.sum(np.abs(self.state))
+        
+        # Check if episode is done
+        done = self.steps >= self.max_steps or np.any(np.abs(self.state) > 5)
+        
+        info = {'steps': self.steps}
+        
+        return self.state, reward, done, info
+    
+    def render(self, mode='human'):
+        print(f"State: {self.state}, Steps: {self.steps}")
+
+class RLTrainer:
+    def __init__(self, env_name: str = "CartPole-v1"):
+        self.env_name = env_name
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f"🚀 Using device: {self.device}")
+        
+    def create_environment(self, n_envs: int = 1):
+        if self.env_name == "Custom":
+            env = CustomEnvironment()
+            if n_envs > 1:
+                env = make_vec_env(lambda: env, n_envs=n_envs)
+        else:
+            env = make_vec_env(self.env_name, n_envs=n_envs)
+        
+        return env
+    
+    def train_agent(self, algorithm: str = "PPO", total_timesteps: int = 10000):
+        env = self.create_environment()
+        eval_env = self.create_environment()
+        
+        # Choose algorithm
+        if algorithm == "PPO":
+            model = PPO("MlpPolicy", env, verbose=1, device=self.device)
+        elif algorithm == "DQN":
+            model = DQN("MlpPolicy", env, verbose=1, device=self.device)
+        elif algorithm == "A2C":
+            model = A2C("MlpPolicy", env, verbose=1, device=self.device)
+        elif algorithm == "SAC":
+            model = SAC("MlpPolicy", env, verbose=1, device=self.device)
+        else:
+            raise ValueError(f"Unknown algorithm: {algorithm}")
+        
+        # Setup evaluation callback
+        eval_callback = EvalCallback(
+            eval_env, 
+            best_model_save_path='./best_model/',
+            log_path='./logs/', 
+            eval_freq=1000,
+            deterministic=True, 
+            render=False
+        )
+        
+        print(f"🎯 Training {algorithm} agent...")
+        model.learn(total_timesteps=total_timesteps, callback=eval_callback)
+        
+        return model
+    
+    def evaluate_agent(self, model, n_episodes: int = 10):
+        env = self.create_environment()
+        
+        episode_rewards = []
+        
+        for episode in range(n_episodes):
+            obs = env.reset()
+            episode_reward = 0
+            done = False
+            
+            while not done:
+                action, _ = model.predict(obs, deterministic=True)
+                obs, reward, done, info = env.step(action)
+                episode_reward += reward
+            
+            episode_rewards.append(episode_reward)
+            print(f"Episode {episode + 1}: Reward = {episode_reward}")
+        
+        avg_reward = np.mean(episode_rewards)
+        std_reward = np.std(episode_rewards)
+        
+        print(f"📊 Average reward: {avg_reward:.2f} ± {std_reward:.2f}")
+        
+        return episode_rewards
 
 def main():
-    print("📊 Data Science & Analytics Pipeline")
+    print("🎮 Reinforcement Learning Lab")
     print("=" * 50)
     
-    # Generate sample data
-    np.random.seed(42)
-    data = {
-        'feature1': np.random.randn(1000),
-        'feature2': np.random.randn(1000),
-        'feature3': np.random.randn(1000),
-        'target': np.random.randint(0, 2, 1000)
-    }
-    df = pd.DataFrame(data)
+    trainer = RLTrainer("CartPole-v1")
     
-    analyzer = DataAnalyzer(df)
-    info = analyzer.basic_info()
-    print(f"Dataset shape: {info['shape']}")
+    # Train different algorithms
+    algorithms = ["PPO", "DQN", "A2C"]
     
-    analyzer.create_visualizations()
-    print("✅ Data science pipeline complete!")
+    for algo in algorithms:
+        print(f"\n🤖 Training {algo} agent...")
+        model = trainer.train_agent(algorithm=algo, total_timesteps=5000)
+        
+        print(f"📈 Evaluating {algo} agent...")
+        rewards = trainer.evaluate_agent(model, n_episodes=5)
+    
+    print("✅ RL training complete!")
+    print("🎯 Agents ready for deployment!")
 
 if __name__ == "__main__":
     main()`,
