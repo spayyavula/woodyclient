@@ -2136,7 +2136,7 @@ impl WebScraper {
         
         for item in data {
             csv_content.push_str(&format!(
-                "\\"{}\\"",\\"{}\\"",{},{},{},{}\\n",
+                "\\"{}\\",\\"{}\\",{},{},{},{}\\n",
                 item.url.replace('"', '""'),
                 item.title.replace('"', '""'),
                 item.content.len(),
@@ -2472,6 +2472,7 @@ impl ChatServer {
                 };
                 
                 drop(rooms); // Release the lock before broadcasting
+                println!("{}: {:.8} (\\\\${:.2}) - {:.1}%", 
                 self.broadcast_message(room_id, join_message).await.ok();
             }
         }
