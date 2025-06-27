@@ -1790,7 +1790,7 @@ impl CryptoWallet {
         
         println!("\n💼 Portfolio Summary for '{}'", wallet.name);
         println!("=====================================");
-        println!("Total Value: ${:.2}", wallet.total_balance_usd);
+        println!("Total Value: \\${:.2}", wallet.total_balance_usd);
         println!();
         
         for (currency, account) in &wallet.accounts {
@@ -1802,7 +1802,7 @@ impl CryptoWallet {
                 0.0
             };
             
-            println!("{}: {:.8} (${:.2}) - {:.1}%", 
+            println!("{}: {:.8} (\\${:.2}) - {:.1}%", 
                 currency, account.balance, usd_value, percentage);
             println!("  Address: {}", account.address);
             println!("  Transactions: {}", account.transactions.len());
