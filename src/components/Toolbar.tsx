@@ -31,6 +31,7 @@ interface ToolbarProps {
   onRun: () => void;
   onShowTemplates: () => void;
   onShowMobilePreview: () => void;
+  onShowMobilePreview: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({ 
@@ -43,6 +44,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onSave, 
   onRun, 
   onShowTemplates,
+  onShowMobilePreview
   onShowMobilePreview
 }) => {
   const [selectedPlatform, setSelectedPlatform] = React.useState('android');
