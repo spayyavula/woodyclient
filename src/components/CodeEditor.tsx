@@ -26,26 +26,17 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 }) => {
   const [lineNumbers, setLineNumbers] = useState<number[]>([1]);
   const [cursorPosition, setCursorPosition] = useState({ line: 1, column: 1 });
-  const [highlightedContent, setHighlightedContent] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const highlightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const lines = content.split('\n').length;
     setLineNumbers(Array.from({ length: Math.max(lines, 20) }, (_, i) => i + 1));
-    setHighlightedContent(syntaxHighlight(content));
-  }, [content, language]);
+  }, [content]);
 
   const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
     const lineNumbersEl = document.querySelector('.line-numbers');
-    const highlightEl = highlightRef.current;
-    
     if (lineNumbersEl) {
       lineNumbersEl.scrollTop = e.currentTarget.scrollTop;
-    }
-    if (highlightEl) {
-      highlightEl.scrollTop = e.currentTarget.scrollTop;
-      highlightEl.scrollLeft = e.currentTarget.scrollLeft;
     }
   };
 
@@ -66,108 +57,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     handleCursorMove(e);
   };
 
-  const syntaxHighlight = (code: string) => {
-    if (!code) return '';
-    
-    let highlighted = code
-      // Escape HTML entities first
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-    
-    if (language === 'rust') {
-      highlighted = highlighted
-        .replace(/\b(fn|let|mut|pub|struct|impl|enum|match|if|else|while|for|loop|break|continue|return|use|mod|crate|super|self|const|static|unsafe|async|await|move|ref|dyn|where|type|trait|macro_rules!)\b/g, '<span class="text-purple-400 font-medium">$1</span>')
-        .replace(/\b(String|Vec|Option|Result|Box|Rc|Arc|HashMap|BTreeMap|i32|i64|u32|u64|f32|f64|bool|char|str|usize|isize|Device|Tensor|Module|VarBuilder|Linear)\b/g, '<span class="text-blue-400">$1</span>')
-        .replace(/\b(println!|print!|dbg!|panic!|todo!|unimplemented!|unreachable!)\b/g, '<span class="text-green-400">$1</span>')
-        .replace(/(".*?")/g, '<span class="text-yellow-400">$1</span>')
-        .replace(/(\/\/.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
-        .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-gray-500 italic">$1</span>');
-    }
-    
-    if (language === 'dart') {
-      highlighted = highlighted
-        .replace(/\b(class|extends|implements|with|abstract|static|final|const|var|dynamic|void|int|double|String|bool|List|Map|Set|Future|Stream|async|await|yield|import|export|library|part|show|hide|as|if|else|for|while|do|switch|case|default|break|continue|return|try|catch|finally|throw|rethrow|assert)\b/g, '<span class="text-purple-400 font-medium">$1</span>')
-        .replace(/\b(Widget|StatelessWidget|StatefulWidget|State|BuildContext|MaterialApp|Scaffold|AppBar|Container|Column|Row|Text|Button|FloatingActionButton)\b/g, '<span class="text-blue-400">$1</span>')
-        .replace(/(@override|@required|@deprecated)/g, '<span class="text-orange-400">$1</span>')
-        .replace(/(".*?"|'.*?')/g, '<span class="text-yellow-400">$1</span>')
-        .replace(/(\/\/.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
-        .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-gray-500 italic">$1</span>');
-    }
-    
-    if (language === 'kotlin') {
-      highlighted = highlighted
-        .replace(/\b(class|interface|object|enum|data|sealed|abstract|open|final|override|private|protected|public|internal|fun|val|var|const|lateinit|lazy|by|delegate|if|else|when|for|while|do|try|catch|finally|throw|return|break|continue|import|package)\b/g, '<span class="text-purple-400 font-medium">$1</span>')
-        .replace(/\b(String|Int|Long|Float|Double|Boolean|Char|Byte|Short|Any|Unit|Nothing|List|MutableList|Set|MutableSet|Map|MutableMap|Array|IntArray)\b/g, '<span class="text-blue-400">$1</span>')
-        .replace(/(@\w+)/g, '<span class="text-orange-400">$1</span>')
-        .replace(/(".*?")/g, '<span class="text-yellow-400">$1</span>')
-        .replace(/(\/\/.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
-        .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-gray-500 italic">$1</span>');
-    }
-    
-    if (language === 'typescript' || language === 'javascript') {
-      highlighted = highlighted
-        .replace(/\b(import|export|from|default|const|let|var|function|class|interface|type|enum|namespace|async|await|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|new|this|super|extends|implements|public|private|protected|static|readonly|abstract)\b/g, '<span class="text-purple-400 font-medium">$1</span>')
-        .replace(/\b(string|number|boolean|object|undefined|null|void|any|unknown|never|Array|Promise|React|Component|useState|useEffect|useCallback|useMemo|StyleSheet|View|Text|TouchableOpacity|SafeAreaView|ScrollView)\b/g, '<span class="text-blue-400">$1</span>')
-        .replace(/(@\w+)/g, '<span class="text-orange-400">$1</span>')
-        .replace(/(".*?"|'.*?'|`.*?`)/g, '<span class="text-yellow-400">$1</span>')
-        .replace(/(\/\/.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
-        .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-gray-500 italic">$1</span>');
-    }
-    
-    if (language === 'java') {
-      highlighted = highlighted
-        .replace(/\b(public|private|protected|static|final|abstract|class|interface|extends|implements|import|package|new|this|super|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|synchronized|volatile|transient|native|strictfp)\b/g, '<span class="text-purple-400 font-medium">$1</span>')
-        .replace(/\b(String|int|long|float|double|boolean|char|byte|short|void|Object|List|Map|Set|Array|ArrayList|HashMap|HashSet|Intent|Bundle|Activity|Application|Context|View|TextView|Button|LinearLayout|RelativeLayout)\b/g, '<span class="text-blue-400">$1</span>')
-        .replace(/(@\w+)/g, '<span class="text-orange-400">$1</span>')
-        .replace(/(".*?")/g, '<span class="text-yellow-400">$1</span>')
-        .replace(/(\/\/.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
-        .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-gray-500 italic">$1</span>');
-    }
-    
-    if (language === 'objective-c') {
-      highlighted = highlighted
-        .replace(/\b(@interface|@implementation|@end|@property|@synthesize|@dynamic|@protocol|@optional|@required|@class|@import|#import|#include|if|else|for|while|do|switch|case|break|continue|return|static|const|extern|typedef|struct|enum|union)\b/g, '<span class="text-purple-400 font-medium">$1</span>')
-        .replace(/\b(NSString|NSArray|NSDictionary|NSNumber|NSObject|UIView|UIViewController|UIApplication|UIWindow|BOOL|NSInteger|CGFloat|CGRect|CGPoint|CGSize|id|void|int|float|double|char|long|short)\b/g, '<span class="text-blue-400">$1</span>')
-        .replace(/(@".*?")/g, '<span class="text-yellow-400">$1</span>')
-        .replace(/(\/\/.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
-        .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-gray-500 italic">$1</span>');
-    }
-    
-    if (language === 'toml') {
-      highlighted = highlighted
-        .replace(/(\[.*?\])/g, '<span class="text-blue-400 font-medium">$1</span>')
-        .replace(/^(\w+)\s*=/gm, '<span class="text-purple-400">$1</span>=')
-        .replace(/(".*?")/g, '<span class="text-yellow-400">$1</span>')
-        .replace(/(#.*$)/gm, '<span class="text-gray-500 italic">$1</span>');
-    }
-    
-    if (language === 'json') {
-      highlighted = highlighted
-        .replace(/(".*?")(\s*:)/g, '<span class="text-blue-400">$1</span>$2')
-        .replace(/:\s*(".*?")/g, ': <span class="text-yellow-400">$1</span>')
-        .replace(/:\s*(true|false|null)\b/g, ': <span class="text-orange-400">$1</span>')
-        .replace(/:\s*(\d+\.?\d*)/g, ': <span class="text-green-400">$1</span>');
-    }
-    
-    if (language === 'xml') {
-      highlighted = highlighted
-        .replace(/(&lt;\/?)([\w-]+)/g, '$1<span class="text-blue-400">$2</span>')
-        .replace(/([\w-]+)(=)/g, '<span class="text-purple-400">$1</span>$2')
-        .replace(/=(".*?")/g, '=<span class="text-yellow-400">$1</span>')
-        .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="text-gray-500 italic">$1</span>');
-    }
-    
-    // If no specific highlighting was applied, return the text with default color
-    if (highlighted === code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')) {
-      return `<span class="text-gray-100">${highlighted}</span>`;
-    }
-    
-    return highlighted;
-  };
-
   return (
-    <div className="flex h-full bg-gray-900 text-gray-100 font-mono text-sm relative">
+    <div className="flex h-full bg-gray-900 text-gray-100 font-mono text-sm">
       <div className="line-numbers bg-gray-800 px-4 py-4 text-gray-500 text-right select-none overflow-hidden border-r border-gray-700 min-w-[4rem]">
         {lineNumbers.map((num) => (
           <div key={num} className="leading-6">
@@ -175,23 +66,11 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ))}
       </div>
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 relative">
         <LiveCursors cursors={collaborators} currentFile={fileName} />
-        
-        {/* Syntax highlighted background */}
-        <div 
-          ref={highlightRef}
-          className="absolute inset-0 p-4 pointer-events-none whitespace-pre-wrap break-words font-mono text-sm leading-6 overflow-auto"
-          dangerouslySetInnerHTML={{ __html: highlightedContent }}
-          style={{ 
-            zIndex: 1
-          }}
-        />
-        
-        {/* Transparent textarea overlay for input */}
         <textarea
           ref={textareaRef}
-          className="absolute inset-0 w-full h-full p-4 bg-transparent resize-none outline-none font-mono text-sm leading-6 text-transparent caret-white selection:bg-blue-500/30"
+          className="w-full h-full p-4 bg-transparent resize-none outline-none font-mono text-sm leading-6 text-white"
           value={content}
           onChange={handleContentChange}
           onSelect={handleCursorMove}
@@ -200,7 +79,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           placeholder={`Start coding in ${fileName}...`}
           style={{
             tabSize: 4,
-            zIndex: 2
           }}
         />
       </div>
