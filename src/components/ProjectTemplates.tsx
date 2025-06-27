@@ -1761,8 +1761,7 @@ impl CryptoWallet {
                 let rate = self.exchange_rates.get(&account.currency).unwrap_or(&0.0);
                 total_usd += account.balance * rate;
                 
-                console.log(\`  ${account.currency} Balance: ${account.balance.toFixed(8)} ${account.currency} ($${(account.balance * rate).toFixed(2)})`);
-            }
+                console.log(\`  ${account.currency} Balance: ${account.balance.toFixed(8)} ${account.currency} ($${(account.balance * rate).toFixed(2)})\`);
             
             wallet.total_balance_usd = total_usd;
         }
