@@ -224,25 +224,25 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ))}
       </div>
-      <div className="flex-1 relative">
+      <div className="flex-1 relative overflow-hidden">
         <LiveCursors cursors={collaborators} currentFile={fileName} />
         
         {/* Syntax highlighted background */}
         <div 
           ref={highlightRef}
-          className="absolute inset-0 p-4 pointer-events-none whitespace-pre-wrap break-words font-mono text-sm leading-6 overflow-hidden"
+          className="absolute inset-0 p-4 pointer-events-none whitespace-pre-wrap break-words font-mono text-sm leading-6 overflow-auto"
           dangerouslySetInnerHTML={{ __html: syntaxHighlight(content) }}
           style={{ 
-            color: 'transparent',
-            background: 'transparent',
-            zIndex: 1
+            zIndex: 1,
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
           }}
         />
         
         {/* Transparent textarea for editing */}
         <textarea
           ref={textareaRef}
-          className="absolute inset-0 w-full h-full p-4 bg-transparent resize-none outline-none font-mono text-sm leading-6 text-transparent caret-white selection:bg-[#264f78]"
+          className="absolute inset-0 w-full h-full p-4 bg-transparent resize-none outline-none font-mono text-sm leading-6 text-transparent caret-white selection:bg-[#264f78] overflow-auto"
           value={content}
           onChange={handleContentChange}
           onSelect={handleCursorMove}
