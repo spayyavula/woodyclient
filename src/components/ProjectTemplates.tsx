@@ -111,14 +111,485 @@ impl NeuralNetwork {
     
     pub fn train(&mut self, data: &[(Tensor, Tensor)], epochs: usize, learning_rate: f64) -> Result<()> {
         for epoch in 0..epochs {
-            let mut total_loss =
+            let mut total_loss = 0.0;
+            for (input, target) in data {
+                let output = self.forward(input)?;
+                // Calculate loss and backpropagate
+                // Implementation details...
+            }
+            println!("Epoch {}: Loss = {}", epoch, total_loss);
+        }
+        Ok(())
+    }
+}
+
+fn main() -> Result<()> {
+    let device = Device::Cpu;
+    println!("Neural Network Engine initialized on {:?}", device);
+    Ok(())
+}`,
+          language: 'rust',
+        },
+        'Cargo.toml': {
+          content: `[package]
+name = "neural-network-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+candle-core = "0.3"
+candle-nn = "0.3"
+candle-transformers = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }`,
+          language: 'toml',
+        }
+      }
+    },
+    // Mobile Development Templates
+    {
+      id: 'flutter-rust-mobile',
+      name: 'Flutter + Rust Mobile App',
+      description: 'Cross-platform mobile app with Rust backend and Flutter frontend',
+      category: 'Mobile',
+      difficulty: 'Intermediate',
+      tags: ['Flutter', 'Rust', 'Mobile', 'Cross-platform'],
+      icon: <Smartphone className="w-6 h-6 text-blue-400" />,
+      estimatedTime: '2-3 weeks',
+      useCase: 'Build high-performance mobile apps with native Rust logic',
+      techStack: ['Flutter', 'Dart', 'Rust', 'FFI'],
+      features: [
+        'Cross-platform compatibility',
+        'Native performance',
+        'Rust business logic',
+        'Flutter UI framework',
+        'Hot reload development'
+      ],
+      files: {
+        'main.dart': {
+          content: `import 'package:flutter/material.dart';
+import 'package:mobile_rust_app/bridge_generated.dart';
+
+void main() {
+  runApp(const MobileRustApp());
+}
+
+class MobileRustApp extends StatelessWidget {
+  const MobileRustApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Mobile Rust App',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+        useMaterial3: true,
+      ),
+      home: const MobileHomePage(),
+    );
+  }
+}
+
+class MobileHomePage extends StatefulWidget {
+  const MobileHomePage({super.key});
+
+  @override
+  State<MobileHomePage> createState() => _MobileHomePageState();
+}
+
+class _MobileHomePageState extends State<MobileHomePage> {
+  String _rustMessage = '';
+  
+  @override
+  void initState() {
+    super.initState();
+    _initializeRust();
+  }
+  
+  Future<void> _initializeRust() async {
+    try {
+      final message = await RustLib.instance.initMobileApp();
+      setState(() {
+        _rustMessage = message;
+      });
+    } catch (e) {
+      print('Error initializing Rust: \$e');
+    }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Mobile Rust App'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('🦀 Rust + Flutter'),
+            const SizedBox(height: 20),
+            Text(_rustMessage),
+          ],
+        ),
+      ),
+    );
+  }
+}`,
+          language: 'dart',
+        },
+        'lib.rs': {
+          content: `pub mod mobile_utils;
+
+use flutter_rust_bridge::frb;
+
+#[frb(sync)]
+pub fn init_mobile_app() -> String {
+    "Mobile Rust App Initialized".to_string()
+}
+
+#[frb(sync)]
+pub fn get_platform_info() -> String {
+    "Cross-platform Mobile App".to_string()
+}`,
+          language: 'rust',
+        }
+      }
+    },
+    // Web Development Templates
+    {
+      id: 'rust-web-api',
+      name: 'High-Performance Web API',
+      description: 'Blazing fast REST API built with Rust and Actix-web',
+      category: 'Web',
+      difficulty: 'Intermediate',
+      tags: ['Web API', 'REST', 'Actix', 'Performance'],
+      icon: <Globe className="w-6 h-6 text-green-400" />,
+      estimatedTime: '1-2 weeks',
+      useCase: 'Build scalable web APIs with excellent performance',
+      techStack: ['Rust', 'Actix-web', 'PostgreSQL', 'Redis'],
+      features: [
+        'High-performance HTTP server',
+        'Database integration',
+        'Authentication middleware',
+        'API documentation',
+        'Docker deployment'
+      ],
+      files: {
+        'main.rs': {
+          content: `use actix_web::{web, App, HttpServer, Result, HttpResponse};
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct ApiResponse {
+    message: String,
+    status: String,
+}
+
+async fn health_check() -> Result<HttpResponse> {
+    let response = ApiResponse {
+        message: "API is running".to_string(),
+        status: "healthy".to_string(),
+    };
+    Ok(HttpResponse::Ok().json(response))
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    println!("Starting Rust Web API server...");
+    
+    HttpServer::new(|| {
+        App::new()
+            .route("/health", web::get().to(health_check))
+            .route("/api/v1/status", web::get().to(health_check))
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
+}`,
+          language: 'rust',
+        },
+        'Cargo.toml': {
+          content: `[package]
+name = "rust-web-api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4.0"
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres"] }`,
+          language: 'toml',
+        }
+      }
+    },
+    // Game Development Templates
+    {
+      id: 'rust-game-engine',
+      name: 'Game Engine Framework',
+      description: 'Modern game engine built with Rust and Bevy',
+      category: 'Gaming',
+      difficulty: 'Advanced',
+      tags: ['Game Engine', 'Bevy', '3D Graphics', 'ECS'],
+      icon: <Gamepad2 className="w-6 h-6 text-red-400" />,
+      estimatedTime: '4-6 weeks',
+      useCase: 'Create high-performance games with modern architecture',
+      techStack: ['Rust', 'Bevy', 'WGPU', 'ECS'],
+      features: [
+        'Entity Component System',
+        '3D rendering pipeline',
+        'Physics simulation',
+        'Audio system',
+        'Cross-platform deployment'
+      ],
+      files: {
+        'main.rs': {
+          content: `use bevy::prelude::*;
+
+fn main() {
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_systems(Startup, setup)
+        .add_systems(Update, (move_player, rotate_cube))
+        .run();
+}
+
+#[derive(Component)]
+struct Player;
+
+#[derive(Component)]
+struct RotatingCube;
+
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // Spawn a cube
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
+            material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
+            transform: Transform::from_xyz(0.0, 0.5, 0.0),
+            ..default()
+        },
+        RotatingCube,
+    ));
+
+    // Spawn a camera
+    commands.spawn(Camera3dBundle {
+        transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+        ..default()
+    });
+
+    // Spawn a light
+    commands.spawn(PointLightBundle {
+        point_light: PointLight {
+            intensity: 1500.0,
+            shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        ..default()
+    });
+}
+
+fn move_player(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<&mut Transform, With<Player>>,
+) {
+    for mut transform in &mut query {
+        if keyboard_input.pressed(KeyCode::W) {
+            transform.translation.z -= 0.1;
+        }
+        if keyboard_input.pressed(KeyCode::S) {
+            transform.translation.z += 0.1;
+        }
+    }
+}
+
+fn rotate_cube(time: Res<Time>, mut query: Query<&mut Transform, With<RotatingCube>>) {
+    for mut transform in &mut query {
+        transform.rotate_y(time.delta_seconds());
+    }
+}`,
+          language: 'rust',
+        },
+        'Cargo.toml': {
+          content: `[package]
+name = "rust-game-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = "0.12"
+bevy_rapier3d = "0.23"`,
+          language: 'toml',
         }
       }
     }
-  ]
-}
-        }
-      }
+  ];
+
+  const categories = ['all', 'AI/ML', 'Mobile', 'Web', 'Gaming', 'Blockchain', 'IoT', 'DevOps'];
+
+  const filteredTemplates = templates.filter(template => {
+    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
+    const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Beginner': return 'text-green-400 bg-green-400/10';
+      case 'Intermediate': return 'text-yellow-400 bg-yellow-400/10';
+      case 'Advanced': return 'text-orange-400 bg-orange-400/10';
+      case 'Expert': return 'text-red-400 bg-red-400/10';
+      default: return 'text-gray-400 bg-gray-400/10';
     }
-  ]
-}
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-gray-900 rounded-xl border border-gray-700 w-full max-w-6xl max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Project Templates</h2>
+            <p className="text-gray-400 mt-1">Choose a template to get started quickly</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="p-6 border-b border-gray-700">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Search templates..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-orange-500"
+              />
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {categories.map(category => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedCategory === category
+                      ? 'bg-orange-600 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  {category === 'all' ? 'All' : category}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Templates Grid */}
+        <div className="p-6 overflow-y-auto max-h-[60vh]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredTemplates.map(template => (
+              <div
+                key={template.id}
+                className="bg-gray-800 rounded-lg border border-gray-700 hover:border-orange-500 transition-all duration-200 cursor-pointer group"
+                onClick={() => onSelectTemplate(template)}
+              >
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      {template.icon}
+                      <div>
+                        <h3 className="font-semibold text-white group-hover:text-orange-400 transition-colors">
+                          {template.name}
+                        </h3>
+                        <span className={`text-xs px-2 py-1 rounded-full ${getDifficultyColor(template.difficulty)}`}>
+                          {template.difficulty}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                    {template.description}
+                  </p>
+
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Use Case:</p>
+                      <p className="text-sm text-gray-300">{template.useCase}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Tech Stack:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {template.techStack.slice(0, 3).map(tech => (
+                          <span key={tech} className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                            {tech}
+                          </span>
+                        ))}
+                        {template.techStack.length > 3 && (
+                          <span className="text-xs text-gray-500">+{template.techStack.length - 3} more</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Key Features:</p>
+                      <ul className="text-sm text-gray-300 space-y-1">
+                        {template.features.slice(0, 2).map(feature => (
+                          <li key={feature} className="flex items-center gap-2">
+                            <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
+                            {feature}
+                          </li>
+                        ))}
+                        {template.features.length > 2 && (
+                          <li className="text-xs text-gray-500">+{template.features.length - 2} more features</li>
+                        )}
+                      </ul>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-700">
+                      <span className="text-xs text-gray-500">Est. Time: {template.estimatedTime}</span>
+                      <div className="flex gap-1">
+                        {template.tags.slice(0, 2).map(tag => (
+                          <span key={tag} className="text-xs bg-orange-600/20 text-orange-400 px-2 py-1 rounded">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredTemplates.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-500 mb-2">No templates found</div>
+              <p className="text-gray-600 text-sm">Try adjusting your search or category filter</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProjectTemplates;

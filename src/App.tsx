@@ -493,37 +493,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MobileAppContent()
-                }
-            }
-        }
-    }
-}`,
-      language: 'kotlin',
-    },
-    'main.dart': {
-      content: `import 'package:flutter/material.dart';
-import 'package:mobile_rust_app/bridge_generated.dart';
-
-void main() {
-  runApp(const MobileRustApp());
-}
-
-class MobileRustApp extends StatelessWidget {
-  const MobileRustApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialTheme(
-      title: 'Mobile Rust App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        useMaterial3: true,
-      ),
-      home: const MobileHomePage(),
     );
   }
 }
