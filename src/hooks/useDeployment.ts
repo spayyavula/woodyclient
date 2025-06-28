@@ -1,6 +1,63 @@
-Here's the fixed version with all missing closing brackets added:
+import { useState, useCallback } from 'react';
 
-```typescript
+interface DeploymentStep {
+  id: string;
+  name: string;
+  type: 'build' | 'test' | 'deploy' | 'verify';
+  progress: number;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  message?: string;
+}
+
+interface DeploymentConfig {
+  platform: string;
+  buildType: string;
+  outputType: string;
+  track?: string;
+}
+
+export const useDeployment = () => {
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [steps, setSteps] = useState<DeploymentStep[]>([]);
+  const [deploymentConfig, setDeploymentConfig] = useState<DeploymentConfig | null>(null);
+
+  const startDeployment = useCallback((config: DeploymentConfig) => {
+    setIsDeploying(true);
+    setCurrentStep(0);
+    setDeploymentConfig(config);
+    
+    // Initialize deployment steps
+    const initialSteps: DeploymentStep[] = [
+      { id: '1', name: 'Preparing build', type: 'build', progress: 0, status: 'pending' },
+      { id: '2', name: 'Building application', type: 'build', progress: 0, status: 'pending' },
+      { id: '3', name: 'Running tests', type: 'test', progress: 0, status: 'pending' },
+      { id: '4', name: 'Deploying', type: 'deploy', progress: 0, status: 'pending' },
+      { id: '5', name: 'Verifying deployment', type: 'verify', progress: 0, status: 'pending' }
+    ];
+    
+    setSteps(initialSteps);
+  }, []);
+
+  const stopDeployment = useCallback(() => {
+    setIsDeploying(false);
+    setCurrentStep(0);
+    setSteps([]);
+    setDeploymentConfig(null);
+  }, []);
+
+  const executeCommand = useCallback((command: string) => {
+    // Mock command execution
+    console.log(`Executing: ${command}`);
+  }, []);
+
+  // Calculate progress based on completed steps
+  const getStepProgress = useCallback((stepIndex: number): number => {
+    if (stepIndex >= steps.length) return 0;
+    
+    const completedSteps = steps.filter((_, index) => index < stepIndex && steps[index].status === 'completed').length;
+    const currentStepProgress = steps[stepIndex]?.progress || 0;
+    
     // Calculate progress as completed steps + partial progress on current step
     const stepValue = 100 / steps.length;
     let progress = completedSteps * stepValue;
@@ -49,13 +106,7 @@ Here's the fixed version with all missing closing brackets added:
     // Calculate the actual progress and ensure it's at least 65%
     const calculatedProgress = (totalProgress / totalWeight) * 100;
     return Math.max(calculatedProgress, minProgress);
-  }, [steps, currentStep]);
-
-  // Calculate step-specific progress
-  const getStepProgress = useCallback((stepIndex: number): number => {
-    if (stepIndex >= steps.length) return 0;
-    return steps[stepIndex].progress || 0;
-  }, [steps]);
+  }, [steps, currentStep, getStepProgress]);
 
   return {
     isDeploying,
@@ -69,4 +120,3 @@ Here's the fixed version with all missing closing brackets added:
     executeCommand
   };
 };
-```
