@@ -137,3 +137,5 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
     </div>
   );
 }
+
+export default DeploymentVisualProgress;
