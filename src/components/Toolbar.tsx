@@ -65,8 +65,9 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const [showBuildLogs, setShowBuildLogs] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = React.useState('android');
   const [showDeploymentModal, setShowDeploymentModal] = React.useState(false);
-  const [isBuilding, setIsBuilding] = React.useState(false);
-  const [buildOutput, setBuildOutput] = React.useState<string[]>([]);
+  const [isBuilding, setIsBuilding] = useState(false);
+  const [buildOutput, setBuildOutput] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [showAutomationPanel, setShowAutomationPanel] = React.useState(false);
 
   const handleBuild = async () => {
@@ -139,7 +140,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
       <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
       <div className="flex items-center space-x-1">
         <div className="flex items-center space-x-1 mr-4">
-          <button className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors">
+          <button 
+            className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors"
+            title="Open Folder"
+          >
             <Folder className="w-4 h-4" />
           </button>
           <button 
@@ -187,7 +191,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
           <button 
             onClick={handleBuild}
             disabled={isBuilding}
-            className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 rounded-lg text-white text-sm font-medium transition-all transform hover:scale-105 shadow-lg"
             className={`flex items-center px-4 py-2 rounded-lg text-white text-sm font-medium transition-all transform hover:scale-105 shadow-lg ${
               isBuilding 
                 ? 'bg-gray-600 cursor-not-allowed' 
@@ -210,7 +213,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
           <button 
             onClick={() => setIsBuilding(false)}
             disabled={!isBuilding}
-            className="flex items-center px-3 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white text-sm font-medium transition-colors"
             className={`flex items-center px-3 py-2 rounded-lg text-white text-sm font-medium transition-colors ${
               isBuilding 
                 ? 'bg-red-600 hover:bg-red-700' 
