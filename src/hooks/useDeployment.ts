@@ -1137,15 +1137,6 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
     
     if (totalWeight === 0) return 0;
     
-    let totalProgress = 0;
-    
-    // Add completed steps
-    for (let i = 0; i < currentStep; i++) {
-      if (steps[i].status === 'completed') {
-        totalProgress += weights[i];
-      }
-    }
-    
     // Add progress from current step
     if (currentStep < steps.length) {
       const currentStepProgress = steps[currentStep].progress || 0;
