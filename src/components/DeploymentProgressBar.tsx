@@ -74,7 +74,7 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
           <div 
             className={`h-full bg-gradient-to-r ${getPlatformColor(platform)} transition-all duration-500 relative`}
             style={{ width: `${getOverallProgress()}%` }}
-          </div>
+          />
         </div>
       </div>
       
