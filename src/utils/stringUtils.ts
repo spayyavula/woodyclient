@@ -1,0 +1,64 @@
+/**
+ * String utilities for safe handling of special characters
+ * Prevents platform-specific issues with dollar signs and template literals
+ */
+
+// Safe constants for terminal prompts and common strings
+export const TERMINAL_CONSTANTS = {
+  PROMPT: '$ ',
+  WELCOME: '$ Welcome to Rust Cloud IDE Terminal',
+  HELP: '$ Type "help" for available commands',
+} as const;
+
+/**
+ * Safely concatenates strings without using template literals
+ * Prevents issues with dollar sign interpolation
+ */
+export function safeStringConcat(...parts: (string | number)[]): string {
+  return parts.map(part => String(part)).join('');
+}
+
+/**
+ * Safely formats command output without template literal risks
+ */
+export function formatCommandOutput(command: string, output: string): string[] {
+  const commandLine = TERMINAL_CONSTANTS.PROMPT + command;
+  return output ? [commandLine, output] : [commandLine];
+}
+
+/**
+ * Checks if a line is a terminal prompt line
+ */
+export function isTerminalPrompt(line: string): boolean {
+  return line.startsWith(TERMINAL_CONSTANTS.PROMPT);
+}
+
+/**
+ * Escapes dollar signs in strings for safe processing
+ */
+export function escapeDollarSigns(input: string): string {
+  return input.replace(/\$/g, '\\$');
+}
+
+/**
+ * Safely formats Python f-string-like output without template literals
+ */
+export function formatPythonOutput(template: string, values: Record<string, any>): string {
+  let result = template;
+  for (const [key, value] of Object.entries(values)) {
+    const placeholder = `{${key}}`;
+    result = result.replace(new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), String(value));
+  }
+  return result;
+}
+
+/**
+ * Safe string interpolation that avoids dollar sign conflicts
+ */
+export function safeInterpolate(template: string, values: string[]): string {
+  let result = template;
+  values.forEach((value, index) => {
+    result = result.replace(`{${index}}`, value);
+  });
+  return result;
+}

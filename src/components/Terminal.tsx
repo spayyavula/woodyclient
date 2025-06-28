@@ -1,20 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Terminal as TerminalIcon, X, Minimize2 } from 'lucide-react';
+import { TERMINAL_CONSTANTS, formatCommandOutput, isTerminalPrompt } from '../utils/stringUtils';
 
 interface TerminalProps {
   isVisible: boolean;
   onToggle: () => void;
 }
 
-// Constants to avoid runtime string interpolation issues
-const TERMINAL_PROMPT = '$ ';
-const WELCOME_MESSAGE = '$ Welcome to Rust Cloud IDE Terminal';
-const HELP_MESSAGE = '$ Type "help" for available commands';
-
 const Terminal: React.FC<TerminalProps> = ({ isVisible, onToggle }) => {
   const [history, setHistory] = useState<string[]>([
-    WELCOME_MESSAGE,
-    HELP_MESSAGE,
+    TERMINAL_CONSTANTS.WELCOME,
+    TERMINAL_CONSTANTS.HELP,
   ]);
   const [currentCommand, setCurrentCommand] = useState('');
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -249,7 +245,7 @@ Successfully installed torch-2.1.0+cu118 torchvision-0.16.0+cu118 tensorflow-2.1
         output = 'Cargo.toml  Cargo.lock  README.md  src/  platforms/  tests/  assets/  target/  flutter_rust_bridge.yaml  main.py  requirements.txt  computer_vision.py  nlp_transformer.py  data_science.py  setup.py';
         break;
       case 'clear':
-        setHistory([WELCOME_MESSAGE]);
+        setHistory([TERMINAL_CONSTANTS.WELCOME]);
         setCurrentCommand('');
         return;
       default:
@@ -258,12 +254,8 @@ Successfully installed torch-2.1.0+cu118 torchvision-0.16.0+cu118 tensorflow-2.1
         }
     }
 
-    // Use safe string concatenation instead of template literals with $
-    const commandWithPrompt = TERMINAL_PROMPT + command;
-    const newEntries = [commandWithPrompt];
-    if (output) {
-      newEntries.push(output);
-    }
+    // Use utility function for safe command formatting
+    const newEntries = formatCommandOutput(command, output);
     
     setHistory(prev => [...prev, ...newEntries]);
     setCurrentCommand('');
@@ -273,11 +265,6 @@ Successfully installed torch-2.1.0+cu118 torchvision-0.16.0+cu118 tensorflow-2.1
     if (e.key === 'Enter') {
       executeCommand(currentCommand);
     }
-  };
-
-  // Safe check for prompt lines
-  const isPromptLine = (line: string): boolean => {
-    return line.startsWith(TERMINAL_PROMPT);
   };
 
   if (!isVisible) return null;
@@ -303,12 +290,12 @@ Successfully installed torch-2.1.0+cu118 torchvision-0.16.0+cu118 tensorflow-2.1
         className="flex-1 p-4 overflow-y-auto font-mono text-sm text-gray-100"
       >
         {history.map((line, index) => (
-          <div key={index} className={isPromptLine(line) ? 'text-green-400' : 'text-gray-300'}>
+          <div key={index} className={isTerminalPrompt(line) ? 'text-green-400' : 'text-gray-300'}>
             {line}
           </div>
         ))}
         <div className="flex items-center text-green-400">
-          <span>{TERMINAL_PROMPT}</span>
+          <span>{TERMINAL_CONSTANTS.PROMPT}</span>
           <input
             type="text"
             autoComplete="off"
