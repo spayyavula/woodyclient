@@ -194,7 +194,9 @@ mod tests {
     }
 
     // Check if we're in demo mode (no real Supabase connection)
-    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321';
+    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
+                      import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321' ||
+                      import.meta.env.VITE_SUPABASE_URL.includes('your-production-project');
     
     if (isDemoMode) {
       // In demo mode, create a mock user immediately

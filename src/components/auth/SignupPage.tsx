@@ -34,7 +34,9 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSuccess, onSwitchToLogin }) =
     }
 
     // Check if we're in demo mode
-    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321';
+    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
+                      import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321' ||
+                      import.meta.env.VITE_SUPABASE_URL.includes('your-production-project');
     
     if (isDemoMode) {
       // In demo mode, simulate successful signup
