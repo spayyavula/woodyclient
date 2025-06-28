@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 // Visual progress tracking for deployment steps
 export interface DeploymentStep {
@@ -1053,6 +1053,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
     return steps[stepIndex]?.progress || 0;
   }, [steps]);
 
+  // Add visual feedback for deployment steps
   // Add visual feedback for deployment steps
   useEffect(() => {
     if (isDeploying && currentStep < steps.length) {
