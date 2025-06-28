@@ -16,7 +16,6 @@ import {
   Zap,
   Terminal,
   FileText,
-  Clock,
   Smartphone,
   Monitor
 } from 'lucide-react';

@@ -88,6 +88,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSuccess, onSwitchToLogin }) =
                 id="email"
                 type="email"
                 autoComplete="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -106,7 +107,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSuccess, onSwitchToLogin }) =
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
+                autoComplete="off"
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -133,7 +134,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSuccess, onSwitchToLogin }) =
               <input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
-                autoComplete="new-password"
+                autoComplete="off"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required

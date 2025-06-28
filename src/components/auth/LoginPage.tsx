@@ -71,6 +71,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onSwitchToSignup }) =>
                 id="email"
                 type="email"
                 autoComplete="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -89,7 +90,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onSwitchToSignup }) =>
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
+                autoComplete="off"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
