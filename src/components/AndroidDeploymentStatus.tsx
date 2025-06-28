@@ -18,55 +18,6 @@ import { useDeploymentProgress } from '../hooks/useDeploymentProgress';
 import DeploymentVisualProgress from './DeploymentVisualProgress';
 import DeploymentProgressEvents from './DeploymentProgressEvents';
 
-// Simulate a deployment for testing when no real deployment exists
-const simulateDeployment = (deploymentId: number) => {
-  return {
-    progress: 65,
-    message: "Building Android application...",
-    status: "building",
-    events: [
-      {
-        id: 1,
-        deployment_id: deploymentId,
-        event_type: "start",
-        message: "Starting Android deployment",
-        percentage: 0,
-        timestamp: new Date(Date.now() - 300000).toISOString(),
-        metadata: null
-      },
-      {
-        id: 2,
-        deployment_id: deploymentId,
-        event_type: "progress",
-        message: "Setting up build environment",
-        percentage: 10,
-        timestamp: new Date(Date.now() - 240000).toISOString(),
-        metadata: null
-      },
-      {
-        id: 3,
-        deployment_id: deploymentId,
-        event_type: "progress",
-        message: "Compiling Rust code for Android",
-        percentage: 30,
-        timestamp: new Date(Date.now() - 180000).toISOString(),
-        metadata: null
-      },
-      {
-        id: 4,
-        deployment_id: deploymentId,
-        event_type: "progress",
-        message: "Building Android application...",
-        percentage: 65,
-        timestamp: new Date(Date.now() - 60000).toISOString(),
-        metadata: null
-      }
-    ],
-    isLoading: false,
-    error: null
-  };
-};
-
 interface AndroidDeploymentStatusProps {
   deploymentId: number;
   onBack?: () => void;
@@ -90,16 +41,6 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
   
   // Use simulated data if no real data is available
   const hasData = events && events.length > 0;
-  const simulatedData = simulateDeployment(deploymentId);
-  const isCompleted = status === 'completed' || status === 'failed';
-  
-  // Use real data if available, otherwise use simulated data
-  // Always use at least 65% for progress to avoid getting stuck at 0%
-  const displayProgress = hasData ? Math.max(progress, 65) : simulatedData.progress;
-  const displayMessage = hasData ? message || 'Building Android application...' : simulatedData.message;
-  const displayStatus = hasData ? status || 'building' : simulatedData.status;
-  // Ensure we always have events to display
-  const displayEvents = (hasData && events && events.length > 0) ? events : simulatedData.events;
 
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isActive, setIsActive] = useState(false);
@@ -233,9 +174,9 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
             {/* Progress Bar */}
             <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
               <DeploymentVisualProgress
-                progress={displayProgress}
-                status={displayStatus}
-                message={displayMessage}
+                progress={progress}
+                status={status}
+                message={message}
                 platform="android"
                 animate={true}
               />
@@ -315,7 +256,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
 
             {/* Progress Events */}
             <DeploymentProgressEvents 
-              events={displayEvents}
+              events={events}
               autoScroll={!isCompleted}
               maxHeight="300px"
             />

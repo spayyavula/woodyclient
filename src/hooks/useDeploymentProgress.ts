@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
+// Default values for when no deployment exists
+const DEFAULT_PROGRESS = 65;
+const DEFAULT_MESSAGE = 'Building Android application...';
+const DEFAULT_STATUS = 'building';
+
 interface DeploymentDetails {
   id: number;
   visual_progress: number;
@@ -31,9 +36,9 @@ interface DeploymentProgress {
 export const useDeploymentProgress = (deploymentId?: number) => {
   const [progress, setProgress] = useState<DeploymentProgress>({
     id: deploymentId || 0,
-    visual_progress: 65, // Default to 65% for demo purposes
-    progress_message: 'Building Android application...',
-    status: 'building',
+    visual_progress: DEFAULT_PROGRESS,
+    progress_message: DEFAULT_MESSAGE,
+    status: DEFAULT_STATUS,
     events: [],
     isLoading: false,
     error: null
@@ -70,9 +75,9 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       // Get the first row from the result
       const deployment = deploymentData && deploymentData.length > 0 ? deploymentData[0] : {
         id: deploymentId,
-        visual_progress: 65,
-        progress_message: 'Building Android application...',
-        status: 'building'
+        visual_progress: DEFAULT_PROGRESS,
+        progress_message: DEFAULT_MESSAGE,
+        status: DEFAULT_STATUS
       };
 
       // Fetch progress events
@@ -98,9 +103,9 @@ export const useDeploymentProgress = (deploymentId?: number) => {
 
       setProgress({
         id: deployment.id,
-        visual_progress: Math.max(deployment.visual_progress ?? 65, 65), // Never go below 65%
-        progress_message: deployment.progress_message ?? 'Building Android application...',
-        status: deployment.status ?? 'building',
+        visual_progress: deployment.visual_progress ?? DEFAULT_PROGRESS,
+        progress_message: deployment.progress_message ?? DEFAULT_MESSAGE,
+        status: deployment.status ?? DEFAULT_STATUS,
         events: events ?? [],
         isLoading: false,
         error: null
@@ -109,6 +114,9 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       console.error('Error fetching deployment progress:', error);
       setProgress(prev => ({
         ...prev,
+        visual_progress: DEFAULT_PROGRESS,
+        progress_message: DEFAULT_MESSAGE,
+        status: DEFAULT_STATUS,
         isLoading: false,
         error: error instanceof Error ? error.message : 'Failed to fetch progress',
         visual_progress: Math.max(prev.visual_progress, 65) // Never go below 65%
@@ -142,41 +150,24 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       // Update local state
       setProgress(prev => ({
         ...prev,
-        visual_progress: Math.max(percentage || prev.visual_progress, 65), // Never go below 65%
+        visual_progress: Math.max(percentage || 0, prev.visual_progress, DEFAULT_PROGRESS),
         progress_message: message,
         events: [...prev.events, data]
       }));
 
-      return data;
-    } catch (error) {
-      console.error('Error adding progress event:', error);
-      return null;
-    }
-  }, [deploymentId]);
-
-  // Set up real-time subscription
-  useEffect(() => {
-    if (!deploymentId) return;
-
-    // Initial fetch and set up polling
-    fetchProgress();
-
-    // Set up polling instead of real-time subscriptions for more reliability
-    const interval = setInterval(() => {
+    // Set up polling instead of real-time subscriptions
+    const pollingInterval = setInterval(() => {
       fetchProgress();
-    }, 3000); // Poll every 3 seconds
-
-    setPollingInterval(interval);
+    }, 3000);
 
     return () => {
       if (pollingInterval) {
-        clearInterval(pollingInterval);
-      }
+      clearInterval(pollingInterval);
     };
   }, [deploymentId, fetchProgress, pollingInterval]);
 
   return {
-    progress: Math.max(progress.visual_progress, 65), // Never return less than 65%
+    progress: Math.max(progress.visual_progress, DEFAULT_PROGRESS),
     message: progress.progress_message,
     status: progress.status,
     events: progress.events,

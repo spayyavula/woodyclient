@@ -3,7 +3,7 @@ import { CheckCircle, XCircle, AlertTriangle, Clock, RefreshCw } from 'lucide-re
 
 interface DeploymentVisualProgressProps {
   progress: number;
-  status: string;
+  status?: string;
   message?: string;
   platform?: string;
   className?: string;
@@ -13,7 +13,7 @@ interface DeploymentVisualProgressProps {
 
 const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
   progress,
-  status,
+  status = 'building',
   message,
   platform = 'android',
   className = '',
@@ -22,16 +22,19 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
 }) => {
   // Start with at least 65% progress for demo purposes
   const [animatedProgress, setAnimatedProgress] = useState(Math.max(progress, 65));
+  // Ensure progress is never below 65%
+  const safeProgress = Math.max(progress, 65);
+
 
   useEffect(() => {
     if (!animate) {
-      setAnimatedProgress(Math.max(progress, 65));
+      setAnimatedProgress(safeProgress);
       return;
     }
     
     // Ensure progress is never below 65% for demo purposes
     const actualProgress = Math.max(progress, 65);
-    const end = Math.max(progress, 65); // Never go below 65%
+    const end = safeProgress;
     // Animate progress smoothly
     const start = animatedProgress;
     const end = actualProgress;
@@ -47,12 +50,12 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
       if (elapsed < duration && nextProgress < end) {
         requestAnimationFrame(animateProgress);
       } else {
-        setAnimatedProgress(end);
+        setAnimatedProgress(safeProgress);
       }
     };
 
     requestAnimationFrame(animateProgress);
-  }, [progress, animate, animatedProgress]);
+  }, [safeProgress, animate, animatedProgress]);
 
   const getStatusIcon = () => {
     switch (status) {
