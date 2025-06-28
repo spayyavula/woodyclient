@@ -19,7 +19,9 @@ import {
   CreditCard,
   Eye,
   TestTube,
-  Link
+  Link,
+  Hammer,
+  Wrench
 } from 'lucide-react';
 import SubscriptionStatus from './SubscriptionStatus';
 
@@ -103,43 +105,55 @@ const Toolbar: React.FC<ToolbarProps> = ({
         <div className="flex items-center space-x-1">
           <button 
             onClick={onRun}
-            className="flex items-center px-3 py-1.5 bg-orange-600 hover:bg-orange-700 rounded text-white text-sm font-medium transition-colors"
+            className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 rounded-lg text-white text-sm font-medium transition-all transform hover:scale-105 shadow-lg"
+            title="Build & Analyze Code"
           >
-            <Play className="w-4 h-4 mr-1" />
-            Build & Run
+            <Hammer className="w-4 h-4 mr-2" />
+            <span>Build & Analyze</span>
           </button>
-          <button className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors">
-            <Square className="w-4 h-4" />
+          <button 
+            className="flex items-center px-3 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white text-sm font-medium transition-colors"
+            title="Stop Build"
+          >
+            <Square className="w-4 h-4 mr-1" />
+            <span>Stop</span>
           </button>
-          <button className="flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm font-medium transition-colors">
-            <Smartphone className="w-4 h-4 mr-1" />
-            Deploy
+          <button 
+            className="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-medium transition-colors"
+            title="Deploy to Production"
+          >
+            <Smartphone className="w-4 h-4 mr-2" />
+            <span>Deploy</span>
           </button>
-          <button className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors">
-            <Bug className="w-4 h-4" />
+          <button 
+            className="flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-medium transition-colors"
+            title="Debug Mode"
+          >
+            <Bug className="w-4 h-4 mr-1" />
+            <span>Debug</span>
           </button>
           <button 
             onClick={onShowMobilePreview}
-            className="flex items-center px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded text-white text-sm font-medium transition-colors"
+            className="flex items-center px-3 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg text-white text-sm font-medium transition-colors"
             title="Preview Mobile App"
           >
-            <Eye className="w-4 h-4 mr-1" />
-            Preview
+            <Eye className="w-4 h-4 mr-2" />
+            <span>Preview</span>
           </button>
           <button 
             onClick={onShowStripeTests}
-            className="flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded text-white text-sm font-medium transition-colors"
+            className="flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white text-sm font-medium transition-colors"
             title="Stripe E2E Tests"
           >
-            <TestTube className="w-4 h-4 mr-1" />
+            <TestTube className="w-4 h-4 mr-2" />
             <span>Test Stripe</span>
           </button>
           <button 
             onClick={onShowIntegrations}
-            className="flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm font-medium transition-colors"
+            className="flex items-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white text-sm font-medium transition-colors"
             title="Integrations"
           >
-            <Link className="w-4 h-4 mr-1" />
+            <Link className="w-4 h-4 mr-2" />
             <span>Integrations</span>
           </button>
         </div>
