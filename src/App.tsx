@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { isSupabaseConfigured } from './lib/supabase';
 import HelloWorldApp from './components/HelloWorldApp';
+import ScriptRunner from './components/ScriptRunner';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
@@ -59,6 +60,7 @@ function App() {
   const [showStripeTests, setShowStripeTests] = useState(false);
   const [showIntegrations, setShowIntegrations] = useState(false);
   const [showHelloWorld, setShowHelloWorld] = useState(true);
+  const [showScriptRunner, setShowScriptRunner] = useState(false);
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);
   const [isCollaborationVisible, setIsCollaborationVisible] = useState(false);
   const [isMarketplaceVisible, setIsMarketplaceVisible] = useState(false);
@@ -458,6 +460,22 @@ console.log('Hello from ${fileName}!');`;
     );
   }
 
+  if (showScriptRunner) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex flex-col">
+        <ScriptRunner />
+        <div className="p-4 bg-gray-800 border-t border-gray-700">
+          <button 
+            onClick={() => setShowScriptRunner(false)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+          >
+            Back to IDE
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <LandingPage 
@@ -485,6 +503,7 @@ console.log('Hello from ${fileName}!');`;
         onShowStripeTests={() => setShowStripeTests(true)}
         onShowIntegrations={() => setShowIntegrations(true)}
         onShowHelloWorld={() => setShowHelloWorld(true)}
+        onShowScriptRunner={() => setShowScriptRunner(true)}
       />
       
       <div className="flex flex-1 overflow-hidden">

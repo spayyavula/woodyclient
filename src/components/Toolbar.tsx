@@ -41,6 +41,7 @@ interface ToolbarProps {
   onShowMobilePreview: () => void;
   onShowStripeTests: () => void;
   onShowHelloWorld: () => void;
+  onShowScriptRunner: () => void;
   onShowIntegrations: () => void;
 }
 
@@ -56,6 +57,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onShowTemplates,
   onShowMobilePreview,
   onShowHelloWorld,
+  onShowScriptRunner,
   onShowStripeTests,
   onShowIntegrations
 }) => {
@@ -239,6 +241,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
           >
             <Smartphone className="w-4 h-4 mr-2" />
             <span>Hello World</span>
+          </button>
+          <button 
+            onClick={onShowScriptRunner}
+            className="flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-medium transition-colors"
+            title="Run Deployment Scripts"
+          >
+            <Terminal className="w-4 h-4 mr-2" />
+            <span>Run Scripts</span>
           </button>
           <button 
             onClick={onShowStripeTests}
