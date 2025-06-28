@@ -47,7 +47,6 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -331,12 +330,10 @@ mod tests {
     }
   };
 
-  const handleAuthSuccess = () => {
-    // User will be set automatically by the auth state change listener
-  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setUser(null);
     setShowProfile(false);
   };
 

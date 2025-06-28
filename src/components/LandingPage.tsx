@@ -125,7 +125,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
             <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
             <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">Pricing</a>
             <a href="#about" className="text-gray-300 hover:text-white transition-colors">About</a>
-            <button className="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors">
+            <button 
+              onClick={() => document.getElementById('auth-form')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors"
+            >
               Get Started
             </button>
           </div>
@@ -157,7 +160,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg">
+                <button 
+                  onClick={() => document.getElementById('auth-form')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
+                >
                   <Play className="w-5 h-5" />
                   <span>Start Building</span>
                 </button>
@@ -180,7 +186,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
 
             {/* Right Column - Login Form */}
             <div className="relative">
-              <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 shadow-2xl">
+              <div id="auth-form" className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 shadow-2xl">
                 <div className="text-center mb-8">
                   <h2 className="text-2xl font-bold text-white mb-2">
                     {isLoginMode ? 'Welcome Back' : 'Join the Revolution'}
@@ -419,7 +425,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
             Join thousands of developers who are already building amazing mobile apps with Rust Cloud IDE.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg">
+            <button 
+              onClick={() => document.getElementById('auth-form')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
+            >
               <Rocket className="w-5 h-5" />
               <span>Start Free Trial</span>
             </button>
