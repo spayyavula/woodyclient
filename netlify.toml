@@ -1,0 +1,34 @@
+# Netlify configuration file
+
+[build]
+  # Directory to publish (relative to root of your repo)
+  publish = "dist"
+  # Default build command
+  command = "npm run build"
+
+# Redirects and headers
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Environment variable configuration
+[build.environment]
+  # Set Node version
+  NODE_VERSION = "18"
+
+# Production context: all deploys from the Production branch set in your site's
+# deploy contexts will inherit these settings.
+[context.production.environment]
+  # Production specific environment variables
+  VITE_APP_ENVIRONMENT = "production"
+
+# Deploy Preview context: all deploys generated from a pull/merge request will
+# inherit these settings.
+[context.deploy-preview.environment]
+  VITE_APP_ENVIRONMENT = "preview"
+
+# Branch Deploy context: all deploys that are not from a pull/merge request or
+# from the Production branch will inherit these settings.
+[context.branch-deploy.environment]
+  VITE_APP_ENVIRONMENT = "development"
