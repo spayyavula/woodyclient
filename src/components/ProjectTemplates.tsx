@@ -17,7 +17,7 @@ interface Template {
 }
 
 interface ProjectTemplatesProps {
-  isVisible: boolean;
+  isVisible: true;
   onClose: () => void;
   onSelectTemplate: (template: Template) => void;
 }
