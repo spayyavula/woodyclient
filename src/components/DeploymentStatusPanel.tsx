@@ -10,7 +10,8 @@ import {
   ArrowRight,
   Smartphone,
   Globe,
-  Server
+  Server,
+  Copy
 } from 'lucide-react';
 import DeploymentStatus from './DeploymentStatus';
 
@@ -31,7 +32,8 @@ const DeploymentStatusPanel: React.FC<DeploymentStatusPanelProps> = ({
     deployUrl ? 'success' : 'idle'
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(new Date());
+  const [copySuccess, setCopySuccess] = useState(false);
   
   useEffect(() => {
     if (deployUrl) {
@@ -60,14 +62,10 @@ const DeploymentStatusPanel: React.FC<DeploymentStatusPanelProps> = ({
     }
   };
   
-  const startNewDeployment = () => {
-    setDeploymentStatus('in_progress');
-    
-    // Simulate a deployment process
-    setTimeout(() => {
-      setDeploymentStatus('success');
-      setLastUpdated(new Date());
-    }, 10000);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
   };
   
   if (!isVisible) return null;
@@ -116,29 +114,103 @@ const DeploymentStatusPanel: React.FC<DeploymentStatusPanelProps> = ({
             </div>
             
             {/* Web Deployment Status */}
-            <DeploymentStatus
-              deployUrl={deployUrl}
-              deployId={deployId}
-              status={deploymentStatus}
-              platform="web"
-              onRefresh={refreshStatus}
-            />
+            <div className="bg-gray-700 rounded-lg border border-gray-600 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <Globe className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-lg font-semibold text-white">Web Deployment</h3>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <span className="text-sm font-medium text-green-400">Deployed</span>
+                </div>
+              </div>
+              
+              {deployUrl && (
+                <div className="mb-4">
+                  <div className="flex items-center space-x-2 bg-green-900/20 border border-green-500/30 rounded-lg p-3">
+                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-green-300 font-medium">Deployment successful!</p>
+                      <div className="flex items-center mt-1">
+                        <p className="text-sm text-green-200 truncate mr-2">{deployUrl}</p>
+                        <button 
+                          onClick={() => copyToClipboard(deployUrl)}
+                          className="p-1 hover:bg-gray-600 rounded text-gray-300 hover:text-white transition-colors"
+                          title="Copy URL"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        {copySuccess && (
+                          <span className="text-xs text-green-300 ml-1">Copied!</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex flex-wrap gap-2">
+                {deployUrl && (
+                  <a 
+                    href={deployUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Visit Site</span>
+                  </a>
+                )}
+                
+                <button 
+                  onClick={refreshStatus}
+                  className="flex items-center space-x-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Refresh Status</span>
+                </button>
+              </div>
+            </div>
             
-            {/* Android Deployment Status */}
-            <DeploymentStatus
-              status="idle"
-              platform="android"
-            />
-            
-            {/* iOS Deployment Status */}
-            <DeploymentStatus
-              status="idle"
-              platform="ios"
-            />
+            {/* Deployment Details */}
+            <div className="bg-gray-700 rounded-lg border border-gray-600 p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">Deployment Details</h3>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Status:</span>
+                  <span className="text-green-400 font-medium">Live</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Platform:</span>
+                  <span className="text-white">Netlify</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Deployment URL:</span>
+                  <a 
+                    href={deployUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    {deployUrl ? new URL(deployUrl).hostname : 'N/A'}
+                  </a>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Deployed at:</span>
+                  <span className="text-white">{lastUpdated?.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Branch:</span>
+                  <span className="text-white">main</span>
+                </div>
+              </div>
+            </div>
             
             {/* Help Text */}
             <div className="text-sm text-gray-400 mt-4">
-              <p>Need help with deployments? Check out our <a href="#" className="text-blue-400 hover:text-blue-300">deployment documentation</a> for detailed instructions.</p>
+              <p>Your site is now live at <a href={deployUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">{deployUrl}</a>. You can continue to make changes and redeploy as needed.</p>
             </div>
           </div>
         </div>
