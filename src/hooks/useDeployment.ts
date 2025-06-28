@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 export interface DeploymentStep {
   id: string;
@@ -7,6 +7,10 @@ export interface DeploymentStep {
   command?: string;
   output?: string;
   duration?: number;
+  progress?: number;
+  substeps?: string[];
+  currentSubstep?: number;
+  metadata?: Record<string, any>;
 }
 
 export interface DeploymentConfig {
@@ -17,6 +21,7 @@ export interface DeploymentConfig {
   webTarget?: 'spa' | 'pwa' | 'ssr';
   desktopTarget?: 'windows' | 'macos' | 'linux' | 'all';
   androidTarget?: 'apk' | 'aab';
+  enableOptimizations?: boolean;
 }
 
 interface UseDeploymentReturn {
@@ -26,6 +31,8 @@ interface UseDeploymentReturn {
   deploymentConfig: DeploymentConfig;
   startDeployment: (config: DeploymentConfig) => Promise<void>;
   stopDeployment: () => void;
+  getStepProgress: (stepIndex: number) => number;
+  getOverallProgress: () => number;
   executeCommand: (command: string) => Promise<{ success: boolean; output: string }>;
 }
 
@@ -33,6 +40,7 @@ export const useDeployment = (): UseDeploymentReturn => {
   const [isDeploying, setIsDeploying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [steps, setSteps] = useState<DeploymentStep[]>([]);
+  const progressIntervals = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const [deploymentConfig, setDeploymentConfig] = useState<DeploymentConfig>({
     platform: 'ios',
     buildType: 'release',
@@ -41,9 +49,11 @@ export const useDeployment = (): UseDeploymentReturn => {
     androidTarget: 'aab'
   });
 
-  const executeCommand = useCallback(async (command: string): Promise<{ success: boolean; output: string }> => {
+  const executeCommand = useCallback(async (command: string, stepIndex?: number): Promise<{ success: boolean; output: string }> => {
     // Simulate command execution with realistic output
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+    const duration = 2000 + Math.random() * 4000;
+    
+    await simulateProgressiveExecution(command, stepIndex, duration);
     
     // Mock different command outputs
     if (command.includes('cargo build')) {
@@ -54,45 +64,114 @@ export const useDeployment = (): UseDeploymentReturn => {
       };
     }
     
+    // iOS Commands with enhanced feedback
     if (command.includes('xcodebuild')) {
       if (command.includes('build')) {
         return {
           success: true,
-          output: `Build settings from command line:
+          output: `🍎 Building iOS Application...
+
+Build settings from command line:
     CONFIGURATION = Release
     PLATFORM_NAME = iphoneos
+    DEVELOPMENT_TEAM = XXXXXXXXXX
+    CODE_SIGN_IDENTITY = iPhone Distribution
 
 === BUILD TARGET App OF PROJECT App WITH CONFIGURATION Release ===
 
 Check dependencies
-CompileC /Users/dev/Library/Developer/Xcode/DerivedData/App-xyz/Build/Intermediates.noindex/App.build/Release-iphoneos/App.build/Objects-normal/arm64/AppDelegate.o /path/to/ios/App/AppDelegate.swift normal arm64 swift
-...
-** BUILD SUCCEEDED **`
+
+🔨 Compiling Swift sources...
+CompileSwift normal arm64 /path/to/ios/App/AppDelegate.swift
+CompileSwift normal arm64 /path/to/ios/App/ViewController.swift
+CompileSwift normal arm64 /path/to/ios/App/SceneDelegate.swift
+
+📦 Linking Rust libraries...
+Ld /Users/dev/Library/Developer/Xcode/DerivedData/App-xyz/Build/Products/Release-iphoneos/App.app/App normal arm64
+
+🔐 Code signing...
+CodeSign /Users/dev/Library/Developer/Xcode/DerivedData/App-xyz/Build/Products/Release-iphoneos/App.app
+
+✅ ** BUILD SUCCEEDED **
+
+📊 Build Summary:
+   - Target: arm64 (iOS Device)
+   - Configuration: Release
+   - Code Signing: iPhone Distribution
+   - Bundle Size: 42.3 MB
+   - Build Time: 3m 24s`
         };
       }
       
       if (command.includes('archive')) {
         return {
           success: true,
-          output: `=== ARCHIVE TARGET App OF PROJECT App WITH CONFIGURATION Release ===
+          output: `📦 Creating iOS Archive for Distribution...
+
+=== ARCHIVE TARGET App OF PROJECT App WITH CONFIGURATION Release ===
 
 Check dependencies
-...
-** ARCHIVE SUCCEEDED **
 
-Archive path: /Users/dev/Library/Developer/Xcode/Archives/2024-01-15/App 1-15-24, 2.30 PM.xcarchive`
+🔨 Building for archiving...
+CompileSwift normal arm64 (in target 'App' from project 'App')
+Ld /Users/dev/Library/Developer/Xcode/DerivedData/App-xyz/Build/Intermediates.noindex/ArchiveIntermediates/App/BuildProductsPath/Release-iphoneos/App.app/App normal arm64
+
+🔐 Code signing for archive...
+CodeSign /Users/dev/Library/Developer/Xcode/DerivedData/App-xyz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app
+
+📋 Generating dSYM files...
+GenerateDSYMFile /Users/dev/Library/Developer/Xcode/DerivedData/App-xyz/Build/Products/Release-iphoneos/App.app.dSYM /Users/dev/Library/Developer/Xcode/DerivedData/App-xyz/Build/Products/Release-iphoneos/App.app/App
+
+✅ ** ARCHIVE SUCCEEDED **
+
+📦 Archive Details:
+   - Archive path: /Users/dev/Library/Developer/Xcode/Archives/2024-01-15/App 1-15-24, 2.30 PM.xcarchive
+   - App size: 42.3 MB
+   - dSYM size: 8.7 MB
+   - Symbols included: ✓
+   - Bitcode enabled: ✓
+   
+🎯 Ready for App Store distribution!`
         };
       }
       
       if (command.includes('exportArchive')) {
         return {
           success: true,
-          output: `2024-01-15 14:30:45.123 xcodebuild[12345:67890] [MT] IDEDistribution: -[IDEDistributionLogging _createLoggingBundleAtPath:]: Created bundle at path '/var/folders/xyz/T/IDEDistribution_2024-01-15_14-30-45.123/App_2024-01-15_14-30-45.123.xcdistributionlogs'.
-2024-01-15 14:30:47.456 xcodebuild[12345:67890] [MT] IDEDistribution: Step failed: <IDEDistributionThinningStep: 0x600000abc123>: Error Domain=IDEDistributionErrorDomain Code=14 "No applicable devices found." UserInfo={NSLocalizedDescription=No applicable devices found.}
+          output: `📤 Exporting iOS Archive to IPA...
 
-** EXPORT SUCCEEDED **
+🔍 Validating archive...
+   - Checking code signing certificates
+   - Validating provisioning profiles
+   - Verifying entitlements
 
-Export path: /Users/dev/build/App.ipa`
+📋 Export configuration:
+   - Method: App Store
+   - Team: rustyclint Development Team
+   - Provisioning: Automatic
+   - Include symbols: Yes
+   - Include bitcode: Yes
+
+🔨 Processing archive...
+   - Thinning for App Store deployment
+   - Optimizing for distribution
+   - Generating manifest
+
+📦 Creating IPA package...
+   - Compressing application bundle
+   - Adding metadata
+   - Finalizing package
+
+✅ ** EXPORT SUCCEEDED **
+
+📊 Export Summary:
+   - IPA path: /Users/dev/build/App.ipa
+   - File size: 38.9 MB (optimized for App Store)
+   - Supported devices: iPhone 6s and later, iPad Air 2 and later
+   - iOS version: 12.0+
+   - Universal binary: arm64
+   
+🎯 Ready for App Store Connect upload!`
         };
       }
     }
@@ -100,10 +179,37 @@ Export path: /Users/dev/build/App.ipa`
     if (command.includes('xcrun altool')) {
       return {
         success: true,
-        output: `2024-01-15 14:35:12.789 altool[12345:67890] *** Warning: altool has been deprecated for uploading apps to the App Store. Use Transporter instead.
-2024-01-15 14:35:15.123 altool[12345:67890] No errors uploading '/Users/dev/build/App.ipa'.
-2024-01-15 14:35:15.456 altool[12345:67890] Package Summary:
-1 package(s) were successfully uploaded.`
+        output: `☁️  Uploading to App Store Connect...
+
+🔑 Authenticating with App Store Connect API...
+   - API Key: ${process.env.APP_STORE_API_KEY?.slice(0, 8) || 'XXXXXXXX'}...
+   - Issuer ID: ${process.env.APP_STORE_ISSUER_ID?.slice(0, 8) || 'XXXXXXXX'}...
+   - Team ID: Verified ✓
+
+📤 Uploading IPA package...
+   - File: /Users/dev/build/App.ipa
+   - Size: 38.9 MB
+   - Progress: ████████████████████████████████ 100%
+
+🔍 Processing upload...
+   - Validating binary
+   - Checking metadata
+   - Scanning for issues
+
+✅ Upload completed successfully!
+
+📋 Upload Summary:
+   - Build number: 1.0.0 (42)
+   - Status: Processing
+   - Processing time: 5-15 minutes
+   
+📱 Next Steps:
+   1. Wait for processing to complete
+   2. Add build to App Store Connect
+   3. Submit for App Store review
+   4. Review time: 24-48 hours
+   
+🎉 iOS deployment completed successfully!`
       };
     }
     
@@ -227,58 +333,169 @@ Verifying alignment of app-release.apk (4)...
     if (command.includes('wasm-pack')) {
       return {
         success: true,
-        output: `[INFO]: 🎯  Checking for the Wasm target...
+        output: `🌐 Building Rust to WebAssembly...
+
+[INFO]: 🎯  Checking for the Wasm target...
+[INFO]: ✅  Wasm target found: wasm32-unknown-unknown
+
 [INFO]: 🌀  Compiling to Wasm...
+   Compiling proc-macro2 v1.0.70
+   Compiling unicode-ident v1.0.12
+   Compiling wasm-bindgen-shared v0.2.87
+   Compiling log v0.4.20
+   Compiling cfg-if v1.0.0
+   Compiling wasm-bindgen v0.2.87
    Compiling rustyclint v0.1.0
     Finished release [optimized] target(s) in 45.67s
+
 [INFO]: ⬇️  Installing wasm-bindgen...
-[INFO]: Optimizing wasm binaries with \`wasm-opt\`...
-[INFO]: Optional fields missing from Cargo.toml: 'description', 'repository', and 'license'. These are not necessary, but recommended
+[INFO]: 🔧  Generating TypeScript bindings...
+[INFO]: 📦  Generating JavaScript bindings...
+
+[INFO]: ⚡  Optimizing wasm binaries with wasm-opt...
+   - Original size: 2.3 MB
+   - Optimized size: 847 KB (63% reduction)
+   - Optimization level: -Oz (size-focused)
+
 [INFO]: ✨   Done in 47.23s
-[INFO]: 📦   Your wasm pkg is ready to publish at pkg.`
+[INFO]: 📦   Your wasm pkg is ready to publish at pkg/
+
+📊 WebAssembly Build Summary:
+   - WASM file: pkg/rustyclint_bg.wasm (847 KB)
+   - JS bindings: pkg/rustyclint.js (23 KB)
+   - TS definitions: pkg/rustyclint.d.ts (8 KB)
+   - Package.json: pkg/package.json
+   
+🚀 Ready for web deployment!`
       };
     }
     
     if (command.includes('npm run build')) {
       return {
         success: true,
-        output: `> rustyclint-web@1.0.0 build
+        output: `🌐 Building ${deploymentConfig.webTarget?.toUpperCase() || 'Web'} Application...
+
+> rustyclint-web@1.0.0 build
 > vite build
 
-vite v5.0.0 building for production...
+🔨 vite v5.0.0 building for production...
+
+📦 Bundling modules...
+   - Analyzing dependencies
+   - Tree-shaking unused code
+   - Optimizing imports
+
+⚡ Processing WebAssembly...
+   - Loading WASM module
+   - Optimizing WASM imports
+   - Generating WASM bindings
+
+🎨 Processing assets...
+   - Optimizing images
+   - Minifying CSS
+   - Compressing fonts
+
 ✓ 1247 modules transformed.
-✓ building SSR bundle for production...
+${deploymentConfig.webTarget === 'ssr' ? '✓ building SSR bundle for production...' : ''}
+${deploymentConfig.webTarget === 'pwa' ? '✓ generating PWA manifest and service worker...' : ''}
+
+📊 Build Output:
 dist/index.html                   2.34 kB │ gzip:  1.12 kB
 dist/assets/index-B26YQF_l.js   142.67 kB │ gzip: 45.23 kB
 dist/assets/index-Crgjde5t.css   23.45 kB │ gzip:  6.78 kB
-✓ built in 12.34s`
+dist/assets/rustyclint_bg.wasm   847.00 kB │ gzip: 312.45 kB
+${deploymentConfig.webTarget === 'pwa' ? 'dist/manifest.json              1.23 kB │ gzip:  0.67 kB\ndist/sw.js                      12.45 kB │ gzip:  4.23 kB' : ''}
+
+✅ Build completed in 12.34s
+
+🎯 ${deploymentConfig.webTarget === 'pwa' ? 'PWA' : deploymentConfig.webTarget === 'ssr' ? 'SSR' : 'SPA'} ready for deployment!`
       };
     }
     
     if (command.includes('netlify deploy')) {
       return {
         success: true,
-        output: `Deploy path: dist
-Configuration path: netlify.toml
-Deploying to main site URL...
-✔ Finished hashing 127 files and 3 functions
-✔ CDN requesting 89 files and 2 functions
-✔ Finished uploading 89 files and 2 functions
-✔ Deploy is live!
+        output: `🚀 Deploying to Netlify...
 
-Logs:              https://app.netlify.com/sites/rustyclint/deploys/abc123def456
-Unique Deploy URL: https://abc123def456--rustyclint.netlify.app
-Website URL:       https://rustyclint.netlify.app`
+📋 Deployment Configuration:
+Deploy path: dist
+Configuration path: netlify.toml
+Site: rustyclint-web
+
+📦 Preparing deployment...
+   - Scanning build directory
+   - Analyzing file changes
+   - Optimizing for CDN
+
+🔄 Deploying to main site URL...
+✔ Finished hashing 127 files and 3 functions
+✔ CDN requesting 89 files and 2 functions  
+✔ Uploading files: ████████████████████████████████ 100%
+✔ Processing functions...
+✔ Finished uploading 89 files and 3 functions
+
+🌐 Configuring global CDN...
+   - Edge locations: 50+ worldwide
+   - Cache optimization: Enabled
+   - Compression: Brotli + Gzip
+
+✅ Deploy is live!
+
+📊 Deployment Summary:
+   - Files uploaded: 89
+   - Functions deployed: 3
+   - Total size: 1.2 MB (compressed)
+   - Deploy time: 23 seconds
+   - CDN propagation: ~2 minutes
+
+🔗 URLs:
+   - Logs: https://app.netlify.com/sites/rustyclint/deploys/abc123def456
+   - Preview: https://abc123def456--rustyclint.netlify.app
+   - Production: https://rustyclint.netlify.app
+   
+🎉 Web deployment completed successfully!`
       };
     }
     
     if (command.includes('vercel deploy')) {
       return {
         success: true,
-        output: `Vercel CLI 32.5.0
+        output: `🚀 Deploying to Vercel...
+
+Vercel CLI 32.5.0
+
+📋 Project Configuration:
+   - Framework: Vite
+   - Build Command: npm run build
+   - Output Directory: dist
+   - Node.js Version: 18.x
+
+🔨 Building on Vercel...
+   - Installing dependencies
+   - Running build command
+   - Optimizing for Edge Network
+
+📦 Uploading build artifacts...
+   - Static files: 89
+   - Serverless functions: 3
+   - Edge functions: 1
+
+🌐 Deploying to Edge Network...
+   - Regions: 25+ worldwide
+   - Edge caching: Enabled
+   - Automatic optimization: Active
+
 🔍  Inspect: https://vercel.com/rustyclint/rustyclint-web/abc123def456 [2s]
 ✅  Production: https://rustyclint-web.vercel.app [copied to clipboard] [47s]
-📝  Deployed to production. Run \`vercel --prod\` to overwrite later (https://vercel.link/2F).`
+
+📊 Performance Metrics:
+   - First Contentful Paint: 0.8s
+   - Largest Contentful Paint: 1.2s
+   - Time to Interactive: 1.5s
+   - Performance Score: 98/100
+
+📝  Deployed to production. Run vercel --prod to overwrite later.
+🎉 Web deployment completed successfully!`
       };
     }
     
@@ -286,35 +503,91 @@ Website URL:       https://rustyclint.netlify.app`
     if (command.includes('cargo tauri')) {
       return {
         success: true,
-        output: `    Updating crates.io index
+        output: `💻 Building Desktop Application with Tauri...
+
+🔄 Updating crates.io index...
+
+🦀 Compiling Rust backend...
+   Compiling serde v1.0.193
+   Compiling tauri v1.5.4
    Compiling rustyclint v0.1.0
     Finished release [optimized] target(s) in 2m 15s
-    Bundling rustyclint_0.1.0_x64_en-US.msi (/path/to/target/release/bundle/msi/rustyclint_0.1.0_x64_en-US.msi)
-    Bundling rustyclint_0.1.0_x64.app (/path/to/target/release/bundle/macos/rustyclint.app)
-    Bundling rustyclint_0.1.0_amd64.deb (/path/to/target/release/bundle/deb/rustyclint_0.1.0_amd64.deb)
-    Bundling rustyclint_0.1.0_amd64.AppImage (/path/to/target/release/bundle/appimage/rustyclint_0.1.0_amd64.AppImage)
-        Finished 4 bundles at:
-        /path/to/target/release/bundle/msi/rustyclint_0.1.0_x64_en-US.msi
-        /path/to/target/release/bundle/macos/rustyclint.app
-        /path/to/target/release/bundle/deb/rustyclint_0.1.0_amd64.deb
-        /path/to/target/release/bundle/appimage/rustyclint_0.1.0_amd64.AppImage`
+
+🌐 Building web frontend...
+   - Vite build completed
+   - Assets optimized
+   - Bundle size: 2.3 MB
+
+📦 Creating platform bundles...
+
+${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget === 'all' ? `🪟 Windows Bundle:
+    Bundling rustyclint_0.1.0_x64_en-US.msi
+    - Installer size: 45.2 MB
+    - Code signing: ${process.env.WINDOWS_CERT ? 'Enabled ✓' : 'Disabled ⚠️'}
+    - Target: Windows 10/11 x64
+` : ''}
+
+${deploymentConfig.desktopTarget === 'macos' || deploymentConfig.desktopTarget === 'all' ? `🍎 macOS Bundle:
+    Bundling rustyclint_0.1.0_x64.app
+    - App bundle size: 52.7 MB
+    - Code signing: ${process.env.APPLE_CERT ? 'Enabled ✓' : 'Disabled ⚠️'}
+    - Notarization: ${process.env.APPLE_NOTARIZE ? 'Enabled ✓' : 'Disabled ⚠️'}
+    - Target: macOS 10.15+ (Intel & Apple Silicon)
+` : ''}
+
+${deploymentConfig.desktopTarget === 'linux' || deploymentConfig.desktopTarget === 'all' ? `🐧 Linux Bundles:
+    Bundling rustyclint_0.1.0_amd64.deb
+    - DEB package size: 41.8 MB
+    - Target: Ubuntu 20.04+ / Debian 11+
+    
+    Bundling rustyclint_0.1.0_amd64.AppImage
+    - AppImage size: 48.3 MB
+    - Target: Universal Linux x64
+` : ''}
+
+✅ Finished ${deploymentConfig.desktopTarget === 'all' ? '4' : '1'} bundle${deploymentConfig.desktopTarget === 'all' ? 's' : ''} at:
+${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget === 'all' ? '        📦 /path/to/target/release/bundle/msi/rustyclint_0.1.0_x64_en-US.msi\n' : ''}${deploymentConfig.desktopTarget === 'macos' || deploymentConfig.desktopTarget === 'all' ? '        📦 /path/to/target/release/bundle/macos/rustyclint.app\n' : ''}${deploymentConfig.desktopTarget === 'linux' || deploymentConfig.desktopTarget === 'all' ? '        📦 /path/to/target/release/bundle/deb/rustyclint_0.1.0_amd64.deb\n        📦 /path/to/target/release/bundle/appimage/rustyclint_0.1.0_amd64.AppImage\n' : ''}
+🎉 Desktop application built successfully!`
       };
     }
     
     if (command.includes('electron-builder')) {
       return {
         success: true,
-        output: `  • electron-builder  version=24.6.4 os=darwin
+        output: `💻 Building Desktop Application with Electron...
+
+  • electron-builder  version=24.6.4 os=darwin
   • loaded configuration  file=package.json ("build" field)
   • writing effective config  file=dist/builder-effective-config.yaml
+
+🍎 Building for macOS...
   • packaging       platform=darwin arch=x64 electron=27.0.0 appOutDir=dist/mac
   • building        target=macOS zip arch=x64 file=dist/rustyclint-1.0.0-mac.zip
   • building        target=DMG arch=x64 file=dist/rustyclint-1.0.0.dmg
+    - DMG size: 89.4 MB
+    - Code signing: ${process.env.APPLE_CERT ? 'Enabled ✓' : 'Disabled ⚠️'}
+
+🪟 Building for Windows...
   • packaging       platform=win32 arch=x64 electron=27.0.0 appOutDir=dist/win-unpacked
   • building        target=nsis arch=x64 file=dist/rustyclint Setup 1.0.0.exe
+    - Installer size: 95.2 MB
+    - Code signing: ${process.env.WINDOWS_CERT ? 'Enabled ✓' : 'Disabled ⚠️'}
+
+🐧 Building for Linux...
   • packaging       platform=linux arch=x64 electron=27.0.0 appOutDir=dist/linux-unpacked
   • building        target=AppImage arch=x64 file=dist/rustyclint-1.0.0.AppImage
-  • building        target=deb arch=x64 file=dist/rustyclint_1.0.0_amd64.deb`
+  • building        target=deb arch=x64 file=dist/rustyclint_1.0.0_amd64.deb
+    - AppImage size: 102.7 MB
+    - DEB size: 98.3 MB
+
+📊 Build Summary:
+   - Total build time: 4m 32s
+   - Platforms built: 3
+   - Total package size: ~285 MB
+   - Electron version: 27.0.0
+   
+✅ All desktop bundles created successfully!
+🎉 Desktop deployment completed!`
       };
     }
     
@@ -322,7 +595,33 @@ Website URL:       https://rustyclint.netlify.app`
       success: true,
       output: `Command executed: ${command}\nOutput: Success`
     };
-  }, [deploymentConfig.buildType]);
+  }, [deploymentConfig]);
+
+  const simulateProgressiveExecution = async (command: string, stepIndex: number | undefined, duration: number) => {
+    if (stepIndex === undefined) return;
+
+    const progressInterval = setInterval(() => {
+      setSteps(prev => prev.map((step, index) => 
+        index === stepIndex 
+          ? { ...step, progress: Math.min((step.progress || 0) + Math.random() * 15, 95) }
+          : step
+      ));
+    }, 200);
+
+    progressIntervals.current.set(`step-${stepIndex}`, progressInterval);
+
+    await new Promise(resolve => setTimeout(resolve, duration));
+
+    clearInterval(progressInterval);
+    progressIntervals.current.delete(`step-${stepIndex}`);
+
+    // Set final progress to 100%
+    setSteps(prev => prev.map((step, index) => 
+      index === stepIndex 
+        ? { ...step, progress: 100 }
+        : step
+    ));
+  };
 
   const getDeploymentSteps = (config: DeploymentConfig): DeploymentStep[] => {
     switch (config.platform) {
@@ -332,7 +631,12 @@ Website URL:       https://rustyclint.netlify.app`
             id: 'rust-build',
             name: 'Build Rust Code for iOS',
             status: 'pending',
-            command: `cargo build --target aarch64-apple-ios --${config.buildType}`
+            command: `cargo build --target aarch64-apple-ios --${config.buildType}`,
+            substeps: ['Downloading dependencies', 'Compiling core libraries', 'Building for arm64', 'Optimizing binary'],
+            metadata: {
+              estimatedTime: '2-3 minutes',
+              outputSize: '~15 MB'
+            }
           },
           {
             id: 'rust-build-simulator',
@@ -344,7 +648,12 @@ Website URL:       https://rustyclint.netlify.app`
             id: 'universal-binary',
             name: 'Create Universal Binary',
             status: 'pending',
-            command: `lipo -create target/aarch64-apple-ios/${config.buildType}/libapp.a target/x86_64-apple-ios/${config.buildType}/libapp.a -output libapp-universal.a`
+            command: `lipo -create target/aarch64-apple-ios/${config.buildType}/libapp.a target/x86_64-apple-ios/${config.buildType}/libapp.a -output libapp-universal.a`,
+            substeps: ['Merging architectures', 'Verifying compatibility', 'Creating universal binary'],
+            metadata: {
+              estimatedTime: '30 seconds',
+              outputSize: '~30 MB'
+            }
           },
           {
             id: 'xcode-build',
@@ -356,7 +665,12 @@ Website URL:       https://rustyclint.netlify.app`
             id: 'xcode-archive',
             name: 'Create iOS Archive',
             status: 'pending',
-            command: `xcodebuild -project ios/App.xcodeproj -scheme App -configuration Release -destination "generic/platform=iOS" archive -archivePath build/App.xcarchive`
+            command: `xcodebuild -project ios/App.xcodeproj -scheme App -configuration Release -destination "generic/platform=iOS" archive -archivePath build/App.xcarchive`,
+            substeps: ['Building for archiving', 'Code signing', 'Generating dSYM', 'Creating archive'],
+            metadata: {
+              estimatedTime: '3-5 minutes',
+              outputSize: '~50 MB'
+            }
           },
           {
             id: 'export-ipa',
@@ -368,7 +682,12 @@ Website URL:       https://rustyclint.netlify.app`
             id: 'upload-appstore',
             name: 'Upload to App Store Connect',
             status: 'pending',
-            command: `xcrun altool --upload-app --type ios --file build/App.ipa --apiKey "${process.env.APP_STORE_API_KEY}" --apiIssuer "${process.env.APP_STORE_ISSUER_ID}"`
+            command: `xcrun altool --upload-app --type ios --file build/App.ipa --apiKey "${process.env.APP_STORE_API_KEY}" --apiIssuer "${process.env.APP_STORE_ISSUER_ID}"`,
+            substeps: ['Authenticating', 'Uploading IPA', 'Processing binary', 'Finalizing upload'],
+            metadata: {
+              estimatedTime: '5-10 minutes',
+              reviewTime: '24-48 hours'
+            }
           }
         ];
       
@@ -473,7 +792,12 @@ Website URL:       https://rustyclint.netlify.app`
             id: 'rust-wasm',
             name: 'Build Rust to WebAssembly',
             status: 'pending',
-            command: `wasm-pack build --target web --${config.buildType === 'release' ? 'release' : 'dev'}`
+            command: `wasm-pack build --target web --${config.buildType === 'release' ? 'release' : 'dev'}`,
+            substeps: ['Compiling to WASM', 'Generating bindings', 'Optimizing binary', 'Creating package'],
+            metadata: {
+              estimatedTime: '1-2 minutes',
+              outputSize: '~800 KB'
+            }
           },
           {
             id: 'install-deps',
@@ -485,11 +809,16 @@ Website URL:       https://rustyclint.netlify.app`
             id: 'build-web',
             name: `Build ${config.webTarget?.toUpperCase() || 'SPA'} Application`,
             status: 'pending',
-            command: config.webTarget === 'pwa' 
+            command: config.webTarget === 'pwa'
               ? `npm run build:pwa`
               : config.webTarget === 'ssr'
               ? `npm run build:ssr`
-              : `npm run build`
+              : `npm run build`,
+            substeps: ['Bundling modules', 'Processing assets', 'Optimizing output', 'Generating manifest'],
+            metadata: {
+              estimatedTime: '30-60 seconds',
+              outputSize: config.webTarget === 'pwa' ? '~1.5 MB' : '~1.2 MB'
+            }
           },
           {
             id: 'optimize-wasm',
@@ -501,11 +830,16 @@ Website URL:       https://rustyclint.netlify.app`
             id: 'deploy-web',
             name: 'Deploy to Production',
             status: 'pending',
-            command: config.outputPath?.includes('vercel') 
+            command: config.outputPath?.includes('vercel')
               ? `vercel deploy --prod`
               : config.outputPath?.includes('netlify')
               ? `netlify deploy --prod --dir=dist`
-              : `npm run deploy`
+              : `npm run deploy`,
+            substeps: ['Uploading files', 'Configuring CDN', 'Setting up routing', 'Finalizing deployment'],
+            metadata: {
+              estimatedTime: '1-2 minutes',
+              cdnPropagation: '2-5 minutes'
+            }
           },
           {
             id: 'setup-cdn',
@@ -521,7 +855,12 @@ Website URL:       https://rustyclint.netlify.app`
             id: 'rust-build',
             name: 'Build Rust Application',
             status: 'pending',
-            command: `cargo build --${config.buildType}`
+            command: `cargo build --${config.buildType}`,
+            substeps: ['Compiling dependencies', 'Building core', 'Linking libraries', 'Optimizing binary'],
+            metadata: {
+              estimatedTime: '2-4 minutes',
+              outputSize: '~25 MB'
+            }
           },
           {
             id: 'build-ui',
@@ -535,7 +874,12 @@ Website URL:       https://rustyclint.netlify.app`
             status: 'pending',
             command: config.desktopTarget === 'all'
               ? `cargo tauri build --target universal-apple-darwin,x86_64-pc-windows-msvc,x86_64-unknown-linux-gnu`
-              : `cargo tauri build --target ${config.desktopTarget === 'windows' ? 'x86_64-pc-windows-msvc' : config.desktopTarget === 'macos' ? 'universal-apple-darwin' : 'x86_64-unknown-linux-gnu'}`
+              : `cargo tauri build --target ${config.desktopTarget === 'windows' ? 'x86_64-pc-windows-msvc' : config.desktopTarget === 'macos' ? 'universal-apple-darwin' : 'x86_64-unknown-linux-gnu'}`,
+            substeps: ['Building frontend', 'Compiling backend', 'Creating bundles', 'Generating installers'],
+            metadata: {
+              estimatedTime: '5-8 minutes',
+              outputSize: config.desktopTarget === 'all' ? '~200 MB' : '~50 MB'
+            }
           },
           {
             id: 'sign-binaries',
@@ -549,7 +893,12 @@ Website URL:       https://rustyclint.netlify.app`
             id: 'create-installers',
             name: 'Create Installers',
             status: 'pending',
-            command: `electron-builder --publish=never`
+            command: `electron-builder --publish=never`,
+            substeps: ['Packaging apps', 'Creating installers', 'Code signing', 'Verifying bundles'],
+            metadata: {
+              estimatedTime: '3-5 minutes',
+              outputSize: '~300 MB total'
+            }
           },
           {
             id: 'upload-releases',
@@ -565,7 +914,10 @@ Website URL:       https://rustyclint.netlify.app`
             id: 'rust-build',
             name: 'Build Rust Application',
             status: 'pending',
-            command: `cargo build --${config.buildType}`
+            command: `cargo build --${config.buildType}`,
+            metadata: {
+              estimatedTime: '1-2 minutes'
+            }
           },
           {
             id: 'package',
@@ -577,10 +929,10 @@ Website URL:       https://rustyclint.netlify.app`
     }
   };
 
-  const updateStepStatus = (stepIndex: number, status: DeploymentStep['status'], output?: string, duration?: number) => {
+  const updateStepStatus = (stepIndex: number, status: DeploymentStep['status'], output?: string, duration?: number, progress?: number) => {
     setSteps(prev => prev.map((step, index) => 
       index === stepIndex 
-        ? { ...step, status, output, duration }
+        ? { ...step, status, output, duration, progress: progress || step.progress }
         : step
     ));
   };
@@ -601,19 +953,19 @@ Website URL:       https://rustyclint.netlify.app`
       const startTime = Date.now();
       
       try {
-        const result = await executeCommand(step.command || '');
+        const result = await executeCommand(step.command || '', i);
         const duration = Date.now() - startTime;
         
         if (result.success) {
-          updateStepStatus(i, 'completed', result.output, duration);
+          updateStepStatus(i, 'completed', result.output, duration, 100);
         } else {
-          updateStepStatus(i, 'failed', result.output, duration);
+          updateStepStatus(i, 'failed', result.output, duration, 0);
           setIsDeploying(false);
           return;
         }
       } catch (error) {
         const duration = Date.now() - startTime;
-        updateStepStatus(i, 'failed', `Error: ${error}`, duration);
+        updateStepStatus(i, 'failed', `Error: ${error}`, duration, 0);
         setIsDeploying(false);
         return;
       }
@@ -626,6 +978,16 @@ Website URL:       https://rustyclint.netlify.app`
     setIsDeploying(false);
   }, []);
 
+  const getStepProgress = useCallback((stepIndex: number): number => {
+    return steps[stepIndex]?.progress || 0;
+  }, [steps]);
+
+  const getOverallProgress = useCallback((): number => {
+    if (steps.length === 0) return 0;
+    const totalProgress = steps.reduce((sum, step) => sum + (step.progress || 0), 0);
+    return totalProgress / steps.length;
+  }, [steps]);
+
   return {
     isDeploying,
     currentStep,
@@ -633,6 +995,8 @@ Website URL:       https://rustyclint.netlify.app`
     deploymentConfig,
     startDeployment,
     stopDeployment,
+    getStepProgress,
+    getOverallProgress,
     executeCommand
   };
 };
