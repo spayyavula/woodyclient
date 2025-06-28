@@ -35,7 +35,7 @@ interface Template {
   icon: React.ReactNode;
   estimatedTime: string;
   files: Record<string, { content: string; language: string }>;
-  features: string[];
+  features: string[App];
   useCase: string;
   techStack: string[];
 }
