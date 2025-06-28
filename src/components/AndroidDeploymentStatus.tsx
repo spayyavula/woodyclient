@@ -92,7 +92,6 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
   const hasData = events && events.length > 0;
   const simulatedData = simulateDeployment(deploymentId);
   const isCompleted = status === 'completed' || status === 'failed';
-  const isCompleted = status === 'completed' || status === 'failed';
   
   // Use real data if available, otherwise use simulated data
   // Always use at least 65% for progress to avoid getting stuck at 0%
@@ -113,9 +112,6 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
         // Reset timer when starting a new active state
         setTimeElapsed(0);
       }
-        setIsActive(true);
-        // Reset timer when starting a new active state
-        setTimeElapsed(0);
     } else {
       setIsActive(false);
     }
@@ -220,9 +216,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
             {/* Status and Timer */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                {getStatusIcon(status)}
-                <div>
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(status)}`}>
+                {getStatusIcon(displayStatus)}
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(displayStatus)}`}>
                   {displayStatus.toUpperCase()}
                 </div>
@@ -241,7 +235,6 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
               <DeploymentVisualProgress
                 progress={displayProgress}
                 status={displayStatus}
-                message={displayMessage || "Building Android application..."}
                 message={displayMessage}
                 platform="android"
                 animate={true}
