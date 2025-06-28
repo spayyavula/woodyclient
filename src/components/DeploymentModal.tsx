@@ -25,6 +25,7 @@ import {
   Wifi,
   RefreshCw
 } from 'lucide-react';
+import { X as CloseIcon } from 'lucide-react';
 import { useDeployment, DeploymentConfig, DeploymentStep } from '../hooks/useDeployment';
 
 interface DeploymentModalProps {
@@ -299,7 +300,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors text-xl"
           >
-            <X className="w-6 h-6" />
+            <CloseIcon className="w-6 h-6" />
           </button>
         </div>
 

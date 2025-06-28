@@ -314,7 +314,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
               onClick={() => setBuildOutput([])}
               className="text-gray-400 hover:text-white transition-colors"
             >
-              <X className="w-4 h-4" />
+              ✕
             </button>
           </div>
           <div className="p-3 max-h-64 overflow-y-auto">

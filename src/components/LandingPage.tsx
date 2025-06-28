@@ -30,7 +30,8 @@ import {
   Monitor,
   AlertTriangle,
   GitBranch,
-  Workflow
+  Workflow,
+  X
 } from 'lucide-react';
 
 interface LandingPageProps {
