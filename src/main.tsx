@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
+import AndroidBuildLogs from './components/AndroidBuildLogs.tsx';
 import { StripeProvider } from './components/StripeProvider.tsx';
 import './index.css';
 
