@@ -197,10 +197,20 @@ mod tests {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Always start with no user to show landing page
-    // Authentication will be handled by the landing page
-    setUser(null);
-    setLoading(false);
+    // Check for existing session
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error('Error checking session:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
 
     // Listen for auth changes
     const {
@@ -216,25 +226,6 @@ mod tests {
     setAuthLoading(true);
     setAuthError(null);
 
-    // Check if we're in demo mode
-    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
-                      import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321' ||
-                      import.meta.env.VITE_SUPABASE_URL.includes('your-production-project');
-    
-    if (isDemoMode) {
-      // In demo mode, simulate successful login
-      setTimeout(() => {
-        setUser({ 
-          id: 'demo-user', 
-          email: email,
-          created_at: new Date().toISOString(),
-          last_sign_in_at: new Date().toISOString()
-        });
-        setAuthLoading(false);
-      }, 1000);
-      return;
-    }
-
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -245,7 +236,7 @@ mod tests {
         setAuthError(error.message);
       }
     } catch (err: any) {
-      setAuthError('Unable to connect to authentication service. Please try again later.');
+      setAuthError('Authentication failed. Please try again.');
     } finally {
       setAuthLoading(false);
     }
@@ -258,25 +249,6 @@ mod tests {
     if (password.length < 6) {
       setAuthError('Password must be at least 6 characters long');
       setAuthLoading(false);
-      return;
-    }
-
-    // Check if we're in demo mode
-    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
-                      import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321' ||
-                      import.meta.env.VITE_SUPABASE_URL.includes('your-production-project');
-    
-    if (isDemoMode) {
-      // In demo mode, simulate successful signup
-      setTimeout(() => {
-        setUser({ 
-          id: 'demo-user', 
-          email: email,
-          created_at: new Date().toISOString(),
-          last_sign_in_at: new Date().toISOString()
-        });
-        setAuthLoading(false);
-      }, 1000);
       return;
     }
 
@@ -293,7 +265,7 @@ mod tests {
         setAuthError(error.message);
       }
     } catch (err: any) {
-      setAuthError('Unable to connect to authentication service. Please try again later.');
+      setAuthError('Signup failed. Please try again.');
     } finally {
       setAuthLoading(false);
     }

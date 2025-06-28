@@ -251,7 +251,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Demo mode: Use any password (minimum 6 characters)</p>
+                      <p className="text-xs text-gray-500 mt-1">Minimum 6 characters required</p>
                     </div>
                   </div>
 

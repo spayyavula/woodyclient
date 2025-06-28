@@ -21,20 +21,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onSwitchToSignup }) =>
     setLoading(true);
     setError('');
 
-    // Check if we're in demo mode
-    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
-                      import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321' ||
-                      import.meta.env.VITE_SUPABASE_URL.includes('your-production-project');
-    
-    if (isDemoMode) {
-      // In demo mode, simulate successful login
-      setTimeout(() => {
-        setLoading(false);
-        onSuccess();
-      }, 1000);
-      return;
-    }
-
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -47,7 +33,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onSwitchToSignup }) =>
         onSuccess();
       }
     } catch (err: any) {
-      setError('Unable to connect to authentication service. Please try again later.');
+      setError('Authentication failed. Please try again.');
     } finally {
       setLoading(false);
     }

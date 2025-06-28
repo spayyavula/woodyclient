@@ -35,20 +35,6 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSuccess, onSwitchToLogin }) =
       return;
     }
 
-    // Check if we're in demo mode
-    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
-                      import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321' ||
-                      import.meta.env.VITE_SUPABASE_URL.includes('your-production-project');
-    
-    if (isDemoMode) {
-      // In demo mode, simulate successful signup
-      setTimeout(() => {
-        setLoading(false);
-        onSuccess();
-      }, 1000);
-      return;
-    }
-
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -64,7 +50,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSuccess, onSwitchToLogin }) =
         onSuccess();
       }
     } catch (err: any) {
-      setError('Unable to connect to authentication service. Please try again later.');
+      setError('Signup failed. Please try again.');
     } finally {
       setLoading(false);
     }
