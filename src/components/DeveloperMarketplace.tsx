@@ -4,7 +4,6 @@ import {
   Star, 
   DollarSign, 
   Clock, 
-  Clock, 
   User, 
   MessageSquare, 
   Video, 
