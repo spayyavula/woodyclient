@@ -23,11 +23,13 @@ import {
   Link,
   Hammer,
   Wrench,
-  Zap,
-  CheckSquare
+  Zap, 
+  CheckSquare,
+  XCircle
 } from 'lucide-react';
 import SubscriptionStatus from './SubscriptionStatus';
 import AutomationPanel from './AutomationPanel';
+import AndroidBuildLogs from './AndroidBuildLogs';
 
 interface ToolbarProps {
   user?: any;
