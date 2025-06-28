@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
+interface DeploymentDetails {
+  id: number;
+  visual_progress: number;
+  progress_message: string;
+  status: string;
+}
+
 interface ProgressEvent {
   id: number;
   deployment_id: number;
@@ -39,13 +46,21 @@ export const useDeploymentProgress = (deploymentId?: number) => {
 
     try {
       // Fetch deployment details
-      const { data: deployment, error: deploymentError } = await supabase
+      const { data: deploymentData, error: deploymentError } = await supabase
         .from('android_deployments')
         .select('id, visual_progress, progress_message, status')
         .eq('id', deploymentId)
         .single();
 
       if (deploymentError) throw deploymentError;
+      
+      // Ensure we have valid deployment data
+      const deployment: DeploymentDetails = deploymentData || {
+        id: deploymentId,
+        visual_progress: 0,
+        progress_message: '',
+        status: 'pending'
+      };
 
       // Fetch progress events
       const { data: events, error: eventsError } = await supabase
@@ -57,11 +72,11 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       if (eventsError) throw eventsError;
 
       setProgress({
-        id: deploymentId,
-        visual_progress: deployment.visual_progress || 0,
-        progress_message: deployment.progress_message || '',
-        status: deployment.status,
-        events: events || [],
+        id: deployment.id,
+        visual_progress: deployment.visual_progress ?? 0,
+        progress_message: deployment.progress_message ?? '',
+        status: deployment.status ?? 'pending',
+        events: events ?? [],
         isLoading: false,
         error: null
       });
