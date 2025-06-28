@@ -1233,7 +1233,7 @@ async fn main() {
     }
     
     let final_summary = engine.get_performance_summary();
-    println!("🏁 Final Performance: PnL: ${:.2}, Total Trades: {}", 
+    println!("🏁 Final Performance: PnL: \${:.2}, Total Trades: {}", 
             final_summary.total_pnl, final_summary.trade_count);
 }
 
