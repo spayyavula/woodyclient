@@ -5,10 +5,11 @@
  * Tests webhook handling and database synchronization
  */
 
-const chalk = require('chalk');
-const Stripe = require('stripe');
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+import chalk from 'chalk';
+import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Configuration
 const config = {
@@ -347,8 +348,8 @@ async function runWebhookTests() {
 }
 
 // Run tests if this file is executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   runWebhookTests();
 }
 
-module.exports = { runWebhookTests };
+export { runWebhookTests };

@@ -5,10 +5,17 @@
  * Orchestrates all E2E tests for Stripe and Supabase integration
  */
 
-const chalk = require('chalk');
-const { spawn } = require('child_process');
-const path = require('path');
-require('dotenv').config();
+import chalk from 'chalk';
+import { spawn } from 'child_process';
+import path from 'path';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config();
 
 function log(message, type = 'info') {
   const timestamp = new Date().toISOString();

@@ -5,9 +5,10 @@
  * Tests Supabase database schema and RLS policies
  */
 
-const chalk = require('chalk');
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+import chalk from 'chalk';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Configuration
 const config = {
@@ -414,8 +415,8 @@ async function runDatabaseTests() {
 }
 
 // Run tests if this file is executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   runDatabaseTests();
 }
 
-module.exports = { runDatabaseTests };
+export { runDatabaseTests };
