@@ -193,23 +193,11 @@ mod tests {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Get initial session with error handling
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.warn('Auth session error:', error);
-        // In demo mode, create a mock user
-        setUser({ 
-          id: 'demo-user', 
-          email: 'demo@rustcloudide.com',
-          created_at: new Date().toISOString(),
-          last_sign_in_at: new Date().toISOString()
-        });
-      } else {
-        setUser(session?.user ?? null);
-      }
-      setLoading(false);
-    }).catch(() => {
-      // Fallback for demo mode
+    // Check if we're in demo mode (no real Supabase connection)
+    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321';
+    
+    if (isDemoMode) {
+      // In demo mode, create a mock user immediately
       setUser({ 
         id: 'demo-user', 
         email: 'demo@rustcloudide.com',
@@ -217,6 +205,21 @@ mod tests {
         last_sign_in_at: new Date().toISOString()
       });
       setLoading(false);
+    } else {
+      // Get initial session with error handling for real Supabase
+      supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (error) {
+          console.warn('Auth session error:', error);
+          setUser(null);
+        } else {
+          setUser(session?.user ?? null);
+        }
+        setLoading(false);
+      }).catch((err) => {
+        console.error('Failed to get session:', err);
+        setUser(null);
+        setLoading(false);
+      });
     });
 
     // Listen for auth changes with error handling
@@ -224,7 +227,7 @@ mod tests {
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((_event, session) => {
-        setUser(session?.user ?? null);
+        if (!isDemoMode) setUser(session?.user ?? null);
       });
 
       return () => subscription.unsubscribe();
