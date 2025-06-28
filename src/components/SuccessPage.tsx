@@ -76,8 +76,8 @@ const SuccessPage: React.FC<SuccessPageProps> = ({ onContinue }) => {
         <div className="text-center">
           <p className="text-gray-400 text-sm">
             Need help? Contact our support team at{' '}
-            <a href="mailto:support@rustcloudide.com" className="text-orange-400 hover:text-orange-300">
-              support@rustcloudide.com
+            <a href="mailto:support@rustyclint.com" className="text-orange-400 hover:text-orange-300">
+              support@rustyclint.com
             </a>
           </p>
         </div>

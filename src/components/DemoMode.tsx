@@ -13,7 +13,7 @@ const DemoMode: React.FC<DemoModeProps> = ({ isActive, onToggle }) => {
 
   const demoSteps = [
     {
-      title: "Welcome to Rust Cloud IDE",
+      title: "Welcome to rustyclint",
       description: "Let's take a tour of the powerful features available in this development environment.",
       action: "intro",
       duration: 3000,

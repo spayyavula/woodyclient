@@ -493,7 +493,7 @@ console.log('Hello from ${fileName}!');`;
               <div className="flex items-center justify-center h-full bg-gray-900 text-gray-400">
                 <div className="text-center">
                   <div className="text-6xl mb-4">🦀</div>
-                  <h2 className="text-2xl font-bold mb-2">Welcome to Rust Cloud IDE</h2>
+                  <h2 className="text-2xl font-bold mb-2">Welcome to rustyclint</h2>
                   <p className="mb-4">Select a file to start coding or choose a template to get started</p>
                   <button
                     onClick={() => setShowTemplates(true)}
