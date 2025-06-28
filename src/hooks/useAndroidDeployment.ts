@@ -12,6 +12,8 @@ interface DeploymentConfig {
 interface DeploymentStatus {
   id: number;
   status: 'pending' | 'building' | 'signing' | 'uploading' | 'completed' | 'failed';
+  progress_percentage?: number;
+  current_step?: string;
   buildLogs?: string;
   errorMessage?: string;
   filePath?: string;
@@ -27,6 +29,7 @@ interface UseAndroidDeploymentReturn {
   getDeployments: () => Promise<DeploymentStatus[]>;
   loading: boolean;
   error: string | null;
+  updateProgress: (id: number, progress: number, step: string, message?: string) => Promise<void>;
 }
 
 export const useAndroidDeployment = (): UseAndroidDeploymentReturn => {
@@ -92,6 +95,28 @@ export const useAndroidDeployment = (): UseAndroidDeploymentReturn => {
     return result.deployments;
   }, []);
 
+  const updateProgress = useCallback(async (deploymentId: number, progress: number, step: string, message?: string) => {
+    try {
+      // Update the deployment progress
+      await callDeploymentFunction('update', {
+        deploymentId,
+        progress_percentage: progress,
+        current_step: step
+      });
+      
+      // Also create a progress entry for detailed tracking
+      await callDeploymentFunction('progress', {
+        deploymentId,
+        step,
+        progress,
+        message
+      });
+    } catch (err) {
+      console.error('Failed to update progress:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update progress');
+    }
+  }, []);
+
   return {
     createDeployment,
     updateDeployment,
@@ -99,5 +124,6 @@ export const useAndroidDeployment = (): UseAndroidDeploymentReturn => {
     getDeployments,
     loading,
     error,
+    updateProgress
   };
 };

@@ -66,7 +66,12 @@ Deno.serve(async (req) => {
       buildLogs,
       errorMessage,
       filePath,
-      fileSize
+      fileSize,
+      progress_percentage,
+      current_step,
+      step,
+      progress,
+      message
     } = await req.json();
 
     // Handle different actions
@@ -115,6 +120,8 @@ Deno.serve(async (req) => {
         if (status) updateData.status = status;
         if (buildLogs) updateData.build_logs = buildLogs;
         if (errorMessage) updateData.error_message = errorMessage;
+        if (progress_percentage !== undefined) updateData.progress_percentage = progress_percentage;
+        if (current_step) updateData.current_step = current_step;
         if (filePath) updateData.file_path = filePath;
         if (fileSize) updateData.file_size = fileSize;
         if (track) updateData.track = track;
@@ -186,6 +193,54 @@ Deno.serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
+
+      case 'progress':
+        // Add a progress entry
+        if (!deploymentId) {
+          return new Response(JSON.stringify({ error: 'Missing deploymentId' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        // Verify the deployment belongs to the user
+        const { data: deploymentCheck, error: checkError } = await supabase
+          .from('android_deployments')
+          .select('id')
+          .eq('id', deploymentId)
+          .eq('user_id', user.id)
+          .single();
+
+        if (checkError || !deploymentCheck) {
+          return new Response(JSON.stringify({ error: 'Deployment not found or access denied' }), {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        // Insert progress entry
+        const { data: progressEntry, error: progressError } = await supabase
+          .from('deployment_progress')
+          .insert({
+            deployment_id: deploymentId,
+            step: step || 'unknown',
+            progress: progress || 0,
+            message: message || null
+          })
+          .select()
+          .single();
+
+        if (progressError) {
+          return new Response(JSON.stringify({ error: progressError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        return new Response(JSON.stringify({ progress: progressEntry }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
 
       default:
         return new Response(JSON.stringify({ error: 'Invalid action' }), {

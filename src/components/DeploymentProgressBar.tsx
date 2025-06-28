@@ -68,13 +68,19 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-gray-300">Overall Progress</span>
-          <span className="text-gray-300">{Math.round(getOverallProgress())}%</span>
+          <span className="text-gray-300 font-medium">{Math.round(getOverallProgress())}%</span>
         </div>
-        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+        <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden shadow-inner">
           <div 
-            className={`h-full bg-gradient-to-r ${getPlatformColor(platform)} transition-all duration-500`}
+            className={`h-full bg-gradient-to-r ${getPlatformColor(platform)} transition-all duration-500 relative`}
             style={{ width: `${getOverallProgress()}%` }}
-          />
+          >
+            <div className="absolute inset-0 bg-white/10 rounded-full" style={{
+              backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 2s infinite'
+            }}></div>
+          </div>
         </div>
       </div>
       
@@ -93,9 +99,9 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
             <div className="flex-1 min-w-0">
               <div className="flex justify-between mb-1">
                 <span className={`text-sm font-medium ${
-                  step.status === 'completed' ? 'text-green-300' :
-                  step.status === 'failed' ? 'text-red-300' :
-                  index === currentStep ? 'text-blue-300' : 'text-gray-300'
+                  step.status === 'completed' ? 'text-green-300 font-semibold' :
+                  step.status === 'failed' ? 'text-red-300 font-semibold' :
+                  index === currentStep ? 'text-blue-300 font-semibold' : 'text-gray-300'
                 }`}>
                   {step.name}
                 </span>
@@ -108,11 +114,17 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
               
               {/* Step Progress Bar (only for current step) */}
               {index === currentStep && step.status === 'running' && (
-                <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden shadow-inner">
                   <div 
-                    className={`h-full bg-gradient-to-r ${getPlatformColor(platform)} transition-all duration-300`}
+                    className={`h-full bg-gradient-to-r ${getPlatformColor(platform)} transition-all duration-300 relative`}
                     style={{ width: `${step.progress || 0}%` }}
-                  />
+                  >
+                    <div className="absolute inset-0 bg-white/10 rounded-full" style={{
+                      backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 2s infinite'
+                    }}></div>
+                  </div>
                 </div>
               )}
             </div>
@@ -123,15 +135,15 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
       {/* Status Message */}
       {steps.some(step => step.status === 'failed') && (
         <div className="flex items-center space-x-2 text-red-400 text-sm mt-4">
-          <AlertTriangle className="w-4 h-4" />
-          <span>Deployment encountered errors. Check the logs for details.</span>
+          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+          <span className="bg-red-900/20 px-3 py-1 rounded-full">Deployment encountered errors. Check the logs for details.</span>
         </div>
       )}
       
       {steps.every(step => step.status === 'completed') && (
         <div className="flex items-center space-x-2 text-green-400 text-sm mt-4">
-          <CheckCircle className="w-4 h-4" />
-          <span>Deployment completed successfully!</span>
+          <CheckCircle className="w-4 h-4 flex-shrink-0" />
+          <span className="bg-green-900/20 px-3 py-1 rounded-full">Deployment completed successfully!</span>
         </div>
       )}
     </div>

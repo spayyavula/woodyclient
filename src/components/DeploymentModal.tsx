@@ -68,7 +68,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
     cpuUsage: 0,
     networkSpeed: 0
   });
-  const [deploymentError, setDeploymentError] = useState<Error | null>(null);
+  const [deploymentError, setDeploymentError] = useState<string | null>(null);
   const [showAssistant, setShowAssistant] = useState(true);
   const [assistantCurrentStep, setAssistantCurrentStep] = useState('');
   
@@ -93,26 +93,40 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   const handleStartDeployment = () => {
     setIsConfiguring(true);
     setDeploymentError(null);
+
+    // Show configuration animation with progress indicators
+    const configSteps = ['Checking environment', 'Validating keystore', 'Preparing build tools', 'Setting up deployment'];
+    let stepIndex = 0;
     
-    // Show configuration animation
-    try {
-      setTimeout(() => {
+    const interval = setInterval(() => {
+      if (stepIndex < configSteps.length) {
+        setRealTimeMetrics(prev => ({
+          ...prev,
+          buildSpeed: 50 + Math.random() * 30,
+          memoryUsage: 20 + Math.random() * 20,
+          cpuUsage: 15 + Math.random() * 25
+        }));
+        stepIndex++;
+      } else {
+        clearInterval(interval);
         setIsConfiguring(false);
         setShowPreDeployCheck(true);
-      }, 2000);
-    } catch (error) {
-      setDeploymentError(error instanceof Error ? error : new Error('An unknown error occurred'));
-      setIsConfiguring(false);
-    }
+      }
+    }, 500);
   };
 
   const handleConfirmDeployment = () => {
     try {
       setShowPreDeployCheck(false);
       setAssistantCurrentStep('rust-build');
+      
+      // Reset any previous errors
+      setDeploymentError(null);
+      
+      // Start the deployment process
       startDeployment(config);
     } catch (error) {
-      setDeploymentError(error instanceof Error ? error : new Error('An unknown error occurred'));
+      setDeploymentError(error instanceof Error ? error.message : 'An unknown error occurred');
       console.error('Deployment error:', error);
     }
   };
@@ -126,7 +140,10 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
       if (step.status === 'failed') {
         setDeploymentError(step.output || 'Deployment step failed');
       } else {
-        setDeploymentError(null);
+        // Only clear error if we're not in a failed state
+        if (step.status !== 'failed') {
+          setDeploymentError(null);
+        }
       }
     }
   }, [currentStep, steps]);
@@ -754,7 +771,11 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                 <div className="w-full bg-gray-700 rounded-full h-3 shadow-inner">
                   <div 
                     className={`bg-gradient-to-r ${getPlatformColor(config.platform)} h-3 rounded-full transition-all duration-500 shadow-lg`}
-                    style={{ width: `${getOverallProgress()}%` }}
+                    style={{ 
+                      width: `${getOverallProgress()}%`,
+                      backgroundSize: '200% 200%',
+                      animation: isDeploying ? 'gradient-animation 2s ease infinite' : 'none'
+                    }}
                   />
                 </div>
 
@@ -770,13 +791,13 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                           {getStepIcon(step)}
                           <span className="font-medium text-white">{step.name}</span>
                           {index === currentStep && isDeploying && (
-                            <div className="flex items-center space-x-2">
-                              <div className="flex items-center space-x-1">
-                                <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping"></div>
-                                <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.2s' }}></div>
-                                <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.4s' }}></div>
+                            <div className="flex items-center space-x-2 ml-2">
+                              <div className="flex items-center space-x-1 bg-blue-900/30 px-2 py-1 rounded-full">
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping"></div>
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.4s' }}></div>
                               </div>
-                              <span className="text-xs text-blue-300 font-medium">
+                              <span className="text-xs text-blue-300 font-medium bg-blue-900/20 px-2 py-1 rounded-full">
                                 {getStepProgress(index).toFixed(0)}%
                               </span>
                             </div>
@@ -797,14 +818,20 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                       {/* Progress indicator for current step */}
                       {index === currentStep && isDeploying && (
                         <div className="mb-3 space-y-2">
-                          <div className="w-full bg-gray-700 rounded-full h-2 shadow-inner">
+                          <div className="w-full bg-gray-700 rounded-full h-2 shadow-inner overflow-hidden">
                             <div 
-                              className={`bg-gradient-to-r ${getPlatformColor(config.platform)} h-2 rounded-full transition-all duration-300 shadow-sm`}
+                              className={`bg-gradient-to-r ${getPlatformColor(config.platform)} h-2 rounded-full transition-all duration-300 shadow-sm relative`}
                               style={{ width: `${getStepProgress(index)}%` }}
-                            />
+                            >
+                              <div className="absolute inset-0 bg-white/10 rounded-full" style={{
+                                backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                                backgroundSize: '200% 100%',
+                                animation: 'shimmer 2s infinite'
+                              }}></div>
+                            </div>
                           </div>
                           {step.substeps && step.currentSubstep !== undefined && (
-                            <div className="text-xs text-gray-400">
+                            <div className="text-xs text-blue-300 bg-blue-900/20 px-3 py-1 rounded-full inline-block">
                               {step.substeps[step.currentSubstep] || 'Processing...'}
                             </div>
                           )}
@@ -857,7 +884,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                 </div>
 
                 {/* Completion Actions */}
-                {!isDeploying && steps.every(step => step.status === 'completed') && (
+                {!isDeploying && steps.length > 0 && steps.every(step => step.status === 'completed') && (
                   <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500 rounded-lg p-6 text-center shadow-xl">
                     <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-white mb-2">Deployment Successful!</h3>
@@ -975,7 +1002,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                 )}
                 
                 {/* Failed deployment feedback */}
-                {!isDeploying && steps.some(step => step.status === 'failed') && (
+                {!isDeploying && steps.length > 0 && steps.some(step => step.status === 'failed') && (
                   <div className="bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-500 rounded-lg p-6 text-center shadow-xl">
                     <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-white mb-2">Deployment Failed</h3>
@@ -1012,11 +1039,11 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
         deploymentStatus={
           isDeploying ? 'deploying' :
           isConfiguring ? 'configuring' :
-          steps.some(s => s.status === 'failed') ? 'error' :
-          steps.every(s => s.status === 'completed') && steps.length > 0 ? 'success' :
+          steps.length > 0 && steps.some(s => s.status === 'failed') ? 'error' :
+          steps.length > 0 && steps.every(s => s.status === 'completed') ? 'success' :
           'idle'
         }
-        currentError={deploymentError}
+        currentError={deploymentError || (steps.find(s => s.status === 'failed')?.output || null)}
       />
     </div>
   );
