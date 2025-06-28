@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { isSupabaseConfigured } from './lib/supabase';
-import HelloWorldApp from './components/HelloWorldApp';
 import ScriptRunner from './components/ScriptRunner';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/auth/LoginPage';
@@ -56,10 +55,9 @@ function App() {
   const [showProfile, setShowProfile] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
-  const [showDemo, setShowDemo] = useState(false);
+  const [showConfigCheck, setShowConfigCheck] = useState(false);
   const [showStripeTests, setShowStripeTests] = useState(false);
   const [showIntegrations, setShowIntegrations] = useState(false);
-  const [showHelloWorld, setShowHelloWorld] = useState(true);
   const [showScriptRunner, setShowScriptRunner] = useState(false);
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);
   const [isCollaborationVisible, setIsCollaborationVisible] = useState(false);
@@ -444,22 +442,6 @@ console.log('Hello from ${fileName}!');`;
     return <SuccessPage onContinue={() => setShowSuccess(false)} />;
   }
 
-  if (showHelloWorld) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex flex-col">
-        <HelloWorldApp />
-        <div className="p-4 bg-gray-800 border-t border-gray-700">
-          <button 
-            onClick={() => setShowHelloWorld(false)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-          >
-            Back to IDE
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (showScriptRunner) {
     return (
       <div className="min-h-screen bg-gray-900 flex flex-col">
@@ -501,8 +483,8 @@ console.log('Hello from ${fileName}!');`;
         onShowTemplates={() => setShowTemplates(true)}
         onShowMobilePreview={() => setShowMobilePreview(true)}
         onShowStripeTests={() => setShowStripeTests(true)}
+        onShowConfigCheck={() => setShowConfigCheck(true)}
         onShowIntegrations={() => setShowIntegrations(true)}
-        onShowHelloWorld={() => setShowHelloWorld(true)}
         onShowScriptRunner={() => setShowScriptRunner(true)}
       />
       
@@ -618,6 +600,13 @@ console.log('Hello from ${fileName}!');`;
         />
       )}
 
+      {showConfigCheck && (
+        <ConfigurationChecker
+          isVisible={showConfigCheck}
+          onClose={() => setShowConfigCheck(false)}
+        />
+      )}
+
       {showStripeTests && (
         <StripeTestSuite 
           isVisible={showStripeTests}
@@ -625,10 +614,6 @@ console.log('Hello from ${fileName}!');`;
         />
       )}
 
-      <DemoMode 
-        isActive={showDemo}
-        onToggle={() => setShowDemo(!showDemo)}
-      />
     </div>
   );
 }

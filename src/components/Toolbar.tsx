@@ -23,7 +23,8 @@ import {
   Link,
   Hammer,
   Wrench,
-  Zap
+  Zap,
+  CheckSquare
 } from 'lucide-react';
 import SubscriptionStatus from './SubscriptionStatus';
 import AutomationPanel from './AutomationPanel';
@@ -37,10 +38,10 @@ interface ToolbarProps {
   onToggleMarketplace: () => void;
   onSave: () => void;
   onRun: () => void;
+  onShowConfigCheck: () => void;
   onShowTemplates: () => void;
   onShowMobilePreview: () => void;
   onShowStripeTests: () => void;
-  onShowHelloWorld: () => void;
   onShowScriptRunner: () => void;
   onShowIntegrations: () => void;
 }
@@ -53,10 +54,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onToggleCollaboration, 
   onToggleMarketplace,
   onSave, 
-  onRun, 
+  onRun,
+  onShowConfigCheck,
   onShowTemplates,
   onShowMobilePreview,
-  onShowHelloWorld,
   onShowScriptRunner,
   onShowStripeTests,
   onShowIntegrations
@@ -236,12 +237,12 @@ const Toolbar: React.FC<ToolbarProps> = ({
             <span>Preview</span>
           </button>
           <button 
-            onClick={onShowHelloWorld}
+            onClick={onShowConfigCheck}
             className="flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white text-sm font-medium transition-colors"
-            title="Hello World App"
+            title="Check Configuration"
           >
-            <Smartphone className="w-4 h-4 mr-2" />
-            <span>Hello World</span>
+            <CheckSquare className="w-4 h-4 mr-2" />
+            <span>Check Config</span>
           </button>
           <button 
             onClick={onShowScriptRunner}
