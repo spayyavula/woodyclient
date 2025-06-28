@@ -71,7 +71,6 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   const [deploymentError, setDeploymentError] = useState<Error | null>(null);
   const [showAssistant, setShowAssistant] = useState(true);
   const [assistantCurrentStep, setAssistantCurrentStep] = useState('');
-  const [deploymentError, setDeploymentError] = useState<string | null>(null);
   
   const { runAutomation, automationSteps, isRunning: automationRunning } = useDeploymentAutomation();
 
