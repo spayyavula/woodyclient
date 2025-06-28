@@ -30,19 +30,38 @@ export const useSubscription = (): UseSubscriptionReturn => {
       setLoading(true);
       setError(null);
 
+      // Check if user is authenticated first
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // User not authenticated, set to null and return
+        setSubscription(null);
+        return;
+      }
+
       const { data, error: fetchError } = await supabase
         .from('stripe_user_subscriptions')
         .select('*')
         .maybeSingle();
 
       if (fetchError) {
+        // If it's an auth error, just set subscription to null
+        if (fetchError.code === '401' || fetchError.message.includes('authorization')) {
+          setSubscription(null);
+          return;
+        }
         throw fetchError;
       }
 
       setSubscription(data);
     } catch (err: any) {
       console.error('Error fetching subscription:', err);
-      setError(err.message || 'Failed to fetch subscription');
+      // Don't show auth errors to user, just set subscription to null
+      if (err.code === '401' || err.message.includes('authorization')) {
+        setSubscription(null);
+      } else {
+        setError(err.message || 'Failed to fetch subscription');
+      }
     } finally {
       setLoading(false);
     }
