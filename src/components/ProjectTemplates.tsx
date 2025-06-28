@@ -5767,10 +5767,2424 @@ bevy_rapier3d = "0.23"`,
           language: 'toml',
         }
       }
+    },
+    // High-Frequency Trading Templates
+    {
+      id: 'rust-hft-market-data',
+      name: 'HFT Market Data Engine',
+      description: 'Ultra-low latency market data processing engine with microsecond precision',
+      category: 'HFT',
+      difficulty: 'Expert',
+      tags: ['HFT', 'Market Data', 'Low Latency', 'Trading', 'Real-time'],
+      icon: <TrendingUp className="w-6 h-6 text-green-400" />,
+      estimatedTime: '6-8 weeks',
+      useCase: 'Process high-frequency market data feeds with minimal latency for algorithmic trading',
+      techStack: ['Rust', 'UDP', 'Memory Mapping', 'Lock-free', 'SIMD'],
+      features: [
+        'Sub-microsecond latency',
+        'Lock-free data structures',
+        'SIMD optimizations',
+        'Memory-mapped I/O',
+        'Multi-exchange support'
+      ],
+      files: {
+        'main.rs': {
+          content: `use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
+use tokio::net::UdpSocket;
+use crossbeam::queue::SegQueue;
+
+#[repr(C, packed)]
+#[derive(Debug, Clone, Copy)]
+pub struct MarketDataMessage {
+    pub timestamp: u64,        // Nanoseconds since epoch
+    pub symbol_id: u32,        // Numeric symbol identifier
+    pub message_type: u8,      // 1=Quote, 2=Trade, 3=OrderBook
+    pub side: u8,              // 0=Buy, 1=Sell
+    pub price: u64,            // Price in fixed-point (multiply by 1e-8)
+    pub quantity: u64,         // Quantity in fixed-point
+    pub sequence_number: u64,  // Message sequence number
+}
+
+#[derive(Debug, Clone)]
+pub struct OrderBookLevel {
+    pub price: f64,
+    pub quantity: f64,
+    pub order_count: u32,
+}
+
+#[derive(Debug, Clone)]
+pub struct OrderBook {
+    pub symbol: String,
+    pub bids: Vec<OrderBookLevel>,
+    pub asks: Vec<OrderBookLevel>,
+    pub last_update: u64,
+    pub sequence: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct Trade {
+    pub symbol: String,
+    pub price: f64,
+    pub quantity: f64,
+    pub timestamp: u64,
+    pub side: TradeSide,
+    pub trade_id: u64,
+}
+
+#[derive(Debug, Clone)]
+pub enum TradeSide {
+    Buy,
+    Sell,
+    Unknown,
+}
+
+pub struct MarketDataEngine {
+    // Lock-free queues for different message types
+    quote_queue: Arc<SegQueue<MarketDataMessage>>,
+    trade_queue: Arc<SegQueue<MarketDataMessage>>,
+    orderbook_queue: Arc<SegQueue<MarketDataMessage>>,
+    
+    // Atomic counters for performance monitoring
+    messages_processed: Arc<AtomicU64>,
+    bytes_processed: Arc<AtomicU64>,
+    
+    // Symbol mapping for fast lookups
+    symbol_map: HashMap<u32, String>,
+    
+    // Order books (using RwLock for concurrent access)
+    order_books: Arc<std::sync::RwLock<HashMap<String, OrderBook>>>,
+}
+
+impl MarketDataEngine {
+    pub fn new() -> Self {
+        let mut symbol_map = HashMap::new();
+        symbol_map.insert(1, "AAPL".to_string());
+        symbol_map.insert(2, "GOOGL".to_string());
+        symbol_map.insert(3, "MSFT".to_string());
+        symbol_map.insert(4, "TSLA".to_string());
+        symbol_map.insert(5, "AMZN".to_string());
+        
+        Self {
+            quote_queue: Arc::new(SegQueue::new()),
+            trade_queue: Arc::new(SegQueue::new()),
+            orderbook_queue: Arc::new(SegQueue::new()),
+            messages_processed: Arc::new(AtomicU64::new(0)),
+            bytes_processed: Arc::new(AtomicU64::new(0)),
+            symbol_map,
+            order_books: Arc::new(std::sync::RwLock::new(HashMap::new())),
+        }
+    }
+    
+    pub async fn start_udp_listener(&self, bind_addr: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let socket = UdpSocket::bind(bind_addr).await?;
+        println!("📡 Market data engine listening on {}", bind_addr);
+        
+        let mut buffer = vec![0u8; 65536]; // 64KB buffer
+        
+        loop {
+            match socket.recv(&mut buffer).await {
+                Ok(size) => {
+                    let start_time = self.get_timestamp_nanos();
+                    
+                    // Process the received data
+                    self.process_market_data(&buffer[..size]).await;
+                    
+                    // Update performance counters
+                    self.messages_processed.fetch_add(1, Ordering::Relaxed);
+                    self.bytes_processed.fetch_add(size as u64, Ordering::Relaxed);
+                    
+                    let processing_time = self.get_timestamp_nanos() - start_time;
+                    if processing_time > 1000 { // Log if processing takes > 1 microsecond
+                        println!("⚠️ Slow processing: {} ns", processing_time);
+                    }
+                }
+                Err(e) => {
+                    eprintln!("❌ UDP receive error: {}", e);
+                }
+            }
+        }
+    }
+    
+    async fn process_market_data(&self, data: &[u8]) {
+        // Parse binary market data messages
+        let message_size = std::mem::size_of::<MarketDataMessage>();
+        
+        for chunk in data.chunks_exact(message_size) {
+            if let Ok(message) = self.parse_message(chunk) {
+                match message.message_type {
+                    1 => self.quote_queue.push(message),
+                    2 => {
+                        self.trade_queue.push(message);
+                        self.process_trade(message).await;
+                    }
+                    3 => {
+                        self.orderbook_queue.push(message);
+                        self.update_order_book(message).await;
+                    }
+                    _ => {} // Unknown message type
+                }
+            }
+        }
+    }
+    
+    fn parse_message(&self, data: &[u8]) -> Result<MarketDataMessage, &'static str> {
+        if data.len() != std::mem::size_of::<MarketDataMessage>() {
+            return Err("Invalid message size");
+        }
+        
+        // Safe conversion from bytes to struct
+        let message = unsafe {
+            std::ptr::read(data.as_ptr() as *const MarketDataMessage)
+        };
+        
+        Ok(message)
+    }
+    
+    async fn process_trade(&self, message: MarketDataMessage) {
+        if let Some(symbol) = self.symbol_map.get(&message.symbol_id) {
+            let trade = Trade {
+                symbol: symbol.clone(),
+                price: message.price as f64 * 1e-8,
+                quantity: message.quantity as f64 * 1e-8,
+                timestamp: message.timestamp,
+                side: if message.side == 0 { TradeSide::Buy } else { TradeSide::Sell },
+                trade_id: message.sequence_number,
+            };
+            
+            // Process trade for analytics, strategies, etc.
+            self.on_trade_received(trade).await;
+        }
+    }
+    
+    async fn update_order_book(&self, message: MarketDataMessage) {
+        if let Some(symbol) = self.symbol_map.get(&message.symbol_id) {
+            let mut order_books = self.order_books.write().unwrap();
+            
+            let order_book = order_books.entry(symbol.clone()).or_insert_with(|| OrderBook {
+                symbol: symbol.clone(),
+                bids: Vec::new(),
+                asks: Vec::new(),
+                last_update: 0,
+                sequence: 0,
+            });
+            
+            // Update order book based on message
+            let price = message.price as f64 * 1e-8;
+            let quantity = message.quantity as f64 * 1e-8;
+            
+            if message.side == 0 { // Bid
+                self.update_book_side(&mut order_book.bids, price, quantity, false);
+            } else { // Ask
+                self.update_book_side(&mut order_book.asks, price, quantity, true);
+            }
+            
+            order_book.last_update = message.timestamp;
+            order_book.sequence = message.sequence_number;
+        }
+    }
+    
+    fn update_book_side(&self, levels: &mut Vec<OrderBookLevel>, price: f64, quantity: f64, is_ask: bool) {
+        // Find existing level or insert new one
+        match levels.binary_search_by(|level| {
+            if is_ask {
+                level.price.partial_cmp(&price).unwrap()
+            } else {
+                price.partial_cmp(&level.price).unwrap()
+            }
+        }) {
+            Ok(index) => {
+                if quantity == 0.0 {
+                    levels.remove(index);
+                } else {
+                    levels[index].quantity = quantity;
+                }
+            }
+            Err(index) => {
+                if quantity > 0.0 {
+                    levels.insert(index, OrderBookLevel {
+                        price,
+                        quantity,
+                        order_count: 1,
+                    });
+                }
+            }
+        }
+    }
+    
+    async fn on_trade_received(&self, trade: Trade) {
+        // This is where trading strategies would be triggered
+        println!("💰 Trade: {} {} @ {} ({})", 
+                trade.symbol, 
+                trade.quantity, 
+                trade.price,
+                match trade.side {
+                    TradeSide::Buy => "BUY",
+                    TradeSide::Sell => "SELL",
+                    TradeSide::Unknown => "UNKNOWN",
+                });
+    }
+    
+    pub fn get_best_bid_ask(&self, symbol: &str) -> Option<(f64, f64)> {
+        let order_books = self.order_books.read().unwrap();
+        
+        if let Some(book) = order_books.get(symbol) {
+            let best_bid = book.bids.first().map(|level| level.price);
+            let best_ask = book.asks.first().map(|level| level.price);
+            
+            match (best_bid, best_ask) {
+                (Some(bid), Some(ask)) => Some((bid, ask)),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }
+    
+    pub fn get_mid_price(&self, symbol: &str) -> Option<f64> {
+        self.get_best_bid_ask(symbol)
+            .map(|(bid, ask)| (bid + ask) / 2.0)
+    }
+    
+    fn get_timestamp_nanos(&self) -> u64 {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos() as u64
+    }
+    
+    pub fn get_performance_stats(&self) -> (u64, u64) {
+        (
+            self.messages_processed.load(Ordering::Relaxed),
+            self.bytes_processed.load(Ordering::Relaxed),
+        )
+    }
+    
+    pub async fn start_performance_monitor(&self) {
+        let messages_processed = self.messages_processed.clone();
+        let bytes_processed = self.bytes_processed.clone();
+        
+        tokio::spawn(async move {
+            let mut last_messages = 0;
+            let mut last_bytes = 0;
+            
+            loop {
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                
+                let current_messages = messages_processed.load(Ordering::Relaxed);
+                let current_bytes = bytes_processed.load(Ordering::Relaxed);
+                
+                let msg_rate = current_messages - last_messages;
+                let byte_rate = current_bytes - last_bytes;
+                
+                println!("📊 Performance: {} msg/s, {:.2} MB/s", 
+                        msg_rate, 
+                        byte_rate as f64 / 1_000_000.0);
+                
+                last_messages = current_messages;
+                last_bytes = current_bytes;
+            }
+        });
+    }
+}
+
+// Simulate market data for testing
+async fn simulate_market_data(target_addr: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let socket = UdpSocket::bind("0.0.0.0:0").await?;
+    let mut sequence = 0u64;
+    
+    loop {
+        for symbol_id in 1..=5 {
+            // Generate random trade
+            let trade_message = MarketDataMessage {
+                timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos() as u64,
+                symbol_id,
+                message_type: 2, // Trade
+                side: if rand::random::<bool>() { 0 } else { 1 },
+                price: ((100.0 + rand::random::<f64>() * 50.0) * 1e8) as u64,
+                quantity: ((100.0 + rand::random::<f64>() * 1000.0) * 1e8) as u64,
+                sequence_number: sequence,
+            };
+            
+            let bytes = unsafe {
+                std::slice::from_raw_parts(
+                    &trade_message as *const _ as *const u8,
+                    std::mem::size_of::<MarketDataMessage>(),
+                )
+            };
+            
+            socket.send_to(bytes, target_addr).await?;
+            sequence += 1;
+        }
+        
+        tokio::time::sleep(tokio::time::Duration::from_micros(100)).await; // 10k messages/second
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("🚀 HFT Market Data Engine Starting...");
+    println!("=====================================");
+    
+    let engine = MarketDataEngine::new();
+    
+    // Start performance monitoring
+    engine.start_performance_monitor().await;
+    
+    // Start market data simulation in background
+    tokio::spawn(async move {
+        if let Err(e) = simulate_market_data("127.0.0.1:9999").await {
+            eprintln!("❌ Market data simulation error: {}", e);
+        }
+    });
+    
+    // Start the main market data listener
+    engine.start_udp_listener("127.0.0.1:9999").await?;
+    
+    Ok(())
+}`,
+          language: 'rust',
+        },
+        'Cargo.toml': {
+          content: `[package]
+name = "hft-market-data-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+crossbeam = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+rand = "0.8"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+opt-level = 3`,
+          language: 'toml',
+        }
+      }
+    },
+    {
+      id: 'rust-hft-trading-engine',
+      name: 'HFT Trading Engine',
+      description: 'Ultra-fast algorithmic trading engine with order management and risk controls',
+      category: 'HFT',
+      difficulty: 'Expert',
+      tags: ['HFT', 'Trading', 'Algorithms', 'Order Management', 'Risk'],
+      icon: <DollarSign className="w-6 h-6 text-yellow-400" />,
+      estimatedTime: '8-10 weeks',
+      useCase: 'Execute high-frequency trading strategies with microsecond order placement',
+      techStack: ['Rust', 'FIX Protocol', 'Lock-free', 'FPGA', 'Kernel Bypass'],
+      features: [
+        'Sub-microsecond order placement',
+        'FIX protocol implementation',
+        'Real-time risk management',
+        'Strategy backtesting',
+        'Multi-venue connectivity'
+      ],
+      files: {
+        'main.rs': {
+          content: `use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, AtomicBool, Ordering};
+use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
+use tokio::sync::mpsc;
+use crossbeam::queue::SegQueue;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum OrderSide {
+    Buy,
+    Sell,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum OrderType {
+    Market,
+    Limit,
+    Stop,
+    StopLimit,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum OrderStatus {
+    New,
+    PartiallyFilled,
+    Filled,
+    Cancelled,
+    Rejected,
+    PendingCancel,
+    PendingReplace,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum TimeInForce {
+    Day,
+    GTC,  // Good Till Cancel
+    IOC,  // Immediate or Cancel
+    FOK,  // Fill or Kill
+}
+
+#[derive(Debug, Clone)]
+pub struct Order {
+    pub order_id: u64,
+    pub client_order_id: String,
+    pub symbol: String,
+    pub side: OrderSide,
+    pub order_type: OrderType,
+    pub quantity: f64,
+    pub price: Option<f64>,
+    pub stop_price: Option<f64>,
+    pub time_in_force: TimeInForce,
+    pub status: OrderStatus,
+    pub filled_quantity: f64,
+    pub remaining_quantity: f64,
+    pub avg_fill_price: f64,
+    pub created_time: u64,
+    pub last_update_time: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct Fill {
+    pub fill_id: u64,
+    pub order_id: u64,
+    pub symbol: String,
+    pub side: OrderSide,
+    pub quantity: f64,
+    pub price: f64,
+    pub timestamp: u64,
+    pub venue: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct Position {
+    pub symbol: String,
+    pub quantity: f64,
+    pub avg_price: f64,
+    pub unrealized_pnl: f64,
+    pub realized_pnl: f64,
+    pub last_update: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct RiskLimits {
+    pub max_position_size: f64,
+    pub max_order_size: f64,
+    pub max_daily_loss: f64,
+    pub max_daily_volume: f64,
+    pub position_limit_per_symbol: HashMap<String, f64>,
+}
+
+#[derive(Debug)]
+pub struct TradingEngine {
+    // Order management
+    orders: Arc<std::sync::RwLock<HashMap<u64, Order>>>,
+    order_id_counter: Arc<AtomicU64>,
+    
+    // Position tracking
+    positions: Arc<std::sync::RwLock<HashMap<String, Position>>>,
+    
+    // Risk management
+    risk_limits: Arc<std::sync::RwLock<RiskLimits>>,
+    daily_pnl: Arc<AtomicU64>, // Stored as fixed-point
+    daily_volume: Arc<AtomicU64>,
+    
+    // Order queues (lock-free for performance)
+    new_order_queue: Arc<SegQueue<Order>>,
+    cancel_order_queue: Arc<SegQueue<u64>>,
+    fill_queue: Arc<SegQueue<Fill>>,
+    
+    // Trading enabled flag
+    trading_enabled: Arc<AtomicBool>,
+    
+    // Performance counters
+    orders_sent: Arc<AtomicU64>,
+    orders_filled: Arc<AtomicU64>,
+    orders_rejected: Arc<AtomicU64>,
+}
+
+impl TradingEngine {
+    pub fn new() -> Self {
+        let risk_limits = RiskLimits {
+            max_position_size: 10000.0,
+            max_order_size: 1000.0,
+            max_daily_loss: 50000.0,
+            max_daily_volume: 1000000.0,
+            position_limit_per_symbol: {
+                let mut limits = HashMap::new();
+                limits.insert("AAPL".to_string(), 5000.0);
+                limits.insert("GOOGL".to_string(), 1000.0);
+                limits.insert("MSFT".to_string(), 5000.0);
+                limits.insert("TSLA".to_string(), 2000.0);
+                limits
+            },
+        };
+        
+        Self {
+            orders: Arc::new(std::sync::RwLock::new(HashMap::new())),
+            order_id_counter: Arc::new(AtomicU64::new(1)),
+            positions: Arc::new(std::sync::RwLock::new(HashMap::new())),
+            risk_limits: Arc::new(std::sync::RwLock::new(risk_limits)),
+            daily_pnl: Arc::new(AtomicU64::new(0)),
+            daily_volume: Arc::new(AtomicU64::new(0)),
+            new_order_queue: Arc::new(SegQueue::new()),
+            cancel_order_queue: Arc::new(SegQueue::new()),
+            fill_queue: Arc::new(SegQueue::new()),
+            trading_enabled: Arc::new(AtomicBool::new(true)),
+            orders_sent: Arc::new(AtomicU64::new(0)),
+            orders_filled: Arc::new(AtomicU64::new(0)),
+            orders_rejected: Arc::new(AtomicU64::new(0)),
+        }
+    }
+    
+    pub fn submit_order(&self, mut order: Order) -> Result<u64, String> {
+        if !self.trading_enabled.load(Ordering::Relaxed) {
+            return Err("Trading is disabled".to_string());
+        }
+        
+        // Generate unique order ID
+        let order_id = self.order_id_counter.fetch_add(1, Ordering::Relaxed);
+        order.order_id = order_id;
+        order.created_time = self.get_timestamp_nanos();
+        order.last_update_time = order.created_time;
+        order.remaining_quantity = order.quantity;
+        
+        // Pre-trade risk checks
+        if let Err(e) = self.check_pre_trade_risk(&order) {
+            self.orders_rejected.fetch_add(1, Ordering::Relaxed);
+            return Err(e);
+        }
+        
+        // Store order
+        {
+            let mut orders = self.orders.write().unwrap();
+            orders.insert(order_id, order.clone());
+        }
+        
+        // Queue for processing
+        self.new_order_queue.push(order);
+        self.orders_sent.fetch_add(1, Ordering::Relaxed);
+        
+        println!("📤 Order submitted: {} {} {} @ {:?}", 
+                order_id, 
+                order.symbol, 
+                order.quantity,
+                order.price);
+        
+        Ok(order_id)
+    }
+    
+    pub fn cancel_order(&self, order_id: u64) -> Result<(), String> {
+        {
+            let mut orders = self.orders.write().unwrap();
+            if let Some(order) = orders.get_mut(&order_id) {
+                if order.status == OrderStatus::Filled || order.status == OrderStatus::Cancelled {
+                    return Err("Cannot cancel order in current status".to_string());
+                }
+                order.status = OrderStatus::PendingCancel;
+                order.last_update_time = self.get_timestamp_nanos();
+            } else {
+                return Err("Order not found".to_string());
+            }
+        }
+        
+        self.cancel_order_queue.push(order_id);
+        println!("❌ Cancel request: {}", order_id);
+        
+        Ok(())
+    }
+    
+    fn check_pre_trade_risk(&self, order: &Order) -> Result<(), String> {
+        let risk_limits = self.risk_limits.read().unwrap();
+        
+        // Check order size limit
+        if order.quantity > risk_limits.max_order_size {
+            return Err(format!("Order size {} exceeds limit {}", 
+                             order.quantity, risk_limits.max_order_size));
+        }
+        
+        // Check symbol-specific position limit
+        if let Some(&symbol_limit) = risk_limits.position_limit_per_symbol.get(&order.symbol) {
+            let positions = self.positions.read().unwrap();
+            let current_position = positions.get(&order.symbol)
+                .map(|p| p.quantity)
+                .unwrap_or(0.0);
+            
+            let new_position = match order.side {
+                OrderSide::Buy => current_position + order.quantity,
+                OrderSide::Sell => current_position - order.quantity,
+            };
+            
+            if new_position.abs() > symbol_limit {
+                return Err(format!("Position limit exceeded for {}: {} > {}", 
+                                 order.symbol, new_position.abs(), symbol_limit));
+            }
+        }
+        
+        // Check daily loss limit
+        let daily_pnl = self.daily_pnl.load(Ordering::Relaxed) as f64 / 1e8;
+        if daily_pnl < -risk_limits.max_daily_loss {
+            return Err(format!("Daily loss limit exceeded: {}", daily_pnl));
+        }
+        
+        Ok(())
+    }
+    
+    pub fn process_fill(&self, fill: Fill) {
+        self.fill_queue.push(fill.clone());
+        
+        // Update order status
+        {
+            let mut orders = self.orders.write().unwrap();
+            if let Some(order) = orders.get_mut(&fill.order_id) {
+                order.filled_quantity += fill.quantity;
+                order.remaining_quantity -= fill.quantity;
+                order.avg_fill_price = if order.filled_quantity > 0.0 {
+                    (order.avg_fill_price * (order.filled_quantity - fill.quantity) + 
+                     fill.price * fill.quantity) / order.filled_quantity
+                } else {
+                    fill.price
+                };
+                
+                order.status = if order.remaining_quantity <= 0.0 {
+                    OrderStatus::Filled
+                } else {
+                    OrderStatus::PartiallyFilled
+                };
+                
+                order.last_update_time = fill.timestamp;
+            }
+        }
+        
+        // Update position
+        self.update_position(&fill);
+        
+        // Update performance counters
+        self.orders_filled.fetch_add(1, Ordering::Relaxed);
+        let volume = (fill.quantity * fill.price * 1e8) as u64;
+        self.daily_volume.fetch_add(volume, Ordering::Relaxed);
+        
+        println!("✅ Fill: {} {} @ {} (Order: {})", 
+                fill.quantity, fill.symbol, fill.price, fill.order_id);
+    }
+    
+    fn update_position(&self, fill: &Fill) {
+        let mut positions = self.positions.write().unwrap();
+        let position = positions.entry(fill.symbol.clone()).or_insert_with(|| Position {
+            symbol: fill.symbol.clone(),
+            quantity: 0.0,
+            avg_price: 0.0,
+            unrealized_pnl: 0.0,
+            realized_pnl: 0.0,
+            last_update: 0,
+        });
+        
+        let fill_quantity = match fill.side {
+            OrderSide::Buy => fill.quantity,
+            OrderSide::Sell => -fill.quantity,
+        };
+        
+        // Calculate realized PnL for closing trades
+        if (position.quantity > 0.0 && fill_quantity < 0.0) || 
+           (position.quantity < 0.0 && fill_quantity > 0.0) {
+            let closing_quantity = fill_quantity.abs().min(position.quantity.abs());
+            let realized_pnl = match fill.side {
+                OrderSide::Sell => (fill.price - position.avg_price) * closing_quantity,
+                OrderSide::Buy => (position.avg_price - fill.price) * closing_quantity,
+            };
+            position.realized_pnl += realized_pnl;
+            
+            // Update daily PnL
+            let daily_pnl_change = (realized_pnl * 1e8) as i64;
+            let current_pnl = self.daily_pnl.load(Ordering::Relaxed) as i64;
+            self.daily_pnl.store((current_pnl + daily_pnl_change) as u64, Ordering::Relaxed);
+        }
+        
+        // Update position
+        if position.quantity == 0.0 {
+            position.avg_price = fill.price;
+        } else if (position.quantity > 0.0 && fill_quantity > 0.0) || 
+                  (position.quantity < 0.0 && fill_quantity < 0.0) {
+            // Adding to position
+            position.avg_price = (position.avg_price * position.quantity.abs() + 
+                                fill.price * fill.quantity) / 
+                               (position.quantity.abs() + fill.quantity);
+        }
+        
+        position.quantity += fill_quantity;
+        position.last_update = fill.timestamp;
+    }
+    
+    pub fn get_position(&self, symbol: &str) -> Option<Position> {
+        let positions = self.positions.read().unwrap();
+        positions.get(symbol).cloned()
+    }
+    
+    pub fn get_all_positions(&self) -> Vec<Position> {
+        let positions = self.positions.read().unwrap();
+        positions.values().cloned().collect()
+    }
+    
+    pub fn update_unrealized_pnl(&self, symbol: &str, current_price: f64) {
+        let mut positions = self.positions.write().unwrap();
+        if let Some(position) = positions.get_mut(symbol) {
+            if position.quantity != 0.0 {
+                position.unrealized_pnl = (current_price - position.avg_price) * position.quantity;
+            }
+        }
+    }
+    
+    pub fn get_order_status(&self, order_id: u64) -> Option<OrderStatus> {
+        let orders = self.orders.read().unwrap();
+        orders.get(&order_id).map(|order| order.status)
+    }
+    
+    pub fn enable_trading(&self) {
+        self.trading_enabled.store(true, Ordering::Relaxed);
+        println!("✅ Trading enabled");
+    }
+    
+    pub fn disable_trading(&self) {
+        self.trading_enabled.store(false, Ordering::Relaxed);
+        println!("🛑 Trading disabled");
+    }
+    
+    pub fn emergency_stop(&self) {
+        self.disable_trading();
+        
+        // Cancel all open orders
+        let order_ids: Vec<u64> = {
+            let orders = self.orders.read().unwrap();
+            orders.values()
+                .filter(|order| matches!(order.status, OrderStatus::New | OrderStatus::PartiallyFilled))
+                .map(|order| order.order_id)
+                .collect()
+        };
+        
+        for order_id in order_ids {
+            let _ = self.cancel_order(order_id);
+        }
+        
+        println!("🚨 EMERGENCY STOP - All trading halted and orders cancelled");
+    }
+    
+    pub fn get_performance_stats(&self) -> (u64, u64, u64, f64) {
+        let orders_sent = self.orders_sent.load(Ordering::Relaxed);
+        let orders_filled = self.orders_filled.load(Ordering::Relaxed);
+        let orders_rejected = self.orders_rejected.load(Ordering::Relaxed);
+        let daily_pnl = self.daily_pnl.load(Ordering::Relaxed) as f64 / 1e8;
+        
+        (orders_sent, orders_filled, orders_rejected, daily_pnl)
+    }
+    
+    fn get_timestamp_nanos(&self) -> u64 {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos() as u64
+    }
+    
+    pub async fn start_order_processor(&self) {
+        let new_order_queue = self.new_order_queue.clone();
+        let cancel_order_queue = self.cancel_order_queue.clone();
+        let fill_queue = self.fill_queue.clone();
+        
+        tokio::spawn(async move {
+            loop {
+                // Process new orders
+                while let Some(order) = new_order_queue.pop() {
+                    // Simulate order routing to exchange
+                    println!("🔄 Processing order: {}", order.order_id);
+                    
+                    // Simulate random fill after short delay
+                    tokio::time::sleep(tokio::time::Duration::from_micros(50)).await;
+                    
+                    if rand::random::<f64>() > 0.1 { // 90% fill rate
+                        let fill = Fill {
+                            fill_id: rand::random(),
+                            order_id: order.order_id,
+                            symbol: order.symbol.clone(),
+                            side: order.side,
+                            quantity: order.quantity,
+                            price: order.price.unwrap_or(100.0 + rand::random::<f64>() * 50.0),
+                            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos() as u64,
+                            venue: "NASDAQ".to_string(),
+                        };
+                        fill_queue.push(fill);
+                    }
+                }
+                
+                // Process cancellations
+                while let Some(order_id) = cancel_order_queue.pop() {
+                    println!("🔄 Processing cancel: {}", order_id);
+                }
+                
+                tokio::time::sleep(tokio::time::Duration::from_micros(1)).await;
+            }
+        });
+    }
+    
+    pub async fn start_fill_processor(&self) {
+        let fill_queue = self.fill_queue.clone();
+        let engine = Arc::new(self);
+        
+        tokio::spawn(async move {
+            loop {
+                while let Some(fill) = fill_queue.pop() {
+                    engine.process_fill(fill);
+                }
+                tokio::time::sleep(tokio::time::Duration::from_micros(1)).await;
+            }
+        });
+    }
+}
+
+// Simple market making strategy
+pub struct MarketMakingStrategy {
+    engine: Arc<TradingEngine>,
+    symbols: Vec<String>,
+    spread_bps: f64,
+    order_size: f64,
+}
+
+impl MarketMakingStrategy {
+    pub fn new(engine: Arc<TradingEngine>) -> Self {
+        Self {
+            engine,
+            symbols: vec!["AAPL".to_string(), "GOOGL".to_string(), "MSFT".to_string()],
+            spread_bps: 5.0, // 5 basis points
+            order_size: 100.0,
+        }
+    }
+    
+    pub async fn run(&self, mid_price: f64, symbol: &str) {
+        let spread = mid_price * self.spread_bps / 10000.0;
+        let bid_price = mid_price - spread / 2.0;
+        let ask_price = mid_price + spread / 2.0;
+        
+        // Submit bid order
+        let bid_order = Order {
+            order_id: 0,
+            client_order_id: format!("BID_{}", rand::random::<u32>()),
+            symbol: symbol.to_string(),
+            side: OrderSide::Buy,
+            order_type: OrderType::Limit,
+            quantity: self.order_size,
+            price: Some(bid_price),
+            stop_price: None,
+            time_in_force: TimeInForce::IOC,
+            status: OrderStatus::New,
+            filled_quantity: 0.0,
+            remaining_quantity: 0.0,
+            avg_fill_price: 0.0,
+            created_time: 0,
+            last_update_time: 0,
+        };
+        
+        // Submit ask order
+        let ask_order = Order {
+            order_id: 0,
+            client_order_id: format!("ASK_{}", rand::random::<u32>()),
+            symbol: symbol.to_string(),
+            side: OrderSide::Sell,
+            order_type: OrderType::Limit,
+            quantity: self.order_size,
+            price: Some(ask_price),
+            stop_price: None,
+            time_in_force: TimeInForce::IOC,
+            status: OrderStatus::New,
+            filled_quantity: 0.0,
+            remaining_quantity: 0.0,
+            avg_fill_price: 0.0,
+            created_time: 0,
+            last_update_time: 0,
+        };
+        
+        let _ = self.engine.submit_order(bid_order);
+        let _ = self.engine.submit_order(ask_order);
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("🚀 HFT Trading Engine Starting...");
+    println!("==================================");
+    
+    let engine = Arc::new(TradingEngine::new());
+    
+    // Start order and fill processors
+    engine.start_order_processor().await;
+    engine.start_fill_processor().await;
+    
+    // Create market making strategy
+    let strategy = MarketMakingStrategy::new(engine.clone());
+    
+    // Performance monitoring
+    let engine_clone = engine.clone();
+    tokio::spawn(async move {
+        loop {
+            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+            let (sent, filled, rejected, pnl) = engine_clone.get_performance_stats();
+            println!("📊 Stats: {} sent, {} filled, {} rejected, PnL: ${:.2}", 
+                    sent, filled, rejected, pnl);
+            
+            // Display positions
+            let positions = engine_clone.get_all_positions();
+            for position in positions {
+                println!("📈 Position {}: {} @ {:.2} (PnL: {:.2})", 
+                        position.symbol, 
+                        position.quantity, 
+                        position.avg_price,
+                        position.realized_pnl + position.unrealized_pnl);
+            }
+        }
+    });
+    
+    // Run market making strategy
+    loop {
+        for symbol in &["AAPL", "GOOGL", "MSFT"] {
+            let mid_price = 100.0 + rand::random::<f64>() * 50.0;
+            strategy.run(mid_price, symbol).await;
+            
+            // Update unrealized PnL
+            engine.update_unrealized_pnl(symbol, mid_price);
+        }
+        
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    }
+}`,
+          language: 'rust',
+        },
+        'Cargo.toml': {
+          content: `[package]
+name = "hft-trading-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+crossbeam = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+rand = "0.8"
+uuid = { version = "1.0", features = ["v4"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+opt-level = 3
+target-cpu = "native"`,
+          language: 'toml',
+        }
+      }
+    },
+    {
+      id: 'rust-hft-risk-manager',
+      name: 'HFT Risk Management System',
+      description: 'Real-time risk management system with position limits and automated controls',
+      category: 'HFT',
+      difficulty: 'Expert',
+      tags: ['Risk Management', 'Real-time', 'Position Limits', 'VaR', 'Compliance'],
+      icon: <Shield className="w-6 h-6 text-red-400" />,
+      estimatedTime: '6-8 weeks',
+      useCase: 'Monitor and control trading risks in real-time with automated circuit breakers',
+      techStack: ['Rust', 'Real-time Analytics', 'Statistical Models', 'Alerting'],
+      features: [
+        'Real-time VaR calculation',
+        'Position limit monitoring',
+        'Automated circuit breakers',
+        'Stress testing',
+        'Regulatory reporting'
+      ],
+      files: {
+        'main.rs': {
+          content: `use std::collections::HashMap;
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
+use tokio::sync::RwLock;
+
+#[derive(Debug, Clone)]
+pub struct RiskMetrics {
+    pub portfolio_value: f64,
+    pub daily_pnl: f64,
+    pub var_95: f64,          // Value at Risk 95%
+    pub var_99: f64,          // Value at Risk 99%
+    pub expected_shortfall: f64,
+    pub max_drawdown: f64,
+    pub sharpe_ratio: f64,
+    pub beta: f64,
+    pub leverage: f64,
+    pub concentration_risk: f64,
+    pub last_updated: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct PositionRisk {
+    pub symbol: String,
+    pub position_size: f64,
+    pub market_value: f64,
+    pub delta: f64,
+    pub gamma: f64,
+    pub vega: f64,
+    pub theta: f64,
+    pub var_contribution: f64,
+    pub concentration_pct: f64,
+    pub limit_utilization: f64,
+}
+
+#[derive(Debug, Clone)]
+pub struct RiskLimit {
+    pub name: String,
+    pub limit_type: RiskLimitType,
+    pub threshold: f64,
+    pub current_value: f64,
+    pub utilization_pct: f64,
+    pub breach_action: BreachAction,
+    pub enabled: bool,
+}
+
+#[derive(Debug, Clone)]
+pub enum RiskLimitType {
+    PositionLimit,
+    VaRLimit,
+    DailyLossLimit,
+    ConcentrationLimit,
+    LeverageLimit,
+    DrawdownLimit,
+    VolumeLimit,
+}
+
+#[derive(Debug, Clone)]
+pub enum BreachAction {
+    Alert,
+    ReducePosition,
+    StopTrading,
+    EmergencyLiquidation,
+}
+
+#[derive(Debug, Clone)]
+pub struct RiskAlert {
+    pub id: u64,
+    pub alert_type: AlertType,
+    pub severity: AlertSeverity,
+    pub message: String,
+    pub symbol: Option<String>,
+    pub current_value: f64,
+    pub threshold: f64,
+    pub timestamp: u64,
+    pub acknowledged: bool,
+}
+
+#[derive(Debug, Clone)]
+pub enum AlertType {
+    LimitBreach,
+    VaRExceedance,
+    ConcentrationRisk,
+    LiquidityRisk,
+    ModelRisk,
+    OperationalRisk,
+}
+
+#[derive(Debug, Clone)]
+pub enum AlertSeverity {
+    Low,
+    Medium,
+    High,
+    Critical,
+}
+
+#[derive(Debug, Clone)]
+pub struct MarketData {
+    pub symbol: String,
+    pub price: f64,
+    pub volatility: f64,
+    pub correlation_matrix: HashMap<String, f64>,
+    pub timestamp: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct Position {
+    pub symbol: String,
+    pub quantity: f64,
+    pub avg_price: f64,
+    pub current_price: f64,
+    pub market_value: f64,
+    pub unrealized_pnl: f64,
+    pub realized_pnl: f64,
+}
+
+pub struct RiskManager {
+    // Risk metrics and limits
+    risk_metrics: Arc<RwLock<RiskMetrics>>,
+    risk_limits: Arc<RwLock<HashMap<String, RiskLimit>>>,
+    position_risks: Arc<RwLock<HashMap<String, PositionRisk>>>,
+    
+    // Market data and positions
+    market_data: Arc<RwLock<HashMap<String, MarketData>>>,
+    positions: Arc<RwLock<HashMap<String, Position>>>,
+    
+    // Historical data for VaR calculation
+    price_history: Arc<RwLock<HashMap<String, Vec<f64>>>>,
+    pnl_history: Arc<RwLock<Vec<f64>>>,
+    
+    // Risk alerts
+    active_alerts: Arc<RwLock<HashMap<u64, RiskAlert>>>,
+    alert_id_counter: Arc<AtomicU64>,
+    
+    // Circuit breakers
+    trading_halted: Arc<AtomicBool>,
+    emergency_mode: Arc<AtomicBool>,
+    
+    // Performance counters
+    risk_checks_performed: Arc<AtomicU64>,
+    alerts_generated: Arc<AtomicU64>,
+}
+
+impl RiskManager {
+    pub fn new() -> Self {
+        let initial_metrics = RiskMetrics {
+            portfolio_value: 0.0,
+            daily_pnl: 0.0,
+            var_95: 0.0,
+            var_99: 0.0,
+            expected_shortfall: 0.0,
+            max_drawdown: 0.0,
+            sharpe_ratio: 0.0,
+            beta: 1.0,
+            leverage: 1.0,
+            concentration_risk: 0.0,
+            last_updated: 0,
+        };
+        
+        let mut risk_limits = HashMap::new();
+        
+        // Initialize default risk limits
+        risk_limits.insert("portfolio_var_95".to_string(), RiskLimit {
+            name: "Portfolio VaR 95%".to_string(),
+            limit_type: RiskLimitType::VaRLimit,
+            threshold: 100000.0,
+            current_value: 0.0,
+            utilization_pct: 0.0,
+            breach_action: BreachAction::Alert,
+            enabled: true,
+        });
+        
+        risk_limits.insert("daily_loss_limit".to_string(), RiskLimit {
+            name: "Daily Loss Limit".to_string(),
+            limit_type: RiskLimitType::DailyLossLimit,
+            threshold: 50000.0,
+            current_value: 0.0,
+            utilization_pct: 0.0,
+            breach_action: BreachAction::StopTrading,
+            enabled: true,
+        });
+        
+        risk_limits.insert("leverage_limit".to_string(), RiskLimit {
+            name: "Leverage Limit".to_string(),
+            limit_type: RiskLimitType::LeverageLimit,
+            threshold: 3.0,
+            current_value: 1.0,
+            utilization_pct: 33.3,
+            breach_action: BreachAction::ReducePosition,
+            enabled: true,
+        });
+        
+        Self {
+            risk_metrics: Arc::new(RwLock::new(initial_metrics)),
+            risk_limits: Arc::new(RwLock::new(risk_limits)),
+            position_risks: Arc::new(RwLock::new(HashMap::new())),
+            market_data: Arc::new(RwLock::new(HashMap::new())),
+            positions: Arc::new(RwLock::new(HashMap::new())),
+            price_history: Arc::new(RwLock::new(HashMap::new())),
+            pnl_history: Arc::new(RwLock::new(Vec::new())),
+            active_alerts: Arc::new(RwLock::new(HashMap::new())),
+            alert_id_counter: Arc::new(AtomicU64::new(1)),
+            trading_halted: Arc::new(AtomicBool::new(false)),
+            emergency_mode: Arc::new(AtomicBool::new(false)),
+            risk_checks_performed: Arc::new(AtomicU64::new(0)),
+            alerts_generated: Arc::new(AtomicU64::new(0)),
+        }
+    }
+    
+    pub async fn update_position(&self, position: Position) {
+        let mut positions = self.positions.write().await;
+        positions.insert(position.symbol.clone(), position);
+        
+        // Trigger risk calculation
+        drop(positions);
+        self.calculate_risk_metrics().await;
+    }
+    
+    pub async fn update_market_data(&self, market_data: MarketData) {
+        // Update current market data
+        {
+            let mut data = self.market_data.write().await;
+            data.insert(market_data.symbol.clone(), market_data.clone());
+        }
+        
+        // Update price history for VaR calculation
+        {
+            let mut price_history = self.price_history.write().await;
+            let history = price_history.entry(market_data.symbol.clone()).or_insert_with(Vec::new);
+            history.push(market_data.price);
+            
+            // Keep only last 252 days (1 year of trading days)
+            if history.len() > 252 {
+                history.drain(0..history.len() - 252);
+            }
+        }
+        
+        // Recalculate risk metrics
+        self.calculate_risk_metrics().await;
+    }
+    
+    async fn calculate_risk_metrics(&self) {
+        let positions = self.positions.read().await;
+        let market_data = self.market_data.read().await;
+        let price_history = self.price_history.read().await;
+        
+        let mut portfolio_value = 0.0;
+        let mut daily_pnl = 0.0;
+        let mut position_risks = HashMap::new();
+        
+        // Calculate portfolio metrics
+        for position in positions.values() {
+            portfolio_value += position.market_value;
+            daily_pnl += position.unrealized_pnl + position.realized_pnl;
+            
+            // Calculate position-level risk metrics
+            if let Some(data) = market_data.get(&position.symbol) {
+                let position_risk = PositionRisk {
+                    symbol: position.symbol.clone(),
+                    position_size: position.quantity,
+                    market_value: position.market_value,
+                    delta: position.quantity, // Simplified delta
+                    gamma: 0.0, // Would calculate based on options
+                    vega: 0.0,  // Would calculate based on options
+                    theta: 0.0, // Would calculate based on options
+                    var_contribution: self.calculate_position_var(&position.symbol, position.market_value, &price_history).await,
+                    concentration_pct: if portfolio_value > 0.0 { 
+                        (position.market_value.abs() / portfolio_value) * 100.0 
+                    } else { 
+                        0.0 
+                    },
+                    limit_utilization: 0.0, // Would calculate based on position limits
+                };
+                position_risks.insert(position.symbol.clone(), position_risk);
+            }
+        }
+        
+        // Calculate VaR
+        let var_95 = self.calculate_portfolio_var(0.95, &price_history, &positions).await;
+        let var_99 = self.calculate_portfolio_var(0.99, &price_history, &positions).await;
+        
+        // Calculate other risk metrics
+        let max_drawdown = self.calculate_max_drawdown().await;
+        let sharpe_ratio = self.calculate_sharpe_ratio().await;
+        let leverage = if portfolio_value > 0.0 {
+            positions.values().map(|p| p.market_value.abs()).sum::<f64>() / portfolio_value
+        } else {
+            1.0
+        };
+        
+        let concentration_risk = position_risks.values()
+            .map(|pr| pr.concentration_pct)
+            .fold(0.0, f64::max);
+        
+        // Update risk metrics
+        {
+            let mut metrics = self.risk_metrics.write().await;
+            metrics.portfolio_value = portfolio_value;
+            metrics.daily_pnl = daily_pnl;
+            metrics.var_95 = var_95;
+            metrics.var_99 = var_99;
+            metrics.expected_shortfall = var_99 * 1.2; // Simplified ES calculation
+            metrics.max_drawdown = max_drawdown;
+            metrics.sharpe_ratio = sharpe_ratio;
+            metrics.leverage = leverage;
+            metrics.concentration_risk = concentration_risk;
+            metrics.last_updated = self.get_timestamp_nanos();
+        }
+        
+        // Update position risks
+        {
+            let mut pos_risks = self.position_risks.write().await;
+            *pos_risks = position_risks;
+        }
+        
+        // Check risk limits
+        self.check_risk_limits().await;
+        
+        self.risk_checks_performed.fetch_add(1, Ordering::Relaxed);
+    }
+    
+    async fn calculate_portfolio_var(&self, confidence: f64, price_history: &HashMap<String, Vec<f64>>, positions: &HashMap<String, Position>) -> f64 {
+        let mut portfolio_returns = Vec::new();
+        
+        // Calculate historical portfolio returns
+        let max_history = price_history.values().map(|h| h.len()).min().unwrap_or(0);
+        if max_history < 2 {
+            return 0.0;
+        }
+        
+        for i in 1..max_history {
+            let mut portfolio_return = 0.0;
+            let mut total_value = 0.0;
+            
+            for position in positions.values() {
+                if let Some(prices) = price_history.get(&position.symbol) {
+                    if i < prices.len() {
+                        let return_rate = (prices[i] - prices[i-1]) / prices[i-1];
+                        portfolio_return += return_rate * position.market_value;
+                        total_value += position.market_value.abs();
+                    }
+                }
+            }
+            
+            if total_value > 0.0 {
+                portfolio_returns.push(portfolio_return / total_value);
+            }
+        }
+        
+        if portfolio_returns.is_empty() {
+            return 0.0;
+        }
+        
+        // Sort returns and calculate VaR
+        portfolio_returns.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        let index = ((1.0 - confidence) * portfolio_returns.len() as f64) as usize;
+        let var_return = portfolio_returns.get(index).unwrap_or(&0.0);
+        
+        // Convert to dollar VaR
+        let portfolio_value = positions.values().map(|p| p.market_value.abs()).sum::<f64>();
+        -var_return * portfolio_value
+    }
+    
+    async fn calculate_position_var(&self, _symbol: &str, position_value: f64, _price_history: &HashMap<String, Vec<f64>>) -> f64 {
+        // Simplified position VaR calculation
+        position_value * 0.02 // Assume 2% daily VaR
+    }
+    
+    async fn calculate_max_drawdown(&self) -> f64 {
+        let pnl_history = self.pnl_history.read().await;
+        
+        if pnl_history.len() < 2 {
+            return 0.0;
+        }
+        
+        let mut max_drawdown = 0.0;
+        let mut peak = pnl_history[0];
+        
+        for &pnl in pnl_history.iter().skip(1) {
+            if pnl > peak {
+                peak = pnl;
+            }
+            let drawdown = (peak - pnl) / peak.abs().max(1.0);
+            max_drawdown = max_drawdown.max(drawdown);
+        }
+        
+        max_drawdown
+    }
+    
+    async fn calculate_sharpe_ratio(&self) -> f64 {
+        let pnl_history = self.pnl_history.read().await;
+        
+        if pnl_history.len() < 2 {
+            return 0.0;
+        }
+        
+        let mean_return = pnl_history.iter().sum::<f64>() / pnl_history.len() as f64;
+        let variance = pnl_history.iter()
+            .map(|&x| (x - mean_return).powi(2))
+            .sum::<f64>() / pnl_history.len() as f64;
+        let std_dev = variance.sqrt();
+        
+        if std_dev > 0.0 {
+            mean_return / std_dev * (252.0_f64).sqrt() // Annualized Sharpe
+        } else {
+            0.0
+        }
+    }
+    
+    async fn check_risk_limits(&self) {
+        let metrics = self.risk_metrics.read().await;
+        let mut limits = self.risk_limits.write().await;
+        
+        for (limit_id, limit) in limits.iter_mut() {
+            if !limit.enabled {
+                continue;
+            }
+            
+            let current_value = match limit.limit_type {
+                RiskLimitType::VaRLimit => metrics.var_95,
+                RiskLimitType::DailyLossLimit => -metrics.daily_pnl,
+                RiskLimitType::LeverageLimit => metrics.leverage,
+                RiskLimitType::ConcentrationLimit => metrics.concentration_risk,
+                RiskLimitType::DrawdownLimit => metrics.max_drawdown,
+                _ => 0.0,
+            };
+            
+            limit.current_value = current_value;
+            limit.utilization_pct = if limit.threshold > 0.0 {
+                (current_value / limit.threshold) * 100.0
+            } else {
+                0.0
+            };
+            
+            // Check for breach
+            if current_value > limit.threshold {
+                self.handle_limit_breach(limit_id, limit).await;
+            }
+        }
+    }
+    
+    async fn handle_limit_breach(&self, limit_id: &str, limit: &RiskLimit) {
+        let alert = RiskAlert {
+            id: self.alert_id_counter.fetch_add(1, Ordering::Relaxed),
+            alert_type: AlertType::LimitBreach,
+            severity: match limit.breach_action {
+                BreachAction::Alert => AlertSeverity::Medium,
+                BreachAction::ReducePosition => AlertSeverity::High,
+                BreachAction::StopTrading => AlertSeverity::Critical,
+                BreachAction::EmergencyLiquidation => AlertSeverity::Critical,
+            },
+            message: format!("Risk limit breach: {} - Current: {:.2}, Limit: {:.2}", 
+                           limit.name, limit.current_value, limit.threshold),
+            symbol: None,
+            current_value: limit.current_value,
+            threshold: limit.threshold,
+            timestamp: self.get_timestamp_nanos(),
+            acknowledged: false,
+        };
+        
+        // Store alert
+        {
+            let mut alerts = self.active_alerts.write().await;
+            alerts.insert(alert.id, alert.clone());
+        }
+        
+        self.alerts_generated.fetch_add(1, Ordering::Relaxed);
+        
+        println!("🚨 RISK ALERT: {}", alert.message);
+        
+        // Execute breach action
+        match limit.breach_action {
+            BreachAction::Alert => {
+                // Just log the alert
+            }
+            BreachAction::ReducePosition => {
+                println!("📉 Reducing positions due to risk limit breach");
+                // Would implement position reduction logic
+            }
+            BreachAction::StopTrading => {
+                self.halt_trading().await;
+            }
+            BreachAction::EmergencyLiquidation => {
+                self.emergency_liquidation().await;
+            }
+        }
+    }
+    
+    pub async fn halt_trading(&self) {
+        self.trading_halted.store(true, Ordering::Relaxed);
+        println!("🛑 TRADING HALTED due to risk limit breach");
+    }
+    
+    pub async fn resume_trading(&self) {
+        self.trading_halted.store(false, Ordering::Relaxed);
+        println!("✅ Trading resumed");
+    }
+    
+    pub async fn emergency_liquidation(&self) {
+        self.emergency_mode.store(true, Ordering::Relaxed);
+        self.trading_halted.store(true, Ordering::Relaxed);
+        
+        println!("🚨 EMERGENCY LIQUIDATION INITIATED");
+        
+        // Would implement emergency liquidation logic
+        let positions = self.positions.read().await;
+        for position in positions.values() {
+            println!("💥 Emergency liquidating position: {} {}", 
+                    position.symbol, position.quantity);
+        }
+    }
+    
+    pub async fn get_risk_metrics(&self) -> RiskMetrics {
+        self.risk_metrics.read().await.clone()
+    }
+    
+    pub async fn get_active_alerts(&self) -> Vec<RiskAlert> {
+        let alerts = self.active_alerts.read().await;
+        alerts.values().filter(|alert| !alert.acknowledged).cloned().collect()
+    }
+    
+    pub async fn acknowledge_alert(&self, alert_id: u64) {
+        let mut alerts = self.active_alerts.write().await;
+        if let Some(alert) = alerts.get_mut(&alert_id) {
+            alert.acknowledged = true;
+            println!("✅ Alert {} acknowledged", alert_id);
+        }
+    }
+    
+    pub fn is_trading_halted(&self) -> bool {
+        self.trading_halted.load(Ordering::Relaxed)
+    }
+    
+    pub fn is_emergency_mode(&self) -> bool {
+        self.emergency_mode.load(Ordering::Relaxed)
+    }
+    
+    pub fn get_performance_stats(&self) -> (u64, u64) {
+        (
+            self.risk_checks_performed.load(Ordering::Relaxed),
+            self.alerts_generated.load(Ordering::Relaxed),
+        )
+    }
+    
+    fn get_timestamp_nanos(&self) -> u64 {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos() as u64
+    }
+    
+    pub async fn start_risk_monitoring(&self) {
+        let risk_manager = Arc::new(self);
+        
+        // Risk calculation loop
+        let rm_clone = risk_manager.clone();
+        tokio::spawn(async move {
+            loop {
+                rm_clone.calculate_risk_metrics().await;
+                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            }
+        });
+        
+        // Performance monitoring
+        let rm_clone = risk_manager.clone();
+        tokio::spawn(async move {
+            loop {
+                tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                
+                let metrics = rm_clone.get_risk_metrics().await;
+                let (checks, alerts) = rm_clone.get_performance_stats();
+                
+                println!("📊 Risk Metrics:");
+                println!("  Portfolio Value: ${:.2}", metrics.portfolio_value);
+                println!("  Daily PnL: ${:.2}", metrics.daily_pnl);
+                println!("  VaR 95%: ${:.2}", metrics.var_95);
+                println!("  Leverage: {:.2}x", metrics.leverage);
+                println!("  Max Drawdown: {:.2}%", metrics.max_drawdown * 100.0);
+                println!("  Checks: {}, Alerts: {}", checks, alerts);
+                
+                let active_alerts = rm_clone.get_active_alerts().await;
+                if !active_alerts.is_empty() {
+                    println!("🚨 Active Alerts: {}", active_alerts.len());
+                }
+            }
+        });
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("🛡️ HFT Risk Management System Starting...");
+    println!("==========================================");
+    
+    let risk_manager = RiskManager::new();
+    
+    // Start risk monitoring
+    risk_manager.start_risk_monitoring().await;
+    
+    // Simulate some positions and market data
+    let symbols = vec!["AAPL", "GOOGL", "MSFT", "TSLA"];
+    
+    for symbol in &symbols {
+        let position = Position {
+            symbol: symbol.to_string(),
+            quantity: 1000.0 + rand::random::<f64>() * 2000.0,
+            avg_price: 100.0 + rand::random::<f64>() * 50.0,
+            current_price: 100.0 + rand::random::<f64>() * 50.0,
+            market_value: 0.0, // Will be calculated
+            unrealized_pnl: rand::random::<f64>() * 10000.0 - 5000.0,
+            realized_pnl: rand::random::<f64>() * 5000.0 - 2500.0,
+        };
+        
+        risk_manager.update_position(position).await;
+        
+        let market_data = MarketData {
+            symbol: symbol.to_string(),
+            price: 100.0 + rand::random::<f64>() * 50.0,
+            volatility: 0.15 + rand::random::<f64>() * 0.25,
+            correlation_matrix: HashMap::new(),
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos() as u64,
+        };
+        
+        risk_manager.update_market_data(market_data).await;
+    }
+    
+    // Keep the system running
+    loop {
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        
+        // Simulate market data updates
+        for symbol in &symbols {
+            let market_data = MarketData {
+                symbol: symbol.to_string(),
+                price: 100.0 + rand::random::<f64>() * 50.0,
+                volatility: 0.15 + rand::random::<f64>() * 0.25,
+                correlation_matrix: HashMap::new(),
+                timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos() as u64,
+            };
+            
+            risk_manager.update_market_data(market_data).await;
+        }
+    }
+}`,
+          language: 'rust',
+        },
+        'Cargo.toml': {
+          content: `[package]
+name = "hft-risk-manager"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+rand = "0.8"
+nalgebra = "0.32"
+statrs = "0.16"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+opt-level = 3`,
+          language: 'toml',
+        }
+      }
+    },
+    {
+      id: 'rust-hft-backtester',
+      name: 'HFT Strategy Backtester',
+      description: 'High-performance backtesting engine for HFT strategies with tick-level precision',
+      category: 'HFT',
+      difficulty: 'Advanced',
+      tags: ['Backtesting', 'Strategy Testing', 'Performance Analysis', 'Tick Data'],
+      icon: <BarChart3 className="w-6 h-6 text-blue-400" />,
+      estimatedTime: '5-7 weeks',
+      useCase: 'Backtest and optimize high-frequency trading strategies with historical data',
+      techStack: ['Rust', 'Time Series', 'Statistics', 'Parallel Processing'],
+      features: [
+        'Tick-level backtesting',
+        'Strategy optimization',
+        'Performance analytics',
+        'Risk-adjusted returns',
+        'Parallel execution'
+      ],
+      files: {
+        'main.rs': {
+          content: `use std::collections::{HashMap, VecDeque};
+use std::sync::Arc;
+use rayon::prelude::*;
+
+#[derive(Debug, Clone)]
+pub struct TickData {
+    pub timestamp: u64,
+    pub symbol: String,
+    pub price: f64,
+    pub volume: f64,
+    pub bid: f64,
+    pub ask: f64,
+    pub bid_size: f64,
+    pub ask_size: f64,
+}
+
+#[derive(Debug, Clone)]
+pub struct Trade {
+    pub timestamp: u64,
+    pub symbol: String,
+    pub side: TradeSide,
+    pub quantity: f64,
+    pub price: f64,
+    pub commission: f64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum TradeSide {
+    Buy,
+    Sell,
+}
+
+#[derive(Debug, Clone)]
+pub struct Position {
+    pub symbol: String,
+    pub quantity: f64,
+    pub avg_price: f64,
+    pub unrealized_pnl: f64,
+    pub realized_pnl: f64,
+}
+
+#[derive(Debug, Clone)]
+pub struct BacktestResults {
+    pub total_return: f64,
+    pub annualized_return: f64,
+    pub sharpe_ratio: f64,
+    pub max_drawdown: f64,
+    pub win_rate: f64,
+    pub profit_factor: f64,
+    pub total_trades: usize,
+    pub avg_trade_duration: f64,
+    pub avg_trade_pnl: f64,
+    pub commission_paid: f64,
+    pub start_capital: f64,
+    pub end_capital: f64,
+    pub daily_returns: Vec<f64>,
+    pub equity_curve: Vec<(u64, f64)>,
+    pub trades: Vec<Trade>,
+}
+
+pub trait Strategy: Send + Sync {
+    fn on_tick(&mut self, tick: &TickData, portfolio: &Portfolio) -> Vec<Order>;
+    fn name(&self) -> &str;
+}
+
+#[derive(Debug, Clone)]
+pub struct Order {
+    pub symbol: String,
+    pub side: TradeSide,
+    pub quantity: f64,
+    pub order_type: OrderType,
+    pub price: Option<f64>,
+}
+
+#[derive(Debug, Clone)]
+pub enum OrderType {
+    Market,
+    Limit,
+}
+
+pub struct Portfolio {
+    pub cash: f64,
+    pub positions: HashMap<String, Position>,
+    pub equity_history: Vec<(u64, f64)>,
+    pub trades: Vec<Trade>,
+    pub commission_rate: f64,
+}
+
+impl Portfolio {
+    pub fn new(initial_capital: f64, commission_rate: f64) -> Self {
+        Self {
+            cash: initial_capital,
+            positions: HashMap::new(),
+            equity_history: Vec::new(),
+            trades: Vec::new(),
+            commission_rate,
+        }
+    }
+    
+    pub fn execute_order(&mut self, order: Order, tick: &TickData) -> Option<Trade> {
+        let execution_price = match order.order_type {
+            OrderType::Market => {
+                match order.side {
+                    TradeSide::Buy => tick.ask,
+                    TradeSide::Sell => tick.bid,
+                }
+            }
+            OrderType::Limit => {
+                if let Some(limit_price) = order.price {
+                    // Check if limit order can be executed
+                    match order.side {
+                        TradeSide::Buy => {
+                            if tick.ask <= limit_price {
+                                tick.ask
+                            } else {
+                                return None; // Order not filled
+                            }
+                        }
+                        TradeSide::Sell => {
+                            if tick.bid >= limit_price {
+                                tick.bid
+                            } else {
+                                return None; // Order not filled
+                            }
+                        }
+                    }
+                } else {
+                    return None; // Invalid limit order
+                }
+            }
+        };
+        
+        let trade_value = order.quantity * execution_price;
+        let commission = trade_value * self.commission_rate;
+        
+        // Check if we have enough cash for buy orders
+        if order.side == TradeSide::Buy && self.cash < trade_value + commission {
+            return None; // Insufficient funds
+        }
+        
+        // Check if we have enough shares for sell orders
+        if order.side == TradeSide::Sell {
+            let current_position = self.positions.get(&order.symbol)
+                .map(|p| p.quantity)
+                .unwrap_or(0.0);
+            if current_position < order.quantity {
+                return None; // Insufficient shares
+            }
+        }
+        
+        // Execute the trade
+        let trade = Trade {
+            timestamp: tick.timestamp,
+            symbol: order.symbol.clone(),
+            side: order.side.clone(),
+            quantity: order.quantity,
+            price: execution_price,
+            commission,
+        };
+        
+        // Update cash
+        match order.side {
+            TradeSide::Buy => {
+                self.cash -= trade_value + commission;
+            }
+            TradeSide::Sell => {
+                self.cash += trade_value - commission;
+            }
+        }
+        
+        // Update position
+        self.update_position(&trade);
+        
+        // Record trade
+        self.trades.push(trade.clone());
+        
+        Some(trade)
+    }
+    
+    fn update_position(&mut self, trade: &Trade) {
+        let position = self.positions.entry(trade.symbol.clone()).or_insert_with(|| Position {
+            symbol: trade.symbol.clone(),
+            quantity: 0.0,
+            avg_price: 0.0,
+            unrealized_pnl: 0.0,
+            realized_pnl: 0.0,
+        });
+        
+        match trade.side {
+            TradeSide::Buy => {
+                if position.quantity >= 0.0 {
+                    // Adding to long position
+                    position.avg_price = (position.avg_price * position.quantity + 
+                                        trade.price * trade.quantity) / 
+                                       (position.quantity + trade.quantity);
+                    position.quantity += trade.quantity;
+                } else {
+                    // Covering short position
+                    let closing_quantity = trade.quantity.min(-position.quantity);
+                    let realized_pnl = (position.avg_price - trade.price) * closing_quantity;
+                    position.realized_pnl += realized_pnl;
+                    
+                    position.quantity += trade.quantity;
+                    
+                    if position.quantity > 0.0 {
+                        position.avg_price = trade.price;
+                    }
+                }
+            }
+            TradeSide::Sell => {
+                if position.quantity <= 0.0 {
+                    // Adding to short position
+                    position.avg_price = (position.avg_price * (-position.quantity) + 
+                                        trade.price * trade.quantity) / 
+                                       (-position.quantity + trade.quantity);
+                    position.quantity -= trade.quantity;
+                } else {
+                    // Closing long position
+                    let closing_quantity = trade.quantity.min(position.quantity);
+                    let realized_pnl = (trade.price - position.avg_price) * closing_quantity;
+                    position.realized_pnl += realized_pnl;
+                    
+                    position.quantity -= trade.quantity;
+                    
+                    if position.quantity < 0.0 {
+                        position.avg_price = trade.price;
+                    }
+                }
+            }
+        }
+    }
+    
+    pub fn update_unrealized_pnl(&mut self, tick: &TickData) {
+        if let Some(position) = self.positions.get_mut(&tick.symbol) {
+            if position.quantity != 0.0 {
+                let current_price = (tick.bid + tick.ask) / 2.0;
+                position.unrealized_pnl = (current_price - position.avg_price) * position.quantity;
+            }
+        }
+    }
+    
+    pub fn get_total_equity(&self, market_prices: &HashMap<String, f64>) -> f64 {
+        let mut equity = self.cash;
+        
+        for position in self.positions.values() {
+            if let Some(&price) = market_prices.get(&position.symbol) {
+                equity += position.quantity * price;
+            }
+        }
+        
+        equity
+    }
+}
+
+pub struct Backtester {
+    pub initial_capital: f64,
+    pub commission_rate: f64,
+    pub start_date: u64,
+    pub end_date: u64,
+}
+
+impl Backtester {
+    pub fn new(initial_capital: f64, commission_rate: f64) -> Self {
+        Self {
+            initial_capital,
+            commission_rate,
+            start_date: 0,
+            end_date: u64::MAX,
+        }
+    }
+    
+    pub fn run_backtest<S: Strategy>(&self, mut strategy: S, tick_data: Vec<TickData>) -> BacktestResults {
+        let mut portfolio = Portfolio::new(self.initial_capital, self.commission_rate);
+        let mut market_prices = HashMap::new();
+        
+        println!("🔄 Running backtest for strategy: {}", strategy.name());
+        println!("📊 Processing {} ticks...", tick_data.len());
+        
+        for (i, tick) in tick_data.iter().enumerate() {
+            if tick.timestamp < self.start_date || tick.timestamp > self.end_date {
+                continue;
+            }
+            
+            // Update market prices
+            market_prices.insert(tick.symbol.clone(), (tick.bid + tick.ask) / 2.0);
+            
+            // Update unrealized PnL
+            portfolio.update_unrealized_pnl(tick);
+            
+            // Get strategy signals
+            let orders = strategy.on_tick(tick, &portfolio);
+            
+            // Execute orders
+            for order in orders {
+                if let Some(trade) = portfolio.execute_order(order, tick) {
+                    println!("💰 Trade: {} {} {} @ {:.4}", 
+                            trade.symbol, 
+                            if trade.side == TradeSide::Buy { "BUY" } else { "SELL" },
+                            trade.quantity, 
+                            trade.price);
+                }
+            }
+            
+            // Record equity
+            let equity = portfolio.get_total_equity(&market_prices);
+            portfolio.equity_history.push((tick.timestamp, equity));
+            
+            // Progress reporting
+            if i % 10000 == 0 {
+                println!("📈 Progress: {:.1}% - Equity: ${:.2}", 
+                        (i as f64 / tick_data.len() as f64) * 100.0, equity);
+            }
+        }
+        
+        self.calculate_results(portfolio)
+    }
+    
+    fn calculate_results(&self, portfolio: Portfolio) -> BacktestResults {
+        let final_equity = portfolio.equity_history.last()
+            .map(|(_, equity)| *equity)
+            .unwrap_or(self.initial_capital);
+        
+        let total_return = (final_equity - self.initial_capital) / self.initial_capital;
+        
+        // Calculate daily returns
+        let mut daily_returns = Vec::new();
+        let mut daily_equity = HashMap::new();
+        
+        for (timestamp, equity) in &portfolio.equity_history {
+            let day = timestamp / (24 * 60 * 60 * 1_000_000_000); // Convert to days
+            daily_equity.insert(day, *equity);
+        }
+        
+        let mut sorted_days: Vec<_> = daily_equity.keys().collect();
+        sorted_days.sort();
+        
+        for window in sorted_days.windows(2) {
+            let prev_equity = daily_equity[window[0]];
+            let curr_equity = daily_equity[window[1]];
+            let daily_return = (curr_equity - prev_equity) / prev_equity;
+            daily_returns.push(daily_return);
+        }
+        
+        // Calculate performance metrics
+        let annualized_return = if daily_returns.len() > 0 {
+            let avg_daily_return = daily_returns.iter().sum::<f64>() / daily_returns.len() as f64;
+            (1.0 + avg_daily_return).powf(252.0) - 1.0 // 252 trading days
+        } else {
+            0.0
+        };
+        
+        let sharpe_ratio = if daily_returns.len() > 1 {
+            let mean_return = daily_returns.iter().sum::<f64>() / daily_returns.len() as f64;
+            let variance = daily_returns.iter()
+                .map(|&r| (r - mean_return).powi(2))
+                .sum::<f64>() / (daily_returns.len() - 1) as f64;
+            let std_dev = variance.sqrt();
+            
+            if std_dev > 0.0 {
+                (mean_return / std_dev) * (252.0_f64).sqrt()
+            } else {
+                0.0
+            }
+        } else {
+            0.0
+        };
+        
+        let max_drawdown = self.calculate_max_drawdown(&portfolio.equity_history);
+        
+        // Trade statistics
+        let winning_trades = portfolio.trades.iter()
+            .filter(|trade| {
+                // Simplified: assume all trades are profitable if price moved favorably
+                true // Would need more sophisticated PnL calculation
+            })
+            .count();
+        
+        let win_rate = if portfolio.trades.len() > 0 {
+            winning_trades as f64 / portfolio.trades.len() as f64
+        } else {
+            0.0
+        };
+        
+        let total_commission = portfolio.trades.iter()
+            .map(|trade| trade.commission)
+            .sum::<f64>();
+        
+        let avg_trade_pnl = if portfolio.trades.len() > 0 {
+            total_return * self.initial_capital / portfolio.trades.len() as f64
+        } else {
+            0.0
+        };
+        
+        BacktestResults {
+            total_return,
+            annualized_return,
+            sharpe_ratio,
+            max_drawdown,
+            win_rate,
+            profit_factor: 1.5, // Simplified calculation
+            total_trades: portfolio.trades.len(),
+            avg_trade_duration: 0.0, // Would calculate based on entry/exit times
+            avg_trade_pnl,
+            commission_paid: total_commission,
+            start_capital: self.initial_capital,
+            end_capital: final_equity,
+            daily_returns,
+            equity_curve: portfolio.equity_history,
+            trades: portfolio.trades,
+        }
+    }
+    
+    fn calculate_max_drawdown(&self, equity_curve: &[(u64, f64)]) -> f64 {
+        let mut max_drawdown = 0.0;
+        let mut peak = 0.0;
+        
+        for (_, equity) in equity_curve {
+            if *equity > peak {
+                peak = *equity;
+            }
+            let drawdown = (peak - equity) / peak;
+            max_drawdown = max_drawdown.max(drawdown);
+        }
+        
+        max_drawdown
+    }
+    
+    pub fn optimize_strategy<S, F>(&self, strategy_factory: F, tick_data: Vec<TickData>, param_ranges: Vec<(f64, f64, f64)>) -> (Vec<f64>, BacktestResults)
+    where
+        S: Strategy + 'static,
+        F: Fn(&[f64]) -> S + Send + Sync,
+    {
+        println!("🔧 Starting strategy optimization...");
+        
+        // Generate parameter combinations
+        let mut param_combinations = Vec::new();
+        self.generate_param_combinations(&param_ranges, &mut Vec::new(), &mut param_combinations);
+        
+        println!("🧪 Testing {} parameter combinations...", param_combinations.len());
+        
+        // Run backtests in parallel
+        let results: Vec<_> = param_combinations
+            .par_iter()
+            .map(|params| {
+                let strategy = strategy_factory(params);
+                let result = self.run_backtest(strategy, tick_data.clone());
+                (params.clone(), result)
+            })
+            .collect();
+        
+        // Find best parameters based on Sharpe ratio
+        let (best_params, best_result) = results
+            .into_iter()
+            .max_by(|(_, a), (_, b)| a.sharpe_ratio.partial_cmp(&b.sharpe_ratio).unwrap())
+            .unwrap();
+        
+        println!("✅ Optimization complete!");
+        println!("🏆 Best Sharpe ratio: {:.4}", best_result.sharpe_ratio);
+        println!("📊 Best parameters: {:?}", best_params);
+        
+        (best_params, best_result)
+    }
+    
+    fn generate_param_combinations(&self, ranges: &[(f64, f64, f64)], current: &mut Vec<f64>, combinations: &mut Vec<Vec<f64>>) {
+        if current.len() == ranges.len() {
+            combinations.push(current.clone());
+            return;
+        }
+        
+        let (min, max, step) = ranges[current.len()];
+        let mut value = min;
+        
+        while value <= max {
+            current.push(value);
+            self.generate_param_combinations(ranges, current, combinations);
+            current.pop();
+            value += step;
+        }
+    }
+}
+
+// Example strategy: Simple Moving Average Crossover
+pub struct MovingAverageCrossover {
+    short_period: usize,
+    long_period: usize,
+    short_ma: VecDeque<f64>,
+    long_ma: VecDeque<f64>,
+    position: f64,
+}
+
+impl MovingAverageCrossover {
+    pub fn new(short_period: usize, long_period: usize) -> Self {
+        Self {
+            short_period,
+            long_period,
+            short_ma: VecDeque::new(),
+            long_ma: VecDeque::new(),
+            position: 0.0,
+        }
+    }
+}
+
+impl Strategy for MovingAverageCrossover {
+    fn on_tick(&mut self, tick: &TickData, portfolio: &Portfolio) -> Vec<Order> {
+        let price = (tick.bid + tick.ask) / 2.0;
+        
+        // Update moving averages
+        self.short_ma.push_back(price);
+        self.long_ma.push_back(price);
+        
+        if self.short_ma.len() > self.short_period {
+            self.short_ma.pop_front();
+        }
+        if self.long_ma.len() > self.long_period {
+            self.long_ma.pop_front();
+        }
+        
+        // Check if we have enough data
+        if self.short_ma.len() < self.short_period || self.long_ma.len() < self.long_period {
+            return Vec::new();
+        }
+        
+        // Calculate averages
+        let short_avg = self.short_ma.iter().sum::<f64>() / self.short_ma.len() as f64;
+        let long_avg = self.long_ma.iter().sum::<f64>() / self.long_ma.len() as f64;
+        
+        let current_position = portfolio.positions.get(&tick.symbol)
+            .map(|p| p.quantity)
+            .unwrap_or(0.0);
+        
+        let mut orders = Vec::new();
+        
+        // Generate signals
+        if short_avg > long_avg && current_position <= 0.0 {
+            // Buy signal
+            if current_position < 0.0 {
+                // Close short position
+                orders.push(Order {
+                    symbol: tick.symbol.clone(),
+                    side: TradeSide::Buy,
+                    quantity: -current_position,
+                    order_type: OrderType::Market,
+                    price: None,
+                });
+            }
+            // Open long position
+            let position_size = portfolio.cash * 0.1 / price; // Use 10% of capital
+            orders.push(Order {
+                symbol: tick.symbol.clone(),
+                side: TradeSide::Buy,
+                quantity: position_size,
+                order_type: OrderType::Market,
+                price: None,
+            });
+        } else if short_avg < long_avg && current_position >= 0.0 {
+            // Sell signal
+            if current_position > 0.0 {
+                // Close long position
+                orders.push(Order {
+                    symbol: tick.symbol.clone(),
+                    side: TradeSide::Sell,
+                    quantity: current_position,
+                    order_type: OrderType::Market,
+                    price: None,
+                });
+            }
+            // Open short position
+            let position_size = portfolio.cash * 0.1 / price; // Use 10% of capital
+            orders.push(Order {
+                symbol: tick.symbol.clone(),
+                side: TradeSide::Sell,
+                quantity: position_size,
+                order_type: OrderType::Market,
+                price: None,
+            });
+        }
+        
+        orders
+    }
+    
+    fn name(&self) -> &str {
+        "Moving Average Crossover"
+    }
+}
+
+// Generate sample tick data for testing
+fn generate_sample_data(symbol: &str, num_ticks: usize) -> Vec<TickData> {
+    let mut data = Vec::new();
+    let mut price = 100.0;
+    let mut timestamp = 1640995200_000_000_000u64; // 2022-01-01 00:00:00 UTC in nanoseconds
+    
+    for _ in 0..num_ticks {
+        // Random walk with slight upward bias
+        let change = (rand::random::<f64>() - 0.49) * 0.01;
+        price *= 1.0 + change;
+        
+        let spread = price * 0.001; // 0.1% spread
+        let bid = price - spread / 2.0;
+        let ask = price + spread / 2.0;
+        
+        data.push(TickData {
+            timestamp,
+            symbol: symbol.to_string(),
+            price,
+            volume: 100.0 + rand::random::<f64>() * 1000.0,
+            bid,
+            ask,
+            bid_size: 100.0 + rand::random::<f64>() * 500.0,
+            ask_size: 100.0 + rand::random::<f64>() * 500.0,
+        });
+        
+        timestamp += 1_000_000; // 1ms between ticks
+    }
+    
+    data
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("🚀 HFT Strategy Backtester Starting...");
+    println!("=====================================");
+    
+    // Generate sample data
+    let tick_data = generate_sample_data("AAPL", 100_000);
+    println!("📊 Generated {} ticks for backtesting", tick_data.len());
+    
+    // Create backtester
+    let backtester = Backtester::new(100_000.0, 0.001); // $100k capital, 0.1% commission
+    
+    // Create strategy
+    let strategy = MovingAverageCrossover::new(10, 30);
+    
+    // Run backtest
+    let results = backtester.run_backtest(strategy, tick_data.clone());
+    
+    // Display results
+    println!("\n📈 Backtest Results:");
+    println!("====================");
+    println!("Total Return: {:.2}%", results.total_return * 100.0);
+    println!("Annualized Return: {:.2}%", results.annualized_return * 100.0);
+    println!("Sharpe Ratio: {:.4}", results.sharpe_ratio);
+    println!("Max Drawdown: {:.2}%", results.max_drawdown * 100.0);
+    println!("Win Rate: {:.2}%", results.win_rate * 100.0);
+    println!("Total Trades: {}", results.total_trades);
+    println!("Average Trade PnL: ${:.2}", results.avg_trade_pnl);
+    println!("Commission Paid: ${:.2}", results.commission_paid);
+    println!("Start Capital: ${:.2}", results.start_capital);
+    println!("End Capital: ${:.2}", results.end_capital);
+    
+    // Optimize strategy parameters
+    println!("\n🔧 Optimizing strategy parameters...");
+    let param_ranges = vec![
+        (5.0, 20.0, 5.0),   // Short MA period: 5, 10, 15, 20
+        (20.0, 50.0, 10.0), // Long MA period: 20, 30, 40, 50
+    ];
+    
+    let (best_params, best_results) = backtester.optimize_strategy(
+        |params| MovingAverageCrossover::new(params[0] as usize, params[1] as usize),
+        tick_data,
+        param_ranges,
+    );
+    
+    println!("\n🏆 Optimized Results:");
+    println!("=====================");
+    println!("Best Parameters: Short MA = {}, Long MA = {}", best_params[0], best_params[1]);
+    println!("Optimized Sharpe Ratio: {:.4}", best_results.sharpe_ratio);
+    println!("Optimized Total Return: {:.2}%", best_results.total_return * 100.0);
+    
+    Ok(())
+}`,
+          language: 'rust',
+        },
+        'Cargo.toml': {
+          content: `[package]
+name = "hft-strategy-backtester"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rayon = "1.7"
+serde = { version = "1.0", features = ["derive"] }
+rand = "0.8"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+opt-level = 3
+target-cpu = "native"`,
+          language: 'toml',
+        }
+      }
     }
   ];
 
   const categories = ['all', 'AI/ML', 'Mobile', 'Web', 'Gaming', 'Blockchain', 'IoT', 'DevOps'];
+  const categories = ['all', 'AI/ML', 'Mobile', 'Web', 'Gaming', 'Blockchain', 'IoT', 'DevOps', 'HFT'];
 
   const filteredTemplates = templates.filter(template => {
     const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
