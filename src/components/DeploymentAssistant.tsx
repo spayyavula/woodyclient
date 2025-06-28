@@ -420,52 +420,6 @@ const DeploymentAssistant: React.FC<DeploymentAssistantProps> = ({
               <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
               <span>Deployment completed successfully!</span>
             </div>
-            <div className="flex items-start space-x-2">
-              <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-              <span>{currentError}</span>
-            </div>
-          </div>
-        )}
-        
-        {deploymentStatus === 'deploying' && (
-          <div className="mt-2 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg text-blue-300 text-xs">
-            <div className="flex items-center justify-between mb-1.5">
-              <span>Deployment in progress</span>
-              <div className="flex items-center space-x-1">
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping"></div>
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.4s' }}></div>
-              </div>
-            </div>
-            <div className="w-full bg-blue-900/50 rounded-full h-1">
-              <div className="bg-blue-400 h-1 rounded-full animate-pulse" style={{ width: '60%' }}></div>
-            </div>
-          </div>
-        )}
-        
-        {deploymentStatus === 'configuring' && (
-          <div className="mt-2 p-3 bg-purple-900/20 border border-purple-500/30 rounded-lg text-purple-300 text-xs">
-            <div className="flex items-center justify-between mb-1.5">
-              <span>Configuring deployment environment</span>
-              <div className="flex items-center space-x-1">
-                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-ping"></div>
-                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-ping" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-ping" style={{ animationDelay: '0.4s' }}></div>
-              </div>
-            </div>
-            <div className="w-full bg-purple-900/50 rounded-full h-1">
-              <div className="bg-purple-400 h-1 rounded-full animate-pulse" style={{ width: '30%' }}></div>
-            </div>
-          </div>
-        )}
-        
-        {deploymentStatus === 'success' && (
-          <div className="mt-2 p-3 bg-green-900/20 border border-green-500/30 rounded-lg text-green-300 text-xs">
-            <div className="flex items-start space-x-2">
-              <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-              <span>Deployment completed successfully!</span>
-            </div>
-            {currentError}
           </div>
         )}
       </div>
@@ -715,8 +669,6 @@ const DeploymentAssistant: React.FC<DeploymentAssistantProps> = ({
       </div>
     </div>
   );
-};
-
 export default DeploymentAssistant;
 
 export default DeploymentAssistant
