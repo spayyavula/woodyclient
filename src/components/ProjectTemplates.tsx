@@ -1225,7 +1225,7 @@ async fn main() {
         // Print performance every 100 iterations
         if i % 100 == 0 {
             let summary = engine.get_performance_summary();
-            println!("📊 Performance: PnL: ${:.2}, Trades: {}", 
+            println!("📊 Performance: PnL: ${{:.2}}, Trades: {}", 
                     summary.total_pnl, summary.trade_count);
         }
         
@@ -1233,7 +1233,7 @@ async fn main() {
     }
     
     let final_summary = engine.get_performance_summary();
-    println!("🏁 Final Performance: PnL: ${:.2}, Total Trades: {}", 
+    println!("🏁 Final Performance: PnL: ${{:.2}}, Total Trades: {}", 
             final_summary.total_pnl, final_summary.trade_count);
 }
 
