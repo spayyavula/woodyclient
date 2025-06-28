@@ -634,6 +634,8 @@ async fn main() {
             let (sent, filled, rejected, pnl) = engine_clone.get_performance_stats();
             println!("📊 Stats: {} sent, {} filled, {} rejected, PnL: ${{:.2}}",
                     sent, filled, rejected, pnl);
+                    println!("📊 Stats: {} sent, {} filled, {} rejected, PnL: ${:.2}",
+                    sent, filled, rejected, pnl);
         }
     });
     
@@ -1234,6 +1236,7 @@ async fn main() {
     
     let final_summary = engine.get_performance_summary();
     println!("🏁 Final Performance: PnL: \\${{:.2}}, Total Trades: {}", 
+            println!("🏁 Final Performance: PnL: $${:.2}, Total Trades: {}", 
             final_summary.total_pnl, final_summary.trade_count);
 }
 
@@ -1522,10 +1525,10 @@ impl RiskManager {
         format!(
             "📊 RISK MANAGEMENT REPORT
 ============================
-Portfolio Value: \\${{:.2}}
-Total P&L: \\${{:.2}}
-1-Day VaR (95%): \\${{:.2}}
-10-Day VaR (95%): \\${{:.2}}
+Portfolio Value: $${metrics.total_portfolio_value:.2}
+Total P&L: $${metrics.total_pnl:.2}
+1-Day VaR (95%): $${metrics.var_1d:.2}
+10-Day VaR (95%): $${metrics.var_10d:.2}
 Max Drawdown: {:.2}%
 Leverage: {:.2}x
 Largest Position: {:.1}%
