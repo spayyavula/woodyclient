@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Play, 
@@ -17,7 +17,13 @@ import {
   Loader2,
   Zap,
   Shield,
-  Package
+  Package,
+  TrendingUp,
+  Globe,
+  Cpu,
+  HardDrive,
+  Wifi,
+  RefreshCw
 } from 'lucide-react';
 import { useDeployment, DeploymentConfig, DeploymentStep } from '../hooks/useDeployment';
 
@@ -38,7 +44,9 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
     steps, 
     deploymentConfig, 
     startDeployment, 
-    stopDeployment 
+    stopDeployment,
+    getStepProgress,
+    getOverallProgress
   } = useDeployment();
 
   const [config, setConfig] = useState<DeploymentConfig>({
@@ -52,6 +60,28 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [showPreDeployCheck, setShowPreDeployCheck] = useState(false);
+  const [realTimeMetrics, setRealTimeMetrics] = useState({
+    buildSpeed: 0,
+    memoryUsage: 0,
+    cpuUsage: 0,
+    networkSpeed: 0
+  });
+
+  // Simulate real-time metrics during deployment
+  useEffect(() => {
+    if (isDeploying) {
+      const interval = setInterval(() => {
+        setRealTimeMetrics({
+          buildSpeed: 50 + Math.random() * 100, // MB/s
+          memoryUsage: 30 + Math.random() * 40, // %
+          cpuUsage: 20 + Math.random() * 60, // %
+          networkSpeed: 10 + Math.random() * 50 // Mbps
+        });
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isDeploying]);
 
   const handleStartDeployment = () => {
     setIsConfiguring(true);
@@ -71,13 +101,27 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   const getStepIcon = (step: DeploymentStep) => {
     switch (step.status) {
       case 'completed':
-        return <CheckCircle className="w-5 h-5 text-green-400" />;
+        return <CheckCircle className="w-5 h-5 text-green-400 animate-pulse" />;
       case 'failed':
         return <AlertCircle className="w-5 h-5 text-red-400" />;
       case 'running':
         return <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />;
       default:
         return <Clock className="w-5 h-5 text-gray-400" />;
+    }
+  };
+
+  const getStepStatusColor = (step: DeploymentStep, index: number) => {
+    if (index === currentStep && isDeploying) {
+      return 'border-blue-500 bg-gradient-to-r from-blue-600/10 to-purple-600/10 shadow-lg';
+    }
+    switch (step.status) {
+      case 'completed':
+        return 'border-green-500 bg-gradient-to-r from-green-600/10 to-emerald-600/10';
+      case 'failed':
+        return 'border-red-500 bg-gradient-to-r from-red-600/10 to-pink-600/10';
+      default:
+        return 'border-gray-600 bg-gray-700/50';
     }
   };
 
@@ -95,6 +139,38 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
         return <Monitor className="w-5 h-5 text-green-400" />;
       default:
         return <Smartphone className="w-5 h-5 text-gray-400" />;
+    }
+  };
+
+  const getPlatformColor = (platform: string) => {
+    switch (platform) {
+      case 'ios':
+        return 'from-blue-500 to-cyan-500';
+      case 'android':
+        return 'from-green-500 to-emerald-500';
+      case 'flutter':
+        return 'from-cyan-500 to-blue-500';
+      case 'desktop':
+        return 'from-purple-500 to-pink-500';
+      case 'web':
+        return 'from-green-500 to-teal-500';
+      default:
+        return 'from-gray-500 to-slate-500';
+    }
+  };
+
+  const getEstimatedTime = (platform: string) => {
+    switch (platform) {
+      case 'ios':
+        return '8-12 minutes';
+      case 'android':
+        return '5-8 minutes';
+      case 'web':
+        return '2-4 minutes';
+      case 'desktop':
+        return '6-10 minutes';
+      default:
+        return '5-8 minutes';
     }
   };
 
@@ -211,7 +287,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div className="flex items-center space-x-4">
-            <div className="p-2 bg-blue-600 rounded-lg">
+            <div className={`p-3 bg-gradient-to-br ${getPlatformColor(config.platform)} rounded-xl shadow-lg`}>
               {getPlatformIcon(config.platform)}
             </div>
             <div>
@@ -227,6 +303,35 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
           </button>
         </div>
 
+        {/* Real-time Metrics Bar (only during deployment) */}
+        {isDeploying && (
+          <div className="bg-gray-900 border-b border-gray-700 px-6 py-3">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="w-4 h-4 text-blue-400" />
+                  <span className="text-gray-300">Build: {realTimeMetrics.buildSpeed.toFixed(1)} MB/s</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Cpu className="w-4 h-4 text-green-400" />
+                  <span className="text-gray-300">CPU: {realTimeMetrics.cpuUsage.toFixed(0)}%</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <HardDrive className="w-4 h-4 text-purple-400" />
+                  <span className="text-gray-300">Memory: {realTimeMetrics.memoryUsage.toFixed(0)}%</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Wifi className="w-4 h-4 text-orange-400" />
+                  <span className="text-gray-300">Network: {realTimeMetrics.networkSpeed.toFixed(1)} Mbps</span>
+                </div>
+              </div>
+              <div className="text-gray-400">
+                Step {currentStep + 1} of {steps.length} • {getOverallProgress().toFixed(0)}% Complete
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex h-[80vh]">
           {/* Configuration Panel */}
           <div className="w-80 bg-gray-900 border-r border-gray-700 p-6 overflow-y-auto">
@@ -240,9 +345,9 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                   <button
                     key={platform}
                     onClick={() => setConfig(prev => ({ ...prev, platform: platform as any }))}
-                    className={`flex items-center space-x-2 p-3 rounded-lg border transition-colors ${
+                    className={`flex items-center space-x-2 p-3 rounded-lg border transition-all transform hover:scale-105 ${
                       config.platform === platform
-                        ? 'border-blue-500 bg-blue-600/20 text-blue-300'
+                        ? `border-blue-500 bg-gradient-to-r ${getPlatformColor(platform)}/20 text-white shadow-lg`
                         : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
                     }`}
                   >
@@ -256,9 +361,9 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                   <button
                     key={platform}
                     onClick={() => setConfig(prev => ({ ...prev, platform: platform as any }))}
-                    className={`flex items-center space-x-2 p-3 rounded-lg border transition-colors ${
+                    className={`flex items-center space-x-2 p-3 rounded-lg border transition-all transform hover:scale-105 ${
                       config.platform === platform
-                        ? 'border-blue-500 bg-blue-600/20 text-blue-300'
+                        ? `border-blue-500 bg-gradient-to-r ${getPlatformColor(platform)}/20 text-white shadow-lg`
                         : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
                     }`}
                   >
@@ -266,6 +371,21 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                     <span className="text-sm font-medium">{platform.toUpperCase()}</span>
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Platform Info */}
+            <div className="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-600">
+              <div className="flex items-center space-x-2 mb-2">
+                {getPlatformIcon(config.platform)}
+                <span className="font-medium text-white">{config.platform.toUpperCase()} Deployment</span>
+              </div>
+              <div className="text-sm text-gray-400 space-y-1">
+                <div>Estimated time: {getEstimatedTime(config.platform)}</div>
+                <div>Build type: {config.buildType}</div>
+                {config.platform === 'android' && <div>Target: {config.androidTarget?.toUpperCase()}</div>}
+                {config.platform === 'web' && <div>Target: {config.webTarget?.toUpperCase()}</div>}
+                {config.platform === 'desktop' && <div>Target: {config.desktopTarget}</div>}
               </div>
             </div>
 
@@ -281,7 +401,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                     <button
                       key={target.key}
                       onClick={() => setConfig(prev => ({ ...prev, androidTarget: target.key as any }))}
-                      className={`flex-1 p-3 rounded-lg border text-left transition-colors ${
+                      className={`flex-1 p-3 rounded-lg border text-left transition-all transform hover:scale-105 ${
                         config.androidTarget === target.key
                           ? 'border-green-500 bg-green-600/20 text-green-300'
                           : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
@@ -307,7 +427,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                     <button
                       key={target.key}
                       onClick={() => setConfig(prev => ({ ...prev, webTarget: target.key as any }))}
-                      className={`w-full p-3 rounded-lg border text-left transition-colors ${
+                      className={`w-full p-3 rounded-lg border text-left transition-all transform hover:scale-105 ${
                         config.webTarget === target.key
                           ? 'border-green-500 bg-green-600/20 text-green-300'
                           : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
@@ -334,7 +454,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                     <button
                       key={target.key}
                       onClick={() => setConfig(prev => ({ ...prev, desktopTarget: target.key as any }))}
-                      className={`w-full p-3 rounded-lg border text-left transition-colors ${
+                      className={`w-full p-3 rounded-lg border text-left transition-all transform hover:scale-105 ${
                         config.desktopTarget === target.key
                           ? 'border-purple-500 bg-purple-600/20 text-purple-300'
                           : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
@@ -356,7 +476,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                   <button
                     key={type}
                     onClick={() => setConfig(prev => ({ ...prev, buildType: type as any }))}
-                    className={`flex-1 p-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex-1 p-2 rounded-lg text-sm font-medium transition-all transform hover:scale-105 ${
                       config.buildType === type
                         ? 'bg-orange-600 text-white'
                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -420,13 +540,27 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
             {/* Action Buttons */}
             <div className="space-y-3">
               {!isDeploying && !isConfiguring && !showPreDeployCheck ? (
-                <button
+                <div className="space-y-3">
+                  <button
                   onClick={handleStartDeployment}
-                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg"
+                  className={`w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gradient-to-r ${getPlatformColor(config.platform)} hover:shadow-xl text-white rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg`}
                 >
                   <Play className="w-4 h-4" />
                   <span>Start Deployment</span>
                 </button>
+                  
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-gray-800 p-2 rounded text-center">
+                      <div className="text-white font-medium">{getEstimatedTime(config.platform)}</div>
+                      <div className="text-gray-400">Est. Time</div>
+                    </div>
+                    <div className="bg-gray-800 p-2 rounded text-center">
+                      <div className="text-white font-medium">{guide.steps.length}</div>
+                      <div className="text-gray-400">Steps</div>
+                    </div>
+                  </div>
+                </div>
               ) : isConfiguring ? (
                 <div className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600 text-white rounded-lg font-medium">
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -434,7 +568,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                 </div>
               ) : showPreDeployCheck ? (
                 <div className="space-y-3">
-                  <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
+                  <div className="bg-gradient-to-r from-orange-900/20 to-red-900/20 border border-orange-500/30 rounded-lg p-4 shadow-lg">
                     <div className="flex items-center space-x-2 mb-2">
                       <AlertCircle className="w-5 h-5 text-orange-400" />
                       <span className="font-medium text-orange-300">Ready to Deploy</span>
@@ -448,7 +582,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                     <div className="flex space-x-2">
                       <button
                         onClick={handleConfirmDeployment}
-                        className="flex-1 flex items-center justify-center space-x-2 py-2 px-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
+                        className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 bg-gradient-to-r ${getPlatformColor(config.platform)} hover:shadow-lg text-white rounded-lg text-sm font-medium transition-all transform hover:scale-105`}
                       >
                         <Zap className="w-4 h-4" />
                         <span>Deploy Now</span>
@@ -465,7 +599,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
               ) : (
                 <button
                   onClick={stopDeployment}
-                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg"
+                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 hover:shadow-xl text-white rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg"
                 >
                   <Square className="w-4 h-4" />
                   <span>Stop Deployment</span>
@@ -479,7 +613,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
               
               {/* Visual Status Indicators */}
               {(isConfiguring || isDeploying) && (
-                <div className="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <div className={`mt-4 p-3 bg-gradient-to-r ${getPlatformColor(config.platform)}/20 border border-blue-500/30 rounded-lg shadow-lg`}>
                   <div className="flex items-center space-x-2 mb-2">
                     <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
                     <span className="text-blue-300 text-sm font-medium">
@@ -492,6 +626,18 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                       : `Building ${config.platform.toUpperCase()} application...`
                     }
                   </div>
+                  
+                  {/* Progress indicator */}
+                  {isDeploying && (
+                    <div className="mt-2">
+                      <div className="w-full bg-gray-700 rounded-full h-1">
+                        <div 
+                          className="bg-blue-400 h-1 rounded-full transition-all duration-300"
+                          style={{ width: `${getOverallProgress()}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -563,15 +709,15 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-white">Deployment Progress</h3>
                   <div className="text-sm text-gray-400">
-                    Step {currentStep + 1} of {steps.length}
+                    Step {currentStep + 1} of {steps.length} • {getOverallProgress().toFixed(0)}% Complete
                   </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full bg-gray-700 rounded-full h-2">
+                <div className="w-full bg-gray-700 rounded-full h-3 shadow-inner">
                   <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                    className={`bg-gradient-to-r ${getPlatformColor(config.platform)} h-3 rounded-full transition-all duration-500 shadow-lg`}
+                    style={{ width: `${getOverallProgress()}%` }}
                   />
                 </div>
 
@@ -580,39 +726,69 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                   {steps.map((step, index) => (
                     <div 
                       key={step.id} 
-                      className={`p-4 rounded-lg border transition-colors ${
-                        index === currentStep && isDeploying
-                          ? 'border-blue-500 bg-blue-600/10'
-                          : step.status === 'completed'
-                          ? 'border-green-500 bg-green-600/10'
-                          : step.status === 'failed'
-                          ? 'border-red-500 bg-red-600/10'
-                          : 'border-gray-600 bg-gray-700/50'
-                      }`}
+                      className={`p-4 rounded-lg border transition-all duration-300 ${getStepStatusColor(step, index)}`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-3">
                           {getStepIcon(step)}
                           <span className="font-medium text-white">{step.name}</span>
                           {index === currentStep && isDeploying && (
-                            <div className="flex items-center space-x-1">
-                              <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping"></div>
-                              <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.2s' }}></div>
-                              <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.4s' }}></div>
+                            <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-1">
+                                <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping"></div>
+                                <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.4s' }}></div>
+                              </div>
+                              <span className="text-xs text-blue-300 font-medium">
+                                {getStepProgress(index).toFixed(0)}%
+                              </span>
                             </div>
                           )}
                         </div>
-                        {step.duration && (
-                          <span className="text-sm text-gray-400">{(step.duration / 1000).toFixed(1)}s</span>
-                        )}
+                        <div className="flex items-center space-x-3">
+                          {step.metadata?.estimatedTime && index >= currentStep && (
+                            <span className="text-xs text-gray-500">
+                              ~{step.metadata.estimatedTime}
+                            </span>
+                          )}
+                          {step.duration && (
+                            <span className="text-sm text-gray-400">{(step.duration / 1000).toFixed(1)}s</span>
+                          )}
+                        </div>
                       </div>
                       
                       {/* Progress indicator for current step */}
                       {index === currentStep && isDeploying && (
-                        <div className="mb-3">
-                          <div className="w-full bg-gray-700 rounded-full h-1">
-                            <div className="bg-blue-500 h-1 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                        <div className="mb-3 space-y-2">
+                          <div className="w-full bg-gray-700 rounded-full h-2 shadow-inner">
+                            <div 
+                              className={`bg-gradient-to-r ${getPlatformColor(config.platform)} h-2 rounded-full transition-all duration-300 shadow-sm`}
+                              style={{ width: `${getStepProgress(index)}%` }}
+                            />
                           </div>
+                          {step.substeps && step.currentSubstep !== undefined && (
+                            <div className="text-xs text-gray-400">
+                              {step.substeps[step.currentSubstep] || 'Processing...'}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Step metadata */}
+                      {step.metadata && (index === currentStep || step.status === 'completed') && (
+                        <div className="mb-3 grid grid-cols-2 gap-2 text-xs">
+                          {step.metadata.outputSize && (
+                            <div className="bg-gray-800 p-2 rounded">
+                              <div className="text-gray-400">Output Size</div>
+                              <div className="text-white font-medium">{step.metadata.outputSize}</div>
+                            </div>
+                          )}
+                          {step.metadata.estimatedTime && (
+                            <div className="bg-gray-800 p-2 rounded">
+                              <div className="text-gray-400">Est. Time</div>
+                              <div className="text-white font-medium">{step.metadata.estimatedTime}</div>
+                            </div>
+                          )}
                         </div>
                       )}
                       
@@ -645,7 +821,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
 
                 {/* Completion Actions */}
                 {!isDeploying && steps.every(step => step.status === 'completed') && (
-                  <div className="bg-green-900/20 border border-green-500 rounded-lg p-6 text-center">
+                  <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500 rounded-lg p-6 text-center shadow-xl">
                     <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-white mb-2">Deployment Successful!</h3>
                     <p className="text-gray-300 mb-6">
@@ -655,7 +831,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                     
                     {/* Platform-specific success info */}
                     {config.platform === 'android' && (
-                      <div className="bg-green-800/30 rounded-lg p-4 mb-6">
+                      <div className="bg-gradient-to-r from-green-800/30 to-emerald-800/30 rounded-lg p-4 mb-6 border border-green-600/30">
                         <div className="flex items-center justify-center space-x-2 mb-2">
                           <Package className="w-5 h-5 text-green-400" />
                           <span className="font-medium text-green-300">Android Build Complete</span>
@@ -670,37 +846,88 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                         </div>
                       </div>
                     )}
+
+                    {config.platform === 'ios' && (
+                      <div className="bg-gradient-to-r from-blue-800/30 to-cyan-800/30 rounded-lg p-4 mb-6 border border-blue-600/30">
+                        <div className="flex items-center justify-center space-x-2 mb-2">
+                          <Smartphone className="w-5 h-5 text-blue-400" />
+                          <span className="font-medium text-blue-300">iOS Build Complete</span>
+                        </div>
+                        <div className="text-sm text-blue-200 space-y-1">
+                          <div>✓ IPA signed with distribution certificate</div>
+                          <div>✓ Uploaded to App Store Connect</div>
+                          <div>✓ Processing for App Store review</div>
+                          <div className="text-yellow-200 mt-2">
+                            ⏳ Review process: 24-48 hours for App Store approval
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {config.platform === 'web' && (
+                      <div className="bg-gradient-to-r from-green-800/30 to-teal-800/30 rounded-lg p-4 mb-6 border border-green-600/30">
+                        <div className="flex items-center justify-center space-x-2 mb-2">
+                          <Globe className="w-5 h-5 text-green-400" />
+                          <span className="font-medium text-green-300">Web Deployment Complete</span>
+                        </div>
+                        <div className="text-sm text-green-200 space-y-1">
+                          <div>✓ {config.webTarget?.toUpperCase()} built and optimized</div>
+                          <div>✓ WebAssembly optimized for performance</div>
+                          <div>✓ Deployed to global CDN</div>
+                          <div className="text-blue-200 mt-2">
+                            🌐 Live in 50+ edge locations worldwide
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {config.platform === 'desktop' && (
+                      <div className="bg-gradient-to-r from-purple-800/30 to-pink-800/30 rounded-lg p-4 mb-6 border border-purple-600/30">
+                        <div className="flex items-center justify-center space-x-2 mb-2">
+                          <Monitor className="w-5 h-5 text-purple-400" />
+                          <span className="font-medium text-purple-300">Desktop Build Complete</span>
+                        </div>
+                        <div className="text-sm text-purple-200 space-y-1">
+                          <div>✓ Native binaries created for {config.desktopTarget}</div>
+                          <div>✓ Installers generated and signed</div>
+                          <div>✓ Ready for distribution</div>
+                          <div className="text-blue-200 mt-2">
+                            📦 Available for download and installation
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="flex justify-center space-x-4">
                       {config.platform === 'web' ? (
                         <>
-                          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:shadow-lg text-white rounded-lg transition-all transform hover:scale-105">
                             <ExternalLink className="w-4 h-4" />
                             <span>View Live Site</span>
                           </button>
-                          <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:shadow-lg text-white rounded-lg transition-all transform hover:scale-105">
                             <Download className="w-4 h-4" />
                             <span>Download Assets</span>
                           </button>
                         </>
                       ) : config.platform === 'desktop' ? (
                         <>
-                          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-lg text-white rounded-lg transition-all transform hover:scale-105">
                             <Download className="w-4 h-4" />
                             <span>Download Installers</span>
                           </button>
-                          <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg text-white rounded-lg transition-all transform hover:scale-105">
                             <ExternalLink className="w-4 h-4" />
                             <span>View Releases</span>
                           </button>
                         </>
                       ) : (
                         <>
-                          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                          <button className={`flex items-center space-x-2 px-4 py-2 bg-gradient-to-r ${getPlatformColor(config.platform)} hover:shadow-lg text-white rounded-lg transition-all transform hover:scale-105`}>
                             <Download className="w-4 h-4" />
                             <span>Download {config.platform === 'android' ? config.androidTarget?.toUpperCase() : 'Build'}</span>
                           </button>
-                          <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:shadow-lg text-white rounded-lg transition-all transform hover:scale-105">
                             <Upload className="w-4 h-4" />
                             <span>View in {config.platform === 'android' ? 'Play Console' : 'App Store'}</span>
                           </button>
@@ -712,7 +939,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                 
                 {/* Failed deployment feedback */}
                 {!isDeploying && steps.some(step => step.status === 'failed') && (
-                  <div className="bg-red-900/20 border border-red-500 rounded-lg p-6 text-center">
+                  <div className="bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-500 rounded-lg p-6 text-center shadow-xl">
                     <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-white mb-2">Deployment Failed</h3>
                     <p className="text-gray-300 mb-6">
@@ -721,12 +948,12 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                     <div className="flex justify-center space-x-4">
                       <button 
                         onClick={() => handleStartDeployment()}
-                        className="flex items-center space-x-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:shadow-lg text-white rounded-lg transition-all transform hover:scale-105"
                       >
                         <RefreshCw className="w-4 h-4" />
                         <span>Retry Deployment</span>
                       </button>
-                      <button className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                      <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:shadow-lg text-white rounded-lg transition-all transform hover:scale-105">
                         <ExternalLink className="w-4 h-4" />
                         <span>Get Help</span>
                       </button>
