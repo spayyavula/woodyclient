@@ -80,6 +80,8 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
               backgroundSize: '200% 100%',
               animation: 'shimmer 2s infinite'
             }}/>
+          </div>
+        </div>
         {steps.map((step, index) => (
           <div 
             key={step.id}
