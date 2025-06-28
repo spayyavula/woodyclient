@@ -31,9 +31,9 @@ interface DeploymentProgress {
   events: ProgressEvent[];
   isLoading: boolean;
   error: string | null;
-    visual_progress: 65,
-    progress_message: 'Building Android application...',
-    status: 'building',
+}
+
+export const useDeploymentProgress = (deploymentId?: number) => {
   const [progress, setProgress] = useState<DeploymentProgress>({
     id: deploymentId || 0,
     visual_progress: DEFAULT_PROGRESS,
@@ -50,10 +50,10 @@ interface DeploymentProgress {
   const fetchProgress = useCallback(async () => {
     if (!deploymentId) return;
 
+    try {
       // Use the RPC function to get deployment progress with fallback
       const { data: deploymentData, error: deploymentError } = await supabase
         .rpc('get_deployment_progress', { p_deployment_id: deploymentId })
-        .single();
         .single();
 
       if (deploymentError) {
@@ -78,6 +78,9 @@ interface DeploymentProgress {
       // Use the RPC function to get events with fallback
       const { data: events, error: eventsError } = await supabase
         .rpc('get_deployment_events', { p_deployment_id: deploymentId });
+
+      if (eventsError) {
+        console.warn('Error fetching events:', eventsError);
         // Use default event
         events = [{
           id: 1,
@@ -113,10 +116,7 @@ interface DeploymentProgress {
         progress_message: 'Building Android application...',
         status: 'building',
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch progress',
-        visual_progress: 65,
-        progress_message: 'Building Android application...',
-        status: 'building'
+        error: error instanceof Error ? error.message : 'Failed to fetch progress'
       }));
     }
   }, [deploymentId]);
@@ -144,14 +144,19 @@ interface DeploymentProgress {
 
       if (error) throw error;
 
-        visual_progress: Math.max(percentage || prev.visual_progress, 65),
       setProgress(prev => ({
         ...prev,
         visual_progress: Math.max(percentage || prev.visual_progress, 65),
         progress_message: message,
         events: [...prev.events, data]
       }));
+    } catch (error) {
+      console.error('Error adding progress event:', error);
     }
+  }, [deploymentId]);
+
+  useEffect(() => {
+    fetchProgress();
 
     // Set up polling instead of real-time subscriptions
     const pollingInterval = setInterval(() => {
@@ -160,10 +165,10 @@ interface DeploymentProgress {
 
     return () => {
       if (pollingInterval) {
+        clearInterval(pollingInterval);
       }
-      clearInterval(pollingInterval);
     };
-  }, [deploymentId, fetchProgress, pollingInterval]);
+  }, [deploymentId, fetchProgress]);
 
   return {
     progress: Math.max(progress.visual_progress, DEFAULT_PROGRESS),
@@ -176,5 +181,3 @@ interface DeploymentProgress {
     refreshProgress: fetchProgress
   };
 };
-          visual_progress: Math.max(payload.new.visual_progress || 0, 65),
-          progress_message: payload.new.progress_message || 'Building Android application...',
