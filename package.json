@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:stripe": "node scripts/stripe-e2e-tests.js",
+    "test:stripe:watch": "nodemon scripts/stripe-e2e-tests.js",
+    "test:webhooks": "node scripts/webhook-tests.js",
+    "test:db": "node scripts/database-tests.js",
+    "test:all": "npm run test:db && npm run test:stripe && npm run test:webhooks"
   },
   "dependencies": {
     "@stripe/stripe-js": "^5.0.0",
@@ -29,6 +34,10 @@
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2",
-    "vite": "^7.0.0"
+    "vite": "^7.0.0",
+    "nodemon": "^3.0.2",
+    "chalk": "^4.1.2",
+    "dotenv": "^16.3.1",
+    "stripe": "^14.12.0"
   }
 }
