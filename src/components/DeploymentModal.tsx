@@ -1,6 +1,3 @@
-Here's the fixed version with all missing closing brackets added:
-
-```javascript
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
@@ -686,4 +683,103 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
               ) : (
                 <button
                   onClick={stopDeployment}
-                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 hover:shadow-xl text
+                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 hover:shadow-xl text-white rounded-lg font-medium transition-all transform hover:scale-105"
+                >
+                  <Square className="w-4 h-4" />
+                  <span>Stop Deployment</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col">
+            {/* Deployment Steps */}
+            <div className="flex-1 p-6 overflow-y-auto">
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold text-white mb-2">{guide.title}</h3>
+                <p className="text-gray-400">Follow these steps to deploy your application</p>
+              </div>
+
+              {/* Progress Overview */}
+              {isDeploying && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-blue-300 font-medium">Deployment Progress</span>
+                    <span className="text-blue-300">{getOverallProgress().toFixed(0)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${getOverallProgress()}%` }}
+                    />
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    Step {currentStep + 1} of {steps.length}: {steps[currentStep]?.name || 'Preparing...'}
+                  </div>
+                </div>
+              )}
+
+              {/* Error Display */}
+              {deploymentError && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-500/30 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <AlertCircle className="w-5 h-5 text-red-400" />
+                    <span className="font-medium text-red-300">Deployment Error</span>
+                  </div>
+                  <p className="text-sm text-red-200">{deploymentError}</p>
+                </div>
+              )}
+
+              {/* Deployment Steps List */}
+              <div className="space-y-4">
+                {(isDeploying ? steps : guide.steps.map((step, index) => ({
+                  id: `step-${index}`,
+                  name: step,
+                  status: 'pending' as const,
+                  output: ''
+                }))).map((step, index) => (
+                  <div
+                    key={step.id || index}
+                    className={`p-4 rounded-lg border transition-all duration-300 ${getStepStatusColor(step, index)}`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      {getStepIcon(step)}
+                      <div className="flex-1">
+                        <div className="font-medium text-white">{step.name}</div>
+                        {step.output && (
+                          <div className="text-sm text-gray-400 mt-1 font-mono bg-gray-800 p-2 rounded">
+                            {step.output}
+                          </div>
+                        )}
+                      </div>
+                      {isDeploying && index === currentStep && (
+                        <div className="text-sm text-blue-400">
+                          {getStepProgress(index).toFixed(0)}%
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Assistant Panel */}
+            {showAssistant && (
+              <div className="border-t border-gray-700 p-4 bg-gray-900">
+                <DeploymentAssistant
+                  platform={config.platform}
+                  currentStep={assistantCurrentStep}
+                  isDeploying={isDeploying}
+                  onRunAutomation={handleRunAutomation}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DeploymentModal;
