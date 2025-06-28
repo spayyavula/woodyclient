@@ -35,6 +35,9 @@ const Terminal: React.FC<TerminalProps> = ({ isVisible, onToggle }) => {
  rustyclint fix  - Auto-fix vulnerabilities
  rustyclint bench - Performance benchmark
  rustyclint audit - Security audit
+  github sync    - Sync with GitHub repositories
+  supabase status - Check database connection
+  zapier test    - Test automation workflows
   cargo clean    - Clean build artifacts
   ls            - List files
   clear         - Clear terminal
@@ -120,6 +123,67 @@ Vulnerability Scan:
 ⚠️  2 Medium-risk items (non-blocking)
 
 Security Score: 98/100 (Excellent)`;
+        break;
+      case 'github sync':
+        output = `🔄 Syncing with GitHub...
+
+Connected Repositories:
+✅ rustyclint/main (3 commits ahead)
+✅ company/security-tools (webhook active)
+✅ team/web-app (PR checks enabled)
+
+Recent Activity:
+📝 2 new commits scanned
+🔍 1 pull request analyzed
+⚠️  3 vulnerabilities found
+✅ 2 vulnerabilities auto-fixed
+
+Webhook Status: Active
+API Rate Limit: 4,847/5,000 remaining
+
+Sync completed successfully!`;
+        break;
+      case 'supabase status':
+        output = `📊 Supabase Database Status
+
+Connection: ✅ Connected
+Latency: 23ms (excellent)
+Region: us-east-1
+
+Tables:
+├─ scan_results: 8,420 rows (1.2 GB)
+├─ vulnerabilities: 3,240 rows (456 MB)
+├─ user_projects: 1,890 rows (89 MB)
+├─ analytics: 12,340 rows (2.1 GB)
+└─ compliance_reports: 567 rows (234 MB)
+
+Real-time Subscriptions: 4 active
+Row Level Security: ✅ Enabled
+Backup Status: ✅ Daily backups active
+
+Database health: Excellent`;
+        break;
+      case 'zapier test':
+        output = `⚡ Testing Zapier Automations...
+
+Active Workflows:
+✅ Vulnerability Alert → Slack (23 runs, 100% success)
+✅ Scan Complete → Jira (45 runs, 98% success)
+⏸️  Compliance Check → Email (paused)
+✅ New Repository → Teams (8 runs, 100% success)
+
+Test Results:
+🔔 Slack notification: ✅ Delivered
+🎯 Jira ticket creation: ✅ Success
+📧 Email alert: ✅ Sent
+👥 Teams message: ✅ Posted
+
+Webhook Endpoints:
+├─ Primary: https://hooks.zapier.com/hooks/catch/... ✅
+├─ Backup: https://hooks.zapier.com/hooks/catch/... ✅
+└─ Test: https://hooks.zapier.com/hooks/catch/... ✅
+
+All automations working correctly!`;
         break;
       case 'cargo test':
         output = `   Compiling rustyclint v0.1.0
@@ -228,7 +292,7 @@ Successfully installed torch-2.1.0+cu118 torchvision-0.16.0+cu118 tensorflow-2.1
         output = 'CUDA available: True';
         break;
       case 'ls':
-        output = 'Cargo.toml  Cargo.lock  README.md  src/  security/  tests/  benchmarks/  target/  rustyclint.toml  main.py  requirements.txt  security_scanner.py  performance_analyzer.py  compliance_checker.py  setup.py';
+        output = 'Cargo.toml  Cargo.lock  README.md  src/  security/  tests/  benchmarks/  target/  rustyclint.toml  integrations/  github-config.yml  supabase-schema.sql  zapier-workflows.json  main.py  requirements.txt  security_scanner.py  performance_analyzer.py  compliance_checker.py  setup.py';
         break;
       case 'clear':
         setHistory([TERMINAL_CONSTANTS.WELCOME]);

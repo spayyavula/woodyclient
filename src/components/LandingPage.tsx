@@ -28,7 +28,9 @@ import {
   TrendingUp,
   Coffee,
   Monitor,
-  AlertTriangle
+  AlertTriangle,
+  GitBranch,
+  Workflow
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -83,6 +85,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
       title: "Real-Time Security Scanning",
       description: "Continuous vulnerability detection with instant alerts. OWASP Top 10 coverage and custom security rules.",
       color: "from-green-500 to-emerald-500"
+    },
+    {
+      icon: <GitBranch className="w-8 h-8" />,
+      title: "GitHub Integration",
+      description: "Seamless integration with GitHub repositories. Automated scans on commits, PR checks, and webhook support.",
+      color: "from-gray-500 to-slate-500"
+    },
+    {
+      icon: <Workflow className="w-8 h-8" />,
+      title: "Zapier Automation",
+      description: "Connect with 5000+ apps through Zapier. Automate notifications, tickets, and workflows based on security events.",
+      color: "from-orange-500 to-amber-500"
     }
   ];
 
@@ -333,11 +347,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Feature Cards */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className={`p-6 rounded-xl border transition-all cursor-pointer ${
+                  className={`p-4 rounded-xl border transition-all cursor-pointer ${
                     activeFeature === index
                       ? 'bg-gray-700/50 border-orange-500/50'
                       : 'bg-gray-800/30 border-gray-700/50 hover:border-gray-600/50'
@@ -349,7 +363,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                       {feature.icon}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
+                      <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
                       <p className="text-gray-300">{feature.description}</p>
                     </div>
                   </div>
@@ -396,10 +410,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
       </section>
 
       {/* Performance & Security Stats */}
-      <section className="px-6 py-20 bg-gray-800/50">
+      <section className="px-6 py-16 bg-gray-800/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
               Unmatched
               <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Performance & Security</span>
             </h2>
@@ -499,11 +513,137 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
         </div>
       </section>
 
-      {/* Security Features */}
-      <section className="px-6 py-20">
+      {/* Integrations Section */}
+      <section className="px-6 py-16">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
+              Seamless
+              <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Integrations</span>
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Connect rustyclint with your existing development workflow. GitHub, databases, and automation tools work together seamlessly.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            {/* GitHub Integration */}
+            <div className="bg-gray-700/30 rounded-xl p-6 border border-gray-600/30">
+              <div className="flex items-center space-x-3 mb-4">
+                <Github className="w-8 h-8 text-white" />
+                <h3 className="text-xl font-semibold text-white">GitHub</h3>
+              </div>
+              <p className="text-gray-300 mb-4">
+                Automated security scans on every commit. PR checks, webhook integration, and repository monitoring.
+              </p>
+              <ul className="space-y-2 text-gray-300">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Automatic PR security checks</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Webhook-triggered scans</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Repository vulnerability tracking</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Supabase Integration */}
+            <div className="bg-gray-700/30 rounded-xl p-6 border border-gray-600/30">
+              <div className="flex items-center space-x-3 mb-4">
+                <Database className="w-8 h-8 text-green-400" />
+                <h3 className="text-xl font-semibold text-white">Supabase</h3>
+              </div>
+              <p className="text-gray-300 mb-4">
+                Real-time database for scan results, analytics, and user data. Secure, scalable, and lightning-fast.
+              </p>
+              <ul className="space-y-2 text-gray-300">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Real-time vulnerability tracking</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Advanced analytics & reporting</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Row-level security & compliance</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Zapier Integration */}
+            <div className="bg-gray-700/30 rounded-xl p-6 border border-gray-600/30">
+              <div className="flex items-center space-x-3 mb-4">
+                <Zap className="w-8 h-8 text-orange-400" />
+                <h3 className="text-xl font-semibold text-white">Zapier</h3>
+              </div>
+              <p className="text-gray-300 mb-4">
+                Connect with 5000+ apps. Automate notifications, create tickets, and trigger workflows based on security events.
+              </p>
+              <ul className="space-y-2 text-gray-300">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Slack/Teams notifications</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Jira/Trello ticket creation</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Custom workflow automation</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Integration Flow Diagram */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
+            <h3 className="text-xl font-semibold text-white mb-6 text-center">Automated Security Workflow</h3>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col items-center space-y-2">
+                <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center">
+                  <Github className="w-8 h-8 text-white" />
+                </div>
+                <span className="text-sm text-gray-300">Code Push</span>
+              </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-gray-600 to-orange-500 mx-4" />
+              <div className="flex flex-col items-center space-y-2">
+                <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center">
+                  <Shield className="w-8 h-8 text-white" />
+                </div>
+                <span className="text-sm text-gray-300">Security Scan</span>
+              </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-orange-500 to-green-500 mx-4" />
+              <div className="flex flex-col items-center space-y-2">
+                <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center">
+                  <Database className="w-8 h-8 text-white" />
+                </div>
+                <span className="text-sm text-gray-300">Store Results</span>
+              </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-green-500 to-blue-500 mx-4" />
+              <div className="flex flex-col items-center space-y-2">
+                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+                  <Zap className="w-8 h-8 text-white" />
+                </div>
+                <span className="text-sm text-gray-300">Notify Team</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Security Features */}
+      <section className="px-6 py-16">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
               Enterprise
               <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Security</span>
             </h2>
@@ -593,10 +733,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
       </section>
 
       {/* Testimonials */}
-      <section className="px-6 py-20">
+      <section className="px-6 py-16">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
               Loved by Developers
               <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Worldwide</span>
             </h2>
@@ -628,9 +768,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
       </section>
 
       {/* CTA Section */}
-      <section className="px-6 py-20 bg-gradient-to-r from-orange-600/10 to-red-600/10">
+      <section className="px-6 py-16 bg-gradient-to-r from-orange-600/10 to-red-600/10">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
             Ready to Secure Your Code?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
