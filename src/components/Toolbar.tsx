@@ -17,7 +17,7 @@ import {
   ShoppingCart,
   User,
   CreditCard,
-  Eye
+  Eye,
   TestTube
 } from 'lucide-react';
 import SubscriptionStatus from './SubscriptionStatus';
