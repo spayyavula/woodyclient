@@ -30,6 +30,15 @@ export const useSubscription = (): UseSubscriptionReturn => {
       setLoading(true);
       setError(null);
 
+      // Check if we're in demo mode
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!supabaseUrl || supabaseUrl === 'your_supabase_project_url_here' || supabaseUrl === 'https://demo.supabase.co') {
+        // Return mock data for demo mode
+        setSubscription(null);
+        setLoading(false);
+        return;
+      }
+
       const { data, error: fetchError } = await supabase
         .from('stripe_user_subscriptions')
         .select('*')
@@ -42,7 +51,11 @@ export const useSubscription = (): UseSubscriptionReturn => {
       setSubscription(data);
     } catch (err: any) {
       console.error('Error fetching subscription:', err);
-      setError(err.message || 'Failed to fetch subscription');
+      // Don't show error in demo mode
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (supabaseUrl && supabaseUrl !== 'your_supabase_project_url_here' && supabaseUrl !== 'https://demo.supabase.co') {
+        setError(err.message || 'Failed to fetch subscription');
+      }
     } finally {
       setLoading(false);
     }
