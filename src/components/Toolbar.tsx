@@ -18,6 +18,7 @@ import {
   User,
   CreditCard,
   Eye
+  TestTube
 } from 'lucide-react';
 import SubscriptionStatus from './SubscriptionStatus';
 
@@ -32,6 +33,7 @@ interface ToolbarProps {
   onRun: () => void;
   onShowTemplates: () => void;
   onShowMobilePreview: () => void;
+  onShowStripeTests: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({ 
@@ -45,6 +47,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onRun, 
   onShowTemplates,
   onShowMobilePreview
+  onShowStripeTests
 }) => {
   const [selectedPlatform, setSelectedPlatform] = React.useState('android');
 
@@ -119,6 +122,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
           >
             <Eye className="w-4 h-4 mr-1" />
             Preview
+          </button>
+          <button 
+            onClick={onShowStripeTests}
+            className="flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded text-white text-sm font-medium transition-colors"
+            title="Stripe E2E Tests"
+          >
+            <TestTube className="w-4 h-4 mr-1" />
+            <span>Test Stripe</span>
           </button>
         </div>
       </div>

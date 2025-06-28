@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Eye, EyeOff, Mail, Lock, LogIn, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, LogIn, UserPlus, TestTube } from 'lucide-react';
+import StripeTestSuite from '../StripeTestSuite';
 
 interface LoginPageProps {
   onSuccess: () => void;
@@ -13,6 +14,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onSwitchToSignup }) =>
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showStripeTests, setShowStripeTests] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +55,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onSwitchToSignup }) =>
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+      {/* Stripe Test Suite */}
+      <StripeTestSuite 
+        isVisible={showStripeTests}
+        onClose={() => setShowStripeTests(false)}
+      />
+      
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="text-6xl mb-4">🦀</div>
@@ -138,6 +146,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onSwitchToSignup }) =>
               Sign up
             </button>
           </p>
+          
+          {/* E2E Test Button */}
+          <div className="mt-6 pt-6 border-t border-gray-700">
+            <button
+              onClick={() => setShowStripeTests(true)}
+              className="flex items-center justify-center space-x-2 w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+            >
+              <TestTube className="w-5 h-5" />
+              <span>Run Stripe E2E Tests</span>
+            </button>
+            <p className="text-gray-500 text-xs mt-2">
+              Comprehensive payment flow testing suite
+            </p>
+          </div>
         </div>
       </div>
     </div>

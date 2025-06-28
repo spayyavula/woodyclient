@@ -16,6 +16,7 @@ import DeveloperMarketplace from './components/DeveloperMarketplace';
 import ProjectTemplates from './components/ProjectTemplates';
 import MobilePreview from './components/MobilePreview';
 import DemoMode from './components/DemoMode';
+import StripeTestSuite from './components/StripeTestSuite';
 
 interface Tab {
   id: string;
@@ -50,6 +51,7 @@ function App() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
+  const [showStripeTests, setShowStripeTests] = useState(false);
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);
   const [isCollaborationVisible, setIsCollaborationVisible] = useState(false);
   const [isMarketplaceVisible, setIsMarketplaceVisible] = useState(false);
@@ -401,6 +403,7 @@ console.log('Hello from ${fileName}!');`;
         onRun={handleRun}
         onShowTemplates={() => setShowTemplates(true)}
         onShowMobilePreview={() => setShowMobilePreview(true)}
+        onShowStripeTests={() => setShowStripeTests(true)}
       />
       
       <div className="flex flex-1 overflow-hidden">
@@ -505,6 +508,13 @@ console.log('Hello from ${fileName}!');`;
         <DeveloperMarketplace 
           isVisible={isMarketplaceVisible}
           onToggle={() => setIsMarketplaceVisible(!isMarketplaceVisible)}
+        />
+      )}
+
+      {showStripeTests && (
+        <StripeTestSuite 
+          isVisible={showStripeTests}
+          onClose={() => setShowStripeTests(false)}
         />
       )}
 
