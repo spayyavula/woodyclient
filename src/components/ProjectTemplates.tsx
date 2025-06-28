@@ -604,12 +604,16 @@ async fn main() {
     
     // Simulate market data feed
     let market_data_task = tokio::spawn(async move {
+        let mut counter = 0;
+        let mut price = 150.0;
+        loop {
+            price += ((counter % 100) as f64 / 100.0 - 0.5) * 2.0; // Deterministic for demo
             price += ((i % 100) as f64 / 100.0 - 0.5) * 2.0; // Deterministic for demo
         loop {
             let market_data = MarketData {
                 symbol: "AAPL".to_string(),
-                bid_price: 150.00 + (counter as f64 * 0.01),
-                ask_price: 150.01 + (counter as f64 * 0.01),
+                bid_price: price,
+                ask_price: price + 0.01,
                 bid_size: 1000,
                 ask_size: 1000,
                 timestamp: Instant::now(),
@@ -619,9 +623,9 @@ async fn main() {
             
             // High-frequency updates (1000 times per second)
             time::sleep(Duration::from_millis(1)).await;
-            counter += 1;
+            i += 1;
             
-            if counter > 10000 {
+            if i > 10000 {
                 break;
             }
         }
@@ -1209,9 +1213,10 @@ async fn main() {
     
     // Simulate market data feed
     let mut price = 150.0;
+    let mut counter = 0;
     for i in 0..1000 {
         // Simulate price movement
-        price += (0.5 - 0.5) * 2.0; // Simplified for demo
+        price += (counter as f64 / 1000.0 - 0.5) * 2.0; // Simplified for demo
         
         let market_data = MarketData {
             symbol: "AAPL".to_string(),
@@ -1229,6 +1234,7 @@ async fn main() {
                     summary.total_pnl, summary.trade_count);
         }
         
+        counter += 1;
         tokio::time::sleep(Duration::from_millis(10)).await;
     }
     

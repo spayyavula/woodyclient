@@ -36,7 +36,10 @@ export const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
         const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
         
         if (!stripePublishableKey) {
-          throw new Error('Stripe publishable key is not configured');
+          console.warn('Stripe publishable key is not configured. Stripe features will be disabled.');
+          setError('Stripe not configured');
+          setIsLoading(false);
+          return;
         }
 
         const stripeInstance = await loadStripe(stripePublishableKey);
