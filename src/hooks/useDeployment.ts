@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 
+// Visual progress tracking for deployment steps
 export interface DeploymentStep {
   id: string;
   name: string;
@@ -13,6 +14,7 @@ export interface DeploymentStep {
   metadata?: Record<string, any>;
 }
 
+// Configuration options for different deployment platforms
 export interface DeploymentConfig {
   platform: 'ios' | 'android' | 'flutter' | 'desktop' | 'web';
   buildType: 'debug' | 'release';
@@ -22,6 +24,14 @@ export interface DeploymentConfig {
   desktopTarget?: 'windows' | 'macos' | 'linux' | 'all';
   androidTarget?: 'apk' | 'aab';
   enableOptimizations?: boolean;
+}
+
+// Progress tracking for visual feedback
+interface ProgressTracker {
+  stepId: string;
+  progress: number;
+  startTime: number;
+  substep?: number;
 }
 
 interface UseDeploymentReturn {
@@ -41,6 +51,7 @@ export const useDeployment = (): UseDeploymentReturn => {
   const [currentStep, setCurrentStep] = useState(0);
   const [steps, setSteps] = useState<DeploymentStep[]>([]);
   const progressIntervals = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const progressTrackers = useRef<Map<string, ProgressTracker>>(new Map());
   const [deploymentConfig, setDeploymentConfig] = useState<DeploymentConfig>({
     platform: 'ios',
     buildType: 'release',
@@ -51,7 +62,17 @@ export const useDeployment = (): UseDeploymentReturn => {
 
   const executeCommand = useCallback(async (command: string, stepIndex?: number): Promise<{ success: boolean; output: string }> => {
     // Simulate command execution with realistic output
-    const duration = 2000 + Math.random() * 4000;
+    const duration = 3000 + Math.random() * 5000;
+    
+    // Initialize progress tracker for visual feedback
+    if (stepIndex !== undefined) {
+      progressTrackers.current.set(`step-${stepIndex}`, {
+        stepId: steps[stepIndex].id,
+        progress: 0,
+        startTime: Date.now(),
+        substep: 0
+      });
+    }
     
     await simulateProgressiveExecution(command, stepIndex, duration);
     
@@ -598,15 +619,39 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
   }, [deploymentConfig]);
 
   const simulateProgressiveExecution = async (command: string, stepIndex: number | undefined, duration: number) => {
-    if (stepIndex === undefined) return;
+    if (stepIndex === undefined || stepIndex >= steps.length) return;
+    
+    const step = steps[stepIndex];
+    const hasSubsteps = step.substeps && step.substeps.length > 0;
+    let currentSubstep = 0;
 
     const progressInterval = setInterval(() => {
-      setSteps(prev => prev.map((step, index) => 
-        index === stepIndex 
-          ? { ...step, progress: Math.min((step.progress || 0) + Math.random() * 15, 95) }
-          : step
+      // Update progress with a more realistic pattern
+      const elapsed = Date.now() - progressTrackers.current.get(`step-${stepIndex}`)!.startTime;
+      const progressPercent = Math.min(Math.floor((elapsed / duration) * 100), 95);
+      
+      // Update substep if needed
+      if (hasSubsteps && step.substeps) {
+        const substepCount = step.substeps.length;
+        const newSubstep = Math.min(Math.floor(progressPercent / (100 / substepCount)), substepCount - 1);
+        
+        if (newSubstep > currentSubstep) {
+          currentSubstep = newSubstep;
+          setSteps(prev => prev.map((s, idx) => 
+            idx === stepIndex 
+              ? { ...s, currentSubstep: currentSubstep }
+              : s
+          ));
+        }
+      }
+      
+      // Update progress
+      setSteps(prev => prev.map((s, idx) => 
+        idx === stepIndex 
+          ? { ...s, progress: progressPercent }
+          : s
       ));
-    }, 200);
+    }, 100);
 
     progressIntervals.current.set(`step-${stepIndex}`, progressInterval);
 
@@ -614,6 +659,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
 
     clearInterval(progressInterval);
     progressIntervals.current.delete(`step-${stepIndex}`);
+    progressTrackers.current.delete(`step-${stepIndex}`);
 
     // Set final progress to 100%
     setSteps(prev => prev.map((step, index) => 
@@ -633,6 +679,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
             status: 'pending',
             command: `cargo build --target aarch64-apple-ios --${config.buildType}`,
             substeps: ['Downloading dependencies', 'Compiling core libraries', 'Building for arm64', 'Optimizing binary'],
+            substeps: ['Downloading dependencies', 'Compiling core libraries', 'Building for arm64', 'Optimizing binary'],
             metadata: {
               estimatedTime: '2-3 minutes',
               outputSize: '~15 MB'
@@ -649,6 +696,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
             name: 'Create Universal Binary',
             status: 'pending',
             command: `lipo -create target/aarch64-apple-ios/${config.buildType}/libapp.a target/x86_64-apple-ios/${config.buildType}/libapp.a -output libapp-universal.a`,
+            substeps: ['Merging architectures', 'Verifying compatibility', 'Creating universal binary'],
             substeps: ['Merging architectures', 'Verifying compatibility', 'Creating universal binary'],
             metadata: {
               estimatedTime: '30 seconds',
@@ -667,6 +715,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
             status: 'pending',
             command: `xcodebuild -project ios/App.xcodeproj -scheme App -configuration Release -destination "generic/platform=iOS" archive -archivePath build/App.xcarchive`,
             substeps: ['Building for archiving', 'Code signing', 'Generating dSYM', 'Creating archive'],
+            substeps: ['Building for archiving', 'Code signing', 'Generating dSYM', 'Creating archive'],
             metadata: {
               estimatedTime: '3-5 minutes',
               outputSize: '~50 MB'
@@ -684,6 +733,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
             status: 'pending',
             command: `xcrun altool --upload-app --type ios --file build/App.ipa --apiKey "${process.env.APP_STORE_API_KEY}" --apiIssuer "${process.env.APP_STORE_ISSUER_ID}"`,
             substeps: ['Authenticating', 'Uploading IPA', 'Processing binary', 'Finalizing upload'],
+            substeps: ['Authenticating', 'Uploading IPA', 'Processing binary', 'Finalizing upload'],
             metadata: {
               estimatedTime: '5-10 minutes',
               reviewTime: '24-48 hours'
@@ -697,7 +747,12 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
             id: 'rust-build',
             name: 'Build Rust Code for Android',
             status: 'pending',
-            command: `cargo build --target aarch64-linux-android --${config.buildType} && cargo build --target armv7-linux-androideabi --${config.buildType} && cargo build --target i686-linux-android --${config.buildType} && cargo build --target x86_64-linux-android --${config.buildType}`
+            command: `cargo build --target aarch64-linux-android --${config.buildType} && cargo build --target armv7-linux-androideabi --${config.buildType} && cargo build --target i686-linux-android --${config.buildType} && cargo build --target x86_64-linux-android --${config.buildType}`,
+            substeps: ['Building for ARM64', 'Building for ARMv7', 'Building for x86', 'Building for x86_64'],
+            metadata: {
+              estimatedTime: '4-6 minutes',
+              outputSize: '~40 MB total'
+            }
           },
           {
             id: 'copy-libs',
@@ -711,7 +766,12 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
             status: 'pending',
             command: config.androidTarget === 'apk' 
               ? `cd android && ./gradlew assemble${config.buildType === 'release' ? 'Release' : 'Debug'}`
-              : `cd android && ./gradlew bundle${config.buildType === 'release' ? 'Release' : 'Debug'}`
+              : `cd android && ./gradlew bundle${config.buildType === 'release' ? 'Release' : 'Debug'}`,
+            substeps: ['Compiling Java/Kotlin', 'Processing resources', 'Linking native libraries', 'Creating bundle'],
+            metadata: {
+              estimatedTime: '2-4 minutes',
+              outputSize: config.androidTarget === 'apk' ? '~40 MB' : '~35 MB'
+            }
           },
           {
             id: 'sign-app',
@@ -734,7 +794,12 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
             status: 'pending',
             command: config.androidTarget === 'apk'
               ? `fastlane supply --apk android/app/build/outputs/apk/release/app-release.apk`
-              : `fastlane supply --aab android/app/build/outputs/bundle/release/app-release.aab`
+              : `fastlane supply --aab android/app/build/outputs/bundle/release/app-release.aab`,
+            substeps: ['Authenticating with Play Console', 'Validating bundle', 'Uploading to Google Play', 'Processing upload'],
+            metadata: {
+              estimatedTime: '5-8 minutes',
+              reviewTime: '1-3 days'
+            }
           },
           {
             id: 'submit-review',
@@ -794,6 +859,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
             status: 'pending',
             command: `wasm-pack build --target web --${config.buildType === 'release' ? 'release' : 'dev'}`,
             substeps: ['Compiling to WASM', 'Generating bindings', 'Optimizing binary', 'Creating package'],
+            substeps: ['Compiling to WASM', 'Generating bindings', 'Optimizing binary', 'Creating package'],
             metadata: {
               estimatedTime: '1-2 minutes',
               outputSize: '~800 KB'
@@ -815,6 +881,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
               ? `npm run build:ssr`
               : `npm run build`,
             substeps: ['Bundling modules', 'Processing assets', 'Optimizing output', 'Generating manifest'],
+            substeps: ['Bundling modules', 'Processing assets', 'Optimizing output', 'Generating manifest'],
             metadata: {
               estimatedTime: '30-60 seconds',
               outputSize: config.webTarget === 'pwa' ? '~1.5 MB' : '~1.2 MB'
@@ -835,6 +902,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
               : config.outputPath?.includes('netlify')
               ? `netlify deploy --prod --dir=dist`
               : `npm run deploy`,
+            substeps: ['Uploading files', 'Configuring CDN', 'Setting up routing', 'Finalizing deployment'],
             substeps: ['Uploading files', 'Configuring CDN', 'Setting up routing', 'Finalizing deployment'],
             metadata: {
               estimatedTime: '1-2 minutes',
@@ -876,6 +944,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
               ? `cargo tauri build --target universal-apple-darwin,x86_64-pc-windows-msvc,x86_64-unknown-linux-gnu`
               : `cargo tauri build --target ${config.desktopTarget === 'windows' ? 'x86_64-pc-windows-msvc' : config.desktopTarget === 'macos' ? 'universal-apple-darwin' : 'x86_64-unknown-linux-gnu'}`,
             substeps: ['Building frontend', 'Compiling backend', 'Creating bundles', 'Generating installers'],
+            substeps: ['Building frontend', 'Compiling backend', 'Creating bundles', 'Generating installers'],
             metadata: {
               estimatedTime: '5-8 minutes',
               outputSize: config.desktopTarget === 'all' ? '~200 MB' : '~50 MB'
@@ -894,6 +963,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
             name: 'Create Installers',
             status: 'pending',
             command: `electron-builder --publish=never`,
+            substeps: ['Packaging apps', 'Creating installers', 'Code signing', 'Verifying bundles'],
             substeps: ['Packaging apps', 'Creating installers', 'Code signing', 'Verifying bundles'],
             metadata: {
               estimatedTime: '3-5 minutes',
@@ -915,6 +985,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
             name: 'Build Rust Application',
             status: 'pending',
             command: `cargo build --${config.buildType}`,
+            substeps: ['Compiling dependencies', 'Building core', 'Linking libraries', 'Optimizing binary'],
             metadata: {
               estimatedTime: '1-2 minutes'
             }
@@ -981,12 +1052,32 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
   const getStepProgress = useCallback((stepIndex: number): number => {
     return steps[stepIndex]?.progress || 0;
   }, [steps]);
-
+  
+  // Calculate overall progress with weighted steps
   const getOverallProgress = useCallback((): number => {
     if (steps.length === 0) return 0;
-    const totalProgress = steps.reduce((sum, step) => sum + (step.progress || 0), 0);
-    return totalProgress / steps.length;
+    
+    // Weight steps by their complexity/duration
+    const weights = steps.map(step => {
+      // Assign weights based on metadata or default to 1
+      const estimatedTime = step.metadata?.estimatedTime || '';
+      if (estimatedTime.includes('5-10') || estimatedTime.includes('5-8')) return 2;
+      if (estimatedTime.includes('3-5') || estimatedTime.includes('4-6')) return 1.5;
+      return 1;
+    });
+    
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+    
+    // Calculate weighted progress
+    let weightedProgress = 0;
+    for (let i = 0; i < steps.length; i++) {
+      const stepProgress = steps[i].progress || 0;
+      weightedProgress += (stepProgress * weights[i]) / totalWeight;
+    }
+    
+    return weightedProgress;
   }, [steps]);
+
 
   return {
     isDeploying,

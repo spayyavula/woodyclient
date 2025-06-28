@@ -1,50 +1,36 @@
 import React, { useState } from 'react';
 import { 
-  X, 
-  Search, 
-  Filter, 
-  Star, 
-  Clock, 
   Code, 
   Smartphone, 
-  Tablet, 
-  Monitor,
-  Zap,
-  Shield,
-  Database,
-  Camera,
-  MapPin,
-  ShoppingCart,
-  Heart,
-  MessageCircle,
-  Music,
-  Gamepad2,
-  TrendingUp,
-  Users,
-  Calendar,
-  FileText,
-  Settings,
+  Zap, 
+  Shield, 
+  Users, 
+  Star, 
+  ArrowRight, 
+  Play, 
+  CheckCircle, 
+  Github, 
+  Twitter, 
+  Mail,
+  Eye,
+  EyeOff,
+  Loader2,
+  Rocket,
   Globe,
-  Cpu,
-  Layers,
-  Palette,
-  Target,
-  Briefcase,
-  BookOpen,
-  Coffee,
-  Headphones,
-  Video,
-  Lock,
-  Wallet,
-  Activity,
+  Database,
   Cloud,
-  Wifi,
-  Battery,
-  Bell,
-  Image,
-  Play,
-  Download,
-  CheckCircle
+  Terminal,
+  Cpu,
+  Lock,
+  Heart,
+  Award,
+  TrendingUp,
+  Coffee,
+  Monitor,
+  AlertTriangle,
+  GitBranch,
+  Workflow,
+  X
 } from 'lucide-react';
 
 interface Template {
@@ -60,9 +46,6 @@ interface Template {
   features: string[];
   useCase: string;
   techStack: string[];
-  platforms: ('iOS' | 'Android' | 'Flutter' | 'React Native' | 'Web')[];
-  rating: number;
-  downloads: number;
 }
 
 interface ProjectTemplatesProps {
@@ -72,3691 +55,1897 @@ interface ProjectTemplatesProps {
 }
 
 const ProjectTemplates: React.FC<ProjectTemplatesProps> = ({ isVisible, onClose, onSelectTemplate }) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedDifficulty, setSelectedDifficulty] = useState('all');
-  const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+
+  const categories = [
+    { id: 'all', name: 'All Templates', icon: <Code className="w-4 h-4" /> },
+    { id: 'mobile', name: 'Mobile Apps', icon: <Smartphone className="w-4 h-4" /> },
+    { id: 'web', name: 'Web Apps', icon: <Globe className="w-4 h-4" /> },
+    { id: 'ai', name: 'AI/ML', icon: <Cpu className="w-4 h-4" /> },
+    { id: 'security', name: 'Security', icon: <Shield className="w-4 h-4" /> },
+    { id: 'deployment', name: 'Deployment', icon: <Rocket className="w-4 h-4" /> }
+  ];
 
   const templates: Template[] = [
-    // Native iOS Templates
     {
-      id: 'ios-swift-social',
-      name: 'iOS Social Media App',
-      description: 'Native iOS social media app with real-time messaging, photo sharing, and user profiles using Swift and UIKit',
-      category: 'Social',
-      difficulty: 'Advanced',
-      tags: ['Swift', 'UIKit', 'Core Data', 'CloudKit', 'Camera', 'Real-time'],
-      icon: <MessageCircle className="w-8 h-8 text-blue-400" />,
-      estimatedTime: '3-4 weeks',
-      platforms: ['iOS'],
-      rating: 4.8,
-      downloads: 2847,
-      files: {
-        'AppDelegate.swift': {
-          content: `import UIKit
-import CloudKit
-
-@main
-class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Configure CloudKit
-        setupCloudKit()
-        
-        // Setup navigation appearance
-        setupNavigationAppearance()
-        
-        return true
-    }
-    
-    private func setupCloudKit() {
-        // CloudKit configuration for real-time sync
-        let container = CKContainer.default()
-        container.accountStatus { status, error in
-            DispatchQueue.main.async {
-                switch status {
-                case .available:
-                    print("CloudKit available")
-                case .noAccount:
-                    print("No iCloud account")
-                default:
-                    print("CloudKit status: \\(status)")
-                }
-            }
-        }
-    }
-    
-    private func setupNavigationAppearance() {
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor.systemBlue
-        appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-        
-        UINavigationBar.appearance().standardAppearance = appearance
-        UINavigationBar.appearance().scrollEdgeAppearance = appearance
-    }
-}`,
-          language: 'swift'
-        },
-        'FeedViewController.swift': {
-          content: `import UIKit
-import CloudKit
-
-class FeedViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
-    
-    private var posts: [Post] = []
-    private let refreshControl = UIRefreshControl()
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupUI()
-        loadPosts()
-    }
-    
-    private func setupUI() {
-        title = "Feed"
-        
-        // Setup table view
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(PostTableViewCell.self, forCellReuseIdentifier: "PostCell")
-        
-        // Setup refresh control
-        refreshControl.addTarget(self, action: #selector(refreshPosts), for: .valueChanged)
-        tableView.refreshControl = refreshControl
-        
-        // Add compose button
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .compose,
-            target: self,
-            action: #selector(composePost)
-        )
-    }
-    
-    @objc private func refreshPosts() {
-        loadPosts()
-    }
-    
-    @objc private func composePost() {
-        let composeVC = ComposeViewController()
-        let navController = UINavigationController(rootViewController: composeVC)
-        present(navController, animated: true)
-    }
-    
-    private func loadPosts() {
-        // CloudKit query for posts
-        let predicate = NSPredicate(value: true)
-        let query = CKQuery(recordType: "Post", predicate: predicate)
-        query.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        
-        CKContainer.default().publicCloudDatabase.perform(query, inZoneWith: nil) { records, error in
-            DispatchQueue.main.async {
-                self.refreshControl.endRefreshing()
-                
-                if let records = records {
-                    self.posts = records.compactMap { Post(record: $0) }
-                    self.tableView.reloadData()
-                }
-            }
-        }
-    }
-}
-
-extension FeedViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return posts.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as! PostTableViewCell
-        cell.configure(with: posts[indexPath.row])
-        return cell
-    }
-}`,
-          language: 'swift'
-        },
-        'Post.swift': {
-          content: `import Foundation
-import CloudKit
-
-struct Post {
-    let id: String
-    let authorName: String
-    let content: String
-    let imageURL: String?
-    let createdAt: Date
-    let likesCount: Int
-    
-    init?(record: CKRecord) {
-        guard let authorName = record["authorName"] as? String,
-              let content = record["content"] as? String else {
-            return nil
-        }
-        
-        self.id = record.recordID.recordName
-        self.authorName = authorName
-        self.content = content
-        self.imageURL = record["imageURL"] as? String
-        self.createdAt = record.creationDate ?? Date()
-        self.likesCount = record["likesCount"] as? Int ?? 0
-    }
-}`,
-          language: 'swift'
-        }
-      },
-      features: [
-        'Real-time messaging with CloudKit',
-        'Photo sharing with camera integration',
-        'User profiles and authentication',
-        'Push notifications',
-        'Offline data synchronization',
-        'Social features (likes, comments)',
-        'Custom UI animations',
-        'Dark mode support'
-      ],
-      useCase: 'Build a complete social media platform for iOS with native performance and Apple ecosystem integration',
-      techStack: ['Swift', 'UIKit', 'CloudKit', 'Core Data', 'AVFoundation', 'UserNotifications']
-    },
-
-    {
-      id: 'ios-swiftui-finance',
-      name: 'iOS Finance Tracker',
-      description: 'Modern SwiftUI finance app with expense tracking, budgeting, and investment portfolio management',
-      category: 'Finance',
-      difficulty: 'Intermediate',
-      tags: ['SwiftUI', 'Core Data', 'Charts', 'Biometrics', 'Widgets'],
-      icon: <TrendingUp className="w-8 h-8 text-green-400" />,
-      estimatedTime: '2-3 weeks',
-      platforms: ['iOS'],
-      rating: 4.9,
-      downloads: 3421,
-      files: {
-        'ContentView.swift': {
-          content: `import SwiftUI
-import Charts
-
-struct ContentView: View {
-    @StateObject private var financeManager = FinanceManager()
-    @State private var selectedTab = 0
-    
-    var body: some View {
-        TabView(selection: $selectedTab) {
-            DashboardView()
-                .tabItem {
-                    Image(systemName: "chart.pie.fill")
-                    Text("Dashboard")
-                }
-                .tag(0)
-            
-            ExpensesView()
-                .tabItem {
-                    Image(systemName: "creditcard.fill")
-                    Text("Expenses")
-                }
-                .tag(1)
-            
-            BudgetView()
-                .tabItem {
-                    Image(systemName: "target")
-                    Text("Budget")
-                }
-                .tag(2)
-            
-            InvestmentsView()
-                .tabItem {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                    Text("Investments")
-                }
-                .tag(3)
-        }
-        .environmentObject(financeManager)
-        .onAppear {
-            financeManager.loadData()
-        }
-    }
-}
-
-struct DashboardView: View {
-    @EnvironmentObject var financeManager: FinanceManager
-    
-    var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Balance Card
-                    BalanceCardView(balance: financeManager.totalBalance)
-                    
-                    // Spending Chart
-                    SpendingChartView(expenses: financeManager.recentExpenses)
-                    
-                    // Quick Actions
-                    QuickActionsView()
-                    
-                    // Recent Transactions
-                    RecentTransactionsView(transactions: financeManager.recentTransactions)
-                }
-                .padding()
-            }
-            .navigationTitle("Finance Tracker")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        // Add transaction
-                    }) {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundColor(.blue)
-                    }
-                }
-            }
-        }
-    }
-}
-
-struct BalanceCardView: View {
-    let balance: Double
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Total Balance")
-                .font(.headline)
-                .foregroundColor(.secondary)
-            
-            Text("$\\(balance, specifier: "%.2f")")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
-        )
-    }
-}`,
-          language: 'swift'
-        },
-        'FinanceManager.swift': {
-          content: `import Foundation
-import CoreData
-import Combine
-
-class FinanceManager: ObservableObject {
-    @Published var totalBalance: Double = 0
-    @Published var recentExpenses: [Expense] = []
-    @Published var recentTransactions: [Transaction] = []
-    @Published var budgets: [Budget] = []
-    @Published var investments: [Investment] = []
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    init() {
-        setupDataObservers()
-    }
-    
-    func loadData() {
-        loadBalance()
-        loadExpenses()
-        loadTransactions()
-        loadBudgets()
-        loadInvestments()
-    }
-    
-    private func setupDataObservers() {
-        // Observe changes and update UI
-        $recentExpenses
-            .sink { [weak self] expenses in
-                self?.calculateTotalBalance()
-            }
-            .store(in: &cancellables)
-    }
-    
-    private func loadBalance() {
-        // Calculate total balance from all accounts
-        totalBalance = 15420.50 // Mock data
-    }
-    
-    private func loadExpenses() {
-        // Load recent expenses from Core Data
-        recentExpenses = [
-            Expense(id: UUID(), amount: 45.99, category: "Food", date: Date(), description: "Grocery shopping"),
-            Expense(id: UUID(), amount: 12.50, category: "Transport", date: Date().addingTimeInterval(-86400), description: "Uber ride"),
-            Expense(id: UUID(), amount: 89.99, category: "Shopping", date: Date().addingTimeInterval(-172800), description: "Clothing")
-        ]
-    }
-    
-    private func loadTransactions() {
-        // Load recent transactions
-        recentTransactions = [
-            Transaction(id: UUID(), amount: -45.99, description: "Grocery Store", date: Date(), category: "Food"),
-            Transaction(id: UUID(), amount: 2500.00, description: "Salary Deposit", date: Date().addingTimeInterval(-86400), category: "Income"),
-            Transaction(id: UUID(), amount: -12.50, description: "Uber", date: Date().addingTimeInterval(-172800), category: "Transport")
-        ]
-    }
-    
-    private func loadBudgets() {
-        // Load budget data
-        budgets = [
-            Budget(id: UUID(), category: "Food", limit: 500, spent: 245.50, period: .monthly),
-            Budget(id: UUID(), category: "Transport", limit: 200, spent: 89.25, period: .monthly),
-            Budget(id: UUID(), category: "Entertainment", limit: 150, spent: 67.80, period: .monthly)
-        ]
-    }
-    
-    private func loadInvestments() {
-        // Load investment portfolio
-        investments = [
-            Investment(id: UUID(), symbol: "AAPL", name: "Apple Inc.", shares: 10, currentPrice: 175.50, totalValue: 1755.00),
-            Investment(id: UUID(), symbol: "GOOGL", name: "Alphabet Inc.", shares: 5, currentPrice: 2750.25, totalValue: 13751.25),
-            Investment(id: UUID(), symbol: "TSLA", name: "Tesla Inc.", shares: 8, currentPrice: 245.80, totalValue: 1966.40)
-        ]
-    }
-    
-    private func calculateTotalBalance() {
-        // Recalculate total balance based on transactions
-        let totalExpenses = recentExpenses.reduce(0) { $0 + $1.amount }
-        // Update balance calculation logic
-    }
-}`,
-          language: 'swift'
-        }
-      },
-      features: [
-        'SwiftUI modern interface',
-        'Expense tracking and categorization',
-        'Budget management with alerts',
-        'Investment portfolio tracking',
-        'Biometric authentication',
-        'Home screen widgets',
-        'Charts and analytics',
-        'Core Data persistence'
-      ],
-      useCase: 'Personal finance management with comprehensive tracking, budgeting, and investment features',
-      techStack: ['SwiftUI', 'Core Data', 'Charts', 'LocalAuthentication', 'WidgetKit', 'Combine']
-    },
-
-    // Native Android Templates
-    {
-      id: 'android-kotlin-ecommerce',
-      name: 'Android E-commerce App',
-      description: 'Modern Android e-commerce app with Jetpack Compose, product catalog, shopping cart, and payment integration',
-      category: 'E-commerce',
-      difficulty: 'Advanced',
-      tags: ['Kotlin', 'Jetpack Compose', 'Room', 'Retrofit', 'Payment'],
-      icon: <ShoppingCart className="w-8 h-8 text-green-400" />,
-      estimatedTime: '4-5 weeks',
-      platforms: ['Android'],
-      rating: 4.7,
-      downloads: 4156,
+      id: 'android-hello-world',
+      name: 'Android Hello World',
+      description: 'A simple Android Hello World app with complete deployment pipeline to Google Play Store',
+      category: 'deployment',
+      difficulty: 'Beginner',
+      tags: ['Android', 'Kotlin', 'Deployment', 'Google Play'],
+      icon: <Smartphone className="w-8 h-8 text-green-400" />,
+      estimatedTime: '30 minutes',
       files: {
         'MainActivity.kt': {
-          content: `package com.rustyclint.ecommerce
+          content: `package com.rustyclint.helloworld
 
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.rustyclint.ecommerce.ui.theme.EcommerceTheme
-import com.rustyclint.ecommerce.ui.screens.*
-import dagger.hilt.android.AndroidEntryPoint
+import android.widget.TextView
 
-@AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            EcommerceTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val navController = rememberNavController()
-                    
-                    NavHost(
-                        navController = navController,
-                        startDestination = "home"
-                    ) {
-                        composable("home") {
-                            HomeScreen(
-                                navController = navController,
-                                viewModel = hiltViewModel()
-                            )
-                        }
-                        composable("product/{productId}") { backStackEntry ->
-                            val productId = backStackEntry.arguments?.getString("productId")
-                            ProductDetailScreen(
-                                productId = productId,
-                                navController = navController,
-                                viewModel = hiltViewModel()
-                            )
-                        }
-                        composable("cart") {
-                            CartScreen(
-                                navController = navController,
-                                viewModel = hiltViewModel()
-                            )
-                        }
-                        composable("checkout") {
-                            CheckoutScreen(
-                                navController = navController,
-                                viewModel = hiltViewModel()
-                            )
-                        }
-                        composable("profile") {
-                            ProfileScreen(
-                                navController = navController,
-                                viewModel = hiltViewModel()
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}`,
-          language: 'kotlin'
-        },
-        'HomeScreen.kt': {
-          content: `package com.rustyclint.ecommerce.ui.screens
-
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import com.rustyclint.ecommerce.data.model.Product
-import com.rustyclint.ecommerce.ui.components.ProductCard
-import com.rustyclint.ecommerce.ui.components.CategoryChip
-import com.rustyclint.ecommerce.viewmodel.HomeViewModel
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomeScreen(
-    navController: NavController,
-    viewModel: HomeViewModel
-) {
-    val uiState by viewModel.uiState.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
-    
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Top App Bar
-        TopAppBar(
-            title = { Text("RustyClint Store") },
-            actions = {
-                IconButton(onClick = { navController.navigate("cart") }) {
-                    BadgedBox(
-                        badge = {
-                            if (uiState.cartItemCount > 0) {
-                                Badge { Text(uiState.cartItemCount.toString()) }
-                            }
-                        }
-                    ) {
-                        Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
-                    }
-                }
-            }
-        )
+        setContentView(R.layout.activity_main)
         
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Search Bar
-            item {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { 
-                        searchQuery = it
-                        viewModel.searchProducts(it)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Search products...") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    },
-                    singleLine = true
-                )
-            }
-            
-            // Categories
-            item {
-                Text(
-                    text = "Categories",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.categories) { category ->
-                        CategoryChip(
-                            category = category,
-                            isSelected = category == uiState.selectedCategory,
-                            onClick = { viewModel.selectCategory(category) }
-                        )
-                    }
-                }
-            }
-            
-            // Featured Products
-            item {
-                Text(
-                    text = "Featured Products",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            
-            // Products Grid
-            items(uiState.products.chunked(2)) { productPair ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    productPair.forEach { product ->
-                        ProductCard(
-                            product = product,
-                            modifier = Modifier.weight(1f),
-                            onClick = { 
-                                navController.navigate("product/\${product.id}")
-                            },
-                            onAddToCart = { 
-                                viewModel.addToCart(product)
-                            }
-                        )
-                    }
-                    // Fill remaining space if odd number of products
-                    if (productPair.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-        }
-    }
-    
-    // Loading state
-    if (uiState.isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        // Find the TextView and set a dynamic message
+        val messageTextView = findViewById<TextView>(R.id.messageTextView)
+        messageTextView.text = "Hello World from rustyclint!"
     }
 }`,
           language: 'kotlin'
         },
-        'Product.kt': {
-          content: `package com.rustyclint.ecommerce.data.model
+        'activity_main.xml': {
+          content: `<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1F2937"
+    tools:context=".MainActivity">
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+    <TextView
+        android:id="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        android:textColor="#FFFFFF"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/messageTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
-@Entity(tableName = "products")
-data class Product(
-    @PrimaryKey
-    val id: String,
-    val name: String,
-    val description: String,
-    val price: Double,
-    val imageUrl: String,
-    val category: String,
-    val rating: Float,
-    val reviewCount: Int,
-    val inStock: Boolean,
-    val tags: List<String> = emptyList()
-)
+    <TextView
+        android:id="@+id/messageTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Welcome to your first Android app!"
+        android:textColor="#E5E7EB"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/versionTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
 
-@Entity(tableName = "cart_items")
-data class CartItem(
-    @PrimaryKey
-    val id: String,
-    val productId: String,
-    val quantity: Int,
-    val addedAt: Long = System.currentTimeMillis()
-)
+    <TextView
+        android:id="@+id/versionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Version 1.0.0"
+        android:textColor="#9CA3AF"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/messageTextView" />
 
-data class CartItemWithProduct(
-    val cartItem: CartItem,
-    val product: Product
-) {
-    val totalPrice: Double
-        get() = product.price * cartItem.quantity
+</androidx.constraintlayout.widget.ConstraintLayout>`,
+          language: 'xml'
+        },
+        'build.gradle': {
+          content: `plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+// Load keystore properties
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace 'com.rustyclint.helloworld'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.rustyclint.helloworld"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias'] ?: System.getenv("KEY_ALIAS") ?: "release-key"
+            keyPassword keystoreProperties['keyPassword'] ?: System.getenv("KEY_PASSWORD")
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword'] ?: System.getenv("KEYSTORE_PASSWORD")
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }`,
-          language: 'kotlin'
+          language: 'gradle'
+        },
+        'keystore.properties': {
+          content: `storePassword=android123
+keyPassword=android123
+keyAlias=release-key
+storeFile=keystore/release.keystore`,
+          language: 'properties'
+        },
+        'deploy-android.sh': {
+          content: `#!/bin/bash
+
+# Android Deployment Script
+set -e
+
+echo "🤖 Starting Android AAB deployment..."
+
+# Check if keystore exists
+if [ ! -f "android/keystore/release.keystore" ]; then
+    echo "❌ Error: Keystore not found. Run generate-android-keystore.sh first"
+    exit 1
+fi
+
+# Load environment variables if .env.android exists
+if [ -f ".env.android" ]; then
+    export $(cat .env.android | xargs)
+    echo "✅ Loaded environment variables from .env.android"
+fi
+
+# Build Rust code for Android
+echo "📦 Building Rust code for Android targets..."
+rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+
+cargo build --target aarch64-linux-android --release
+cargo build --target armv7-linux-androideabi --release  
+cargo build --target i686-linux-android --release
+cargo build --target x86_64-linux-android --release
+
+# Copy native libraries
+echo "📋 Copying native libraries..."
+mkdir -p android/app/src/main/jniLibs/{arm64-v8a,armeabi-v7a,x86,x86_64}
+
+cp target/aarch64-linux-android/release/librustyclint.so android/app/src/main/jniLibs/arm64-v8a/
+cp target/armv7-linux-androideabi/release/librustyclint.so android/app/src/main/jniLibs/armeabi-v7a/
+cp target/i686-linux-android/release/librustyclint.so android/app/src/main/jniLibs/x86/
+cp target/x86_64-linux-android/release/librustyclint.so android/app/src/main/jniLibs/x86_64/
+
+# Build signed AAB
+echo "🔨 Building signed AAB..."
+cd android
+./gradlew bundleRelease
+
+# Check if AAB was created
+AAB_PATH="app/build/outputs/bundle/release/app-release.aab"
+if [ -f "$AAB_PATH" ]; then
+    echo "✅ AAB created successfully: $AAB_PATH"
+    echo "📊 AAB size: $(du -h "$AAB_PATH" | cut -f1)"
+else
+    echo "❌ Error: AAB not found at $AAB_PATH"
+    exit 1
+fi
+
+# Optional: Upload to Play Store using Fastlane
+if command -v fastlane &> /dev/null; then
+    echo "🚀 Uploading to Google Play Store..."
+    fastlane deploy
+else
+    echo "⚠️  Fastlane not found. Install with: gem install fastlane"
+    echo "📱 Manual upload required to Google Play Console"
+fi
+
+echo "🎉 Android deployment completed!"`,
+          language: 'bash'
         }
       },
       features: [
-        'Jetpack Compose modern UI',
-        'Product catalog with search',
-        'Shopping cart functionality',
-        'Payment gateway integration',
-        'User authentication',
-        'Order tracking',
-        'Push notifications',
-        'Offline support with Room'
+        'Complete Android app with Kotlin',
+        'Automated keystore generation',
+        'Secure signing configuration',
+        'Google Play Store deployment pipeline',
+        'CI/CD integration with GitHub Actions',
+        'Step-by-step deployment guide'
       ],
-      useCase: 'Complete e-commerce solution with modern Android architecture and payment processing',
-      techStack: ['Kotlin', 'Jetpack Compose', 'Room', 'Retrofit', 'Hilt', 'Navigation', 'Coil']
+      useCase: 'Perfect for developers who want to learn the complete Android deployment process to Google Play Store.',
+      techStack: ['Android', 'Kotlin', 'Gradle', 'GitHub Actions', 'Fastlane']
     },
-
     {
-      id: 'android-kotlin-fitness',
-      name: 'Android Fitness Tracker',
-      description: 'Comprehensive fitness tracking app with workout plans, progress monitoring, and health integration',
-      category: 'Health & Fitness',
+      id: 'android-deployment-pipeline',
+      name: 'Android Deployment Pipeline',
+      description: 'Complete deployment pipeline for Android apps with visual progress tracking and automation',
+      category: 'deployment',
       difficulty: 'Intermediate',
-      tags: ['Kotlin', 'Health Connect', 'Sensors', 'Charts', 'Notifications'],
-      icon: <Activity className="w-8 h-8 text-red-400" />,
-      estimatedTime: '3-4 weeks',
-      platforms: ['Android'],
-      rating: 4.6,
-      downloads: 2934,
+      tags: ['Android', 'CI/CD', 'Deployment', 'Automation'],
+      icon: <Rocket className="w-8 h-8 text-purple-400" />,
+      estimatedTime: '45 minutes',
       files: {
-        'FitnessActivity.kt': {
-          content: `package com.rustyclint.fitness
+        'DeploymentAssistant.tsx': {
+          content: `import React, { useState, useEffect } from 'react';
+import { 
+  HelpCircle, 
+  CheckCircle, 
+  AlertTriangle, 
+  Info, 
+  ExternalLink, 
+  Copy, 
+  Eye, 
+  EyeOff,
+  Download,
+  Upload,
+  Settings,
+  Key,
+  Shield,
+  Zap,
+  Terminal,
+  FileText,
+  Clock,
+  Smartphone,
+  Monitor
+} from 'lucide-react';
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
-import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.permission.HealthPermission
-import androidx.health.connect.client.records.StepsRecord
-import com.rustyclint.fitness.ui.theme.FitnessTheme
-import com.rustyclint.fitness.ui.screens.MainScreen
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class FitnessActivity : ComponentActivity(), SensorEventListener {
-    
-    private lateinit var sensorManager: SensorManager
-    private var stepCounterSensor: Sensor? = null
-    private var healthConnectClient: HealthConnectClient? = null
-    
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (permissions[Manifest.permission.ACTIVITY_RECOGNITION] == true) {
-            initializeSensors()
-        }
-    }
-    
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        
-        // Initialize Health Connect
-        if (HealthConnectClient.isAvailable(this)) {
-            healthConnectClient = HealthConnectClient.getOrCreate(this)
-        }
-        
-        requestPermissions()
-        
-        setContent {
-            FitnessTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MainScreen()
-                }
-            }
-        }
-    }
-    
-    private fun requestPermissions() {
-        val permissions = arrayOf(
-            Manifest.permission.ACTIVITY_RECOGNITION,
-            Manifest.permission.BODY_SENSORS
-        )
-        
-        val permissionsToRequest = permissions.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
-        
-        if (permissionsToRequest.isNotEmpty()) {
-            permissionLauncher.launch(permissionsToRequest.toTypedArray())
-        } else {
-            initializeSensors()
-        }
-    }
-    
-    private fun initializeSensors() {
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        
-        stepCounterSensor?.let { sensor ->
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
-        }
-    }
-    
-    override fun onSensorChanged(event: SensorEvent?) {
-        event?.let {
-            when (it.sensor.type) {
-                Sensor.TYPE_STEP_COUNTER -> {
-                    val stepCount = it.values[0].toInt()
-                    // Update step count in ViewModel
-                    updateStepCount(stepCount)
-                }
-            }
-        }
-    }
-    
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // Handle accuracy changes if needed
-    }
-    
-    private fun updateStepCount(steps: Int) {
-        // Update step count through ViewModel or repository
-    }
-    
-    override fun onDestroy() {
-        super.onDestroy()
-        sensorManager.unregisterListener(this)
-    }
-}`,
-          language: 'kotlin'
-        },
-        'WorkoutScreen.kt': {
-          content: `package com.rustyclint.fitness.ui.screens
-
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import com.rustyclint.fitness.data.model.Workout
-import com.rustyclint.fitness.data.model.Exercise
-import com.rustyclint.fitness.ui.components.ExerciseCard
-import com.rustyclint.fitness.ui.components.WorkoutTimer
-import com.rustyclint.fitness.viewmodel.WorkoutViewModel
-
-@Composable
-fun WorkoutScreen(
-    viewModel: WorkoutViewModel
-) {
-    val uiState by viewModel.uiState.collectAsState()
-    var showTimer by remember { mutableStateOf(false) }
-    
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Workout Header
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = uiState.currentWorkout?.name ?: "Select Workout",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                if (uiState.currentWorkout != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Duration: \${uiState.currentWorkout.estimatedDuration} min",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            text = "Difficulty: \${uiState.currentWorkout.difficulty}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Button(
-                            onClick = { 
-                                viewModel.startWorkout()
-                                showTimer = true
-                            },
-                            modifier = Modifier.weight(1f),
-                            enabled = !uiState.isWorkoutActive
-                        ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Start Workout")
-                        }
-                        
-                        OutlinedButton(
-                            onClick = { showTimer = !showTimer },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.Timer, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Timer")
-                        }
-                    }
-                }
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Exercise List
-        if (uiState.currentWorkout != null) {
-            Text(
-                text = "Exercises",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(uiState.currentWorkout.exercises) { exercise ->
-                    ExerciseCard(
-                        exercise = exercise,
-                        isCompleted = uiState.completedExercises.contains(exercise.id),
-                        onComplete = { viewModel.completeExercise(exercise.id) },
-                        onSkip = { viewModel.skipExercise(exercise.id) }
-                    )
-                }
-            }
-        } else {
-            // Workout Selection
-            Text(
-                text = "Available Workouts",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(uiState.availableWorkouts) { workout ->
-                    WorkoutCard(
-                        workout = workout,
-                        onClick = { viewModel.selectWorkout(workout) }
-                    )
-                }
-            }
-        }
-    }
-    
-    // Timer Overlay
-    if (showTimer) {
-        WorkoutTimer(
-            isVisible = showTimer,
-            onDismiss = { showTimer = false },
-            onTimerComplete = { viewModel.completeCurrentExercise() }
-        )
-    }
+interface DeploymentAssistantProps {
+  currentStep: string;
+  platform: string;
+  isVisible: boolean;
+  onClose: () => void;
+  deploymentStatus: 'idle' | 'configuring' | 'building' | 'deploying' | 'success' | 'error';
+  currentError?: string;
 }
 
-@Composable
-fun WorkoutCard(
-    workout: Workout,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth(),
-        onClick = onClick,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = workout.name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            Text(
-                text = workout.description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "\${workout.exercises.size} exercises",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "\${workout.estimatedDuration} min",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-    }
-}`,
-          language: 'kotlin'
-        }
-      },
-      features: [
-        'Step counting with sensors',
-        'Workout plans and tracking',
-        'Health Connect integration',
-        'Progress analytics',
-        'Custom timer functionality',
-        'Achievement system',
-        'Nutrition tracking',
-        'Social challenges'
-      ],
-      useCase: 'Complete fitness tracking solution with sensor integration and health data synchronization',
-      techStack: ['Kotlin', 'Jetpack Compose', 'Health Connect', 'Room', 'Sensors API', 'Charts']
-    },
-
-    // Cross-Platform Flutter Templates
-    {
-      id: 'flutter-travel-app',
-      name: 'Flutter Travel Booking',
-      description: 'Beautiful travel booking app with destination discovery, hotel booking, and trip planning features',
-      category: 'Travel',
-      difficulty: 'Advanced',
-      tags: ['Flutter', 'Dart', 'Maps', 'Booking', 'Animations'],
-      icon: <MapPin className="w-8 h-8 text-purple-400" />,
-      estimatedTime: '4-6 weeks',
-      platforms: ['Flutter', 'iOS', 'Android'],
-      rating: 4.8,
-      downloads: 5234,
-      files: {
-        'main.dart': {
-          content: `import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'screens/home_screen.dart';
-import 'screens/search_screen.dart';
-import 'screens/booking_screen.dart';
-import 'screens/profile_screen.dart';
-import 'providers/travel_provider.dart';
-import 'providers/booking_provider.dart';
-import 'utils/app_theme.dart';
-
-void main() {
-  runApp(const TravelApp());
-}
-
-class TravelApp extends StatelessWidget {
-  const TravelApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => TravelProvider()),
-        ChangeNotifierProvider(create: (_) => BookingProvider()),
-      ],
-      child: MaterialApp(
-        title: 'Travel Booking',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        home: const MainScreen(),
-        debugShowCheckedModeBanner: false,
-      ),
-    );
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
-  
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const SearchScreen(),
-    const BookingScreen(),
-    const ProfileScreen(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Theme.of(context).primaryColor,
-          unselectedItemColor: Colors.grey,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search_outlined),
-              activeIcon: Icon(Icons.search),
-              label: 'Search',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bookmark_outline),
-              activeIcon: Icon(Icons.bookmark),
-              label: 'Bookings',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}`,
-          language: 'dart'
-        },
-        'home_screen.dart': {
-          content: `import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/travel_provider.dart';
-import '../models/destination.dart';
-import '../widgets/destination_card.dart';
-import '../widgets/search_bar_widget.dart';
-import '../widgets/category_chips.dart';
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
-    _animationController.forward();
-    
-    // Load destinations
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TravelProvider>().loadDestinations();
-    });
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: CustomScrollView(
-              slivers: [
-                // App Bar
-                SliverAppBar(
-                  expandedHeight: 120,
-                  floating: true,
-                  pinned: true,
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Theme.of(context).primaryColor.withOpacity(0.8),
-                            Theme.of(context).primaryColor.withOpacity(0.6),
-                          ],
-                        ),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              'Discover',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            Text(
-                              'Amazing destinations around the world',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white70,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // Search Bar
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: SearchBarWidget(
-                      onSearch: (query) {
-                        context.read<TravelProvider>().searchDestinations(query);
-                      },
-                    ),
-                  ),
-                ),
-                
-                // Categories
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: CategoryChips(
-                      categories: const [
-                        'All', 'Beach', 'Mountain', 'City', 'Adventure', 'Culture'
-                      ],
-                      onCategorySelected: (category) {
-                        context.read<TravelProvider>().filterByCategory(category);
-                      },
-                    ),
-                  ),
-                ),
-                
-                // Popular Destinations
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Popular Destinations',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            // Navigate to all destinations
-                          },
-                          child: const Text('See All'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                // Destinations Grid
-                Consumer<TravelProvider>(
-                  builder: (context, travelProvider, child) {
-                    if (travelProvider.isLoading) {
-                      return const SliverToBoxAdapter(
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(32.0),
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                      );
-                    }
-                    
-                    return SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      sliver: SliverGrid(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.8,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final destination = travelProvider.destinations[index];
-                            return DestinationCard(
-                              destination: destination,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DestinationDetailScreen(
-                                      destination: destination,
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          childCount: travelProvider.destinations.length,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}`,
-          language: 'dart'
-        },
-        'destination.dart': {
-          content: `class Destination {
-  final String id;
-  final String name;
-  final String country;
-  final String description;
-  final List<String> imageUrls;
-  final double rating;
-  final int reviewCount;
-  final double price;
-  final String currency;
-  final List<String> categories;
-  final double latitude;
-  final double longitude;
-  final List<String> highlights;
-  final String bestTimeToVisit;
-  final int durationDays;
-
-  Destination({
-    required this.id,
-    required this.name,
-    required this.country,
-    required this.description,
-    required this.imageUrls,
-    required this.rating,
-    required this.reviewCount,
-    required this.price,
-    required this.currency,
-    required this.categories,
-    required this.latitude,
-    required this.longitude,
-    required this.highlights,
-    required this.bestTimeToVisit,
-    required this.durationDays,
-  });
-
-  factory Destination.fromJson(Map<String, dynamic> json) {
-    return Destination(
-      id: json['id'],
-      name: json['name'],
-      country: json['country'],
-      description: json['description'],
-      imageUrls: List<String>.from(json['imageUrls']),
-      rating: json['rating'].toDouble(),
-      reviewCount: json['reviewCount'],
-      price: json['price'].toDouble(),
-      currency: json['currency'],
-      categories: List<String>.from(json['categories']),
-      latitude: json['latitude'].toDouble(),
-      longitude: json['longitude'].toDouble(),
-      highlights: List<String>.from(json['highlights']),
-      bestTimeToVisit: json['bestTimeToVisit'],
-      durationDays: json['durationDays'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'country': country,
-      'description': description,
-      'imageUrls': imageUrls,
-      'rating': rating,
-      'reviewCount': reviewCount,
-      'price': price,
-      'currency': currency,
-      'categories': categories,
-      'latitude': latitude,
-      'longitude': longitude,
-      'highlights': highlights,
-      'bestTimeToVisit': bestTimeToVisit,
-      'durationDays': durationDays,
-    };
-  }
-}
-
-class Hotel {
-  final String id;
-  final String name;
-  final String address;
-  final double rating;
-  final int reviewCount;
-  final double pricePerNight;
-  final String currency;
-  final List<String> imageUrls;
-  final List<String> amenities;
-  final double latitude;
-  final double longitude;
-
-  Hotel({
-    required this.id,
-    required this.name,
-    required this.address,
-    required this.rating,
-    required this.reviewCount,
-    required this.pricePerNight,
-    required this.currency,
-    required this.imageUrls,
-    required this.amenities,
-    required this.latitude,
-    required this.longitude,
-  });
-}
-
-class Booking {
-  final String id;
-  final String destinationId;
-  final String hotelId;
-  final DateTime checkInDate;
-  final DateTime checkOutDate;
-  final int guests;
-  final double totalPrice;
-  final String currency;
-  final BookingStatus status;
-  final DateTime createdAt;
-
-  Booking({
-    required this.id,
-    required this.destinationId,
-    required this.hotelId,
-    required this.checkInDate,
-    required this.checkOutDate,
-    required this.guests,
-    required this.totalPrice,
-    required this.currency,
-    required this.status,
-    required this.createdAt,
-  });
-}
-
-enum BookingStatus {
-  pending,
-  confirmed,
-  cancelled,
-  completed,
-}`,
-          language: 'dart'
-        }
-      },
-      features: [
-        'Beautiful destination discovery',
-        'Interactive maps integration',
-        'Hotel booking system',
-        'Trip planning tools',
-        'Real-time price updates',
-        'Offline map support',
-        'Photo galleries',
-        'Review and rating system'
-      ],
-      useCase: 'Complete travel booking platform with destination discovery and trip planning',
-      techStack: ['Flutter', 'Dart', 'Google Maps', 'Provider', 'HTTP', 'Shared Preferences']
-    },
-
-    {
-      id: 'flutter-music-player',
-      name: 'Flutter Music Player',
-      description: 'Feature-rich music player with streaming, playlists, lyrics, and social sharing capabilities',
-      category: 'Entertainment',
-      difficulty: 'Advanced',
-      tags: ['Flutter', 'Audio', 'Streaming', 'Animations', 'Social'],
-      icon: <Music className="w-8 h-8 text-pink-400" />,
-      estimatedTime: '3-4 weeks',
-      platforms: ['Flutter', 'iOS', 'Android'],
-      rating: 4.9,
-      downloads: 6789,
-      files: {
-        'main.dart': {
-          content: `import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:audio_session/audio_session.dart';
-import 'screens/home_screen.dart';
-import 'screens/player_screen.dart';
-import 'screens/library_screen.dart';
-import 'screens/search_screen.dart';
-import 'providers/music_provider.dart';
-import 'providers/player_provider.dart';
-import 'utils/app_theme.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Configure audio session
-  final session = await AudioSession.instance;
-  await session.configure(const AudioSessionConfiguration.music());
-  
-  runApp(const MusicApp());
-}
-
-class MusicApp extends StatelessWidget {
-  const MusicApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => MusicProvider()),
-        ChangeNotifierProvider(create: (_) => PlayerProvider()),
-      ],
-      child: MaterialApp(
-        title: 'Music Player',
-        theme: AppTheme.darkTheme,
-        home: const MainScreen(),
-        debugShowCheckedModeBanner: false,
-      ),
-    );
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
-  int _currentIndex = 0;
-  late AnimationController _playerAnimationController;
-  late Animation<double> _playerSlideAnimation;
-  
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const SearchScreen(),
-    const LibraryScreen(),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _playerAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    
-    _playerSlideAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _playerAnimationController,
-      curve: Curves.easeInOut,
-    ));
-  }
-
-  @override
-  void dispose() {
-    _playerAnimationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Main content
-          IndexedStack(
-            index: _currentIndex,
-            children: _screens,
-          ),
-          
-          // Mini player
-          Consumer<PlayerProvider>(
-            builder: (context, playerProvider, child) {
-              if (playerProvider.currentSong == null) {
-                return const SizedBox.shrink();
-              }
-              
-              return Positioned(
-                left: 0,
-                right: 0,
-                bottom: 80,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            const PlayerScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(0, 1),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                      ),
-                    );
-                  },
-                  child: Container(
-                    height: 70,
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        // Album art
-                        Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            image: DecorationImage(
-                              image: NetworkImage(playerProvider.currentSong!.albumArt),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        
-                        // Song info
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  playerProvider.currentSong!.title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  playerProvider.currentSong!.artist,
-                                  style: TextStyle(
-                                    color: Colors.grey[400],
-                                    fontSize: 14,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        
-                        // Play/pause button
-                        IconButton(
-                          onPressed: playerProvider.togglePlayPause,
-                          icon: Icon(
-                            playerProvider.isPlaying ? Icons.pause : Icons.play_arrow,
-                            size: 30,
-                          ),
-                        ),
-                        
-                        const SizedBox(width: 8),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          selectedItemColor: Theme.of(context).primaryColor,
-          unselectedItemColor: Colors.grey,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search_outlined),
-              activeIcon: Icon(Icons.search),
-              label: 'Search',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.library_music_outlined),
-              activeIcon: Icon(Icons.library_music),
-              label: 'Library',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}`,
-          language: 'dart'
-        },
-        'player_screen.dart': {
-          content: `import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/player_provider.dart';
-import '../widgets/audio_visualizer.dart';
-import '../widgets/lyrics_view.dart';
-
-class PlayerScreen extends StatefulWidget {
-  const PlayerScreen({Key? key}) : super(key: key);
-
-  @override
-  State<PlayerScreen> createState() => _PlayerScreenState();
-}
-
-class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMixin {
-  late AnimationController _albumRotationController;
-  late AnimationController _lyricsController;
-  late Animation<double> _albumRotation;
-  bool _showLyrics = false;
-
-  @override
-  void initState() {
-    super.initState();
-    
-    _albumRotationController = AnimationController(
-      duration: const Duration(seconds: 20),
-      vsync: this,
-    );
-    
-    _lyricsController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    
-    _albumRotation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(_albumRotationController);
-    
-    // Start rotation if playing
-    final playerProvider = context.read<PlayerProvider>();
-    if (playerProvider.isPlaying) {
-      _albumRotationController.repeat();
-    }
-  }
-
-  @override
-  void dispose() {
-    _albumRotationController.dispose();
-    _lyricsController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).primaryColor.withOpacity(0.8),
-              Theme.of(context).scaffoldBackgroundColor,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Consumer<PlayerProvider>(
-            builder: (context, playerProvider, child) {
-              if (playerProvider.currentSong == null) {
-                return const Center(
-                  child: Text('No song selected'),
-                );
-              }
-              
-              // Control album rotation based on play state
-              if (playerProvider.isPlaying && !_albumRotationController.isAnimating) {
-                _albumRotationController.repeat();
-              } else if (!playerProvider.isPlaying && _albumRotationController.isAnimating) {
-                _albumRotationController.stop();
-              }
-              
-              return Column(
-                children: [
-                  // Header
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.keyboard_arrow_down, size: 30),
-                        ),
-                        Column(
-                          children: [
-                            const Text(
-                              'PLAYING FROM PLAYLIST',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                            Text(
-                              playerProvider.currentPlaylist?.name ?? 'Unknown',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            // Show more options
-                          },
-                          icon: const Icon(Icons.more_vert),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  // Album art or lyrics
-                  Expanded(
-                    flex: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: _showLyrics
-                            ? LyricsView(
-                                key: const ValueKey('lyrics'),
-                                song: playerProvider.currentSong!,
-                                currentPosition: playerProvider.position,
-                              )
-                            : GestureDetector(
-                                key: const ValueKey('album'),
-                                onTap: () {
-                                  setState(() {
-                                    _showLyrics = !_showLyrics;
-                                  });
-                                },
-                                child: AnimatedBuilder(
-                                  animation: _albumRotation,
-                                  builder: (context, child) {
-                                    return Transform.rotate(
-                                      angle: _albumRotation.value * 2 * 3.14159,
-                                      child: Container(
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.3),
-                                              blurRadius: 20,
-                                              offset: const Offset(0, 10),
-                                            ),
-                                          ],
-                                        ),
-                                        child: ClipOval(
-                                          child: AspectRatio(
-                                            aspectRatio: 1,
-                                            child: Image.network(
-                                              playerProvider.currentSong!.albumArt,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-                  
-                  // Audio visualizer
-                  if (playerProvider.isPlaying && !_showLyrics)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: AudioVisualizer(),
-                    ),
-                  
-                  // Song info
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          playerProvider.currentSong!.title,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          playerProvider.currentSong!.artist,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[400],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  // Progress bar
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-                    child: Column(
-                      children: [
-                        SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                            trackHeight: 4,
-                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-                          ),
-                          child: Slider(
-                            value: playerProvider.position.inSeconds.toDouble(),
-                            max: playerProvider.duration.inSeconds.toDouble(),
-                            onChanged: (value) {
-                              playerProvider.seek(Duration(seconds: value.toInt()));
-                            },
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              _formatDuration(playerProvider.position),
-                              style: TextStyle(color: Colors.grey[400]),
-                            ),
-                            Text(
-                              _formatDuration(playerProvider.duration),
-                              style: TextStyle(color: Colors.grey[400]),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  // Controls
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        IconButton(
-                          onPressed: playerProvider.toggleShuffle,
-                          icon: Icon(
-                            Icons.shuffle,
-                            color: playerProvider.isShuffleEnabled
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: playerProvider.previousSong,
-                          icon: const Icon(Icons.skip_previous, size: 40),
-                        ),
-                        Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          child: IconButton(
-                            onPressed: playerProvider.togglePlayPause,
-                            icon: Icon(
-                              playerProvider.isPlaying ? Icons.pause : Icons.play_arrow,
-                              size: 35,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: playerProvider.nextSong,
-                          icon: const Icon(Icons.skip_next, size: 40),
-                        ),
-                        IconButton(
-                          onPressed: playerProvider.toggleRepeat,
-                          icon: Icon(
-                            playerProvider.repeatMode == RepeatMode.one
-                                ? Icons.repeat_one
-                                : Icons.repeat,
-                            color: playerProvider.repeatMode != RepeatMode.off
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-  
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return '\${twoDigits(duration.inHours)}:\$twoDigitMinutes:\$twoDigitSeconds';
-  }
-}`,
-          language: 'dart'
-        }
-      },
-      features: [
-        'High-quality audio streaming',
-        'Custom playlist creation',
-        'Lyrics synchronization',
-        'Audio visualizer',
-        'Social sharing features',
-        'Offline music support',
-        'Background playback',
-        'Equalizer controls'
-      ],
-      useCase: 'Professional music streaming app with advanced audio features and social integration',
-      techStack: ['Flutter', 'Dart', 'just_audio', 'Provider', 'HTTP', 'Shared Preferences']
-    },
-
-    // React Native Templates
-    {
-      id: 'react-native-food-delivery',
-      name: 'React Native Food Delivery',
-      description: 'Complete food delivery app with restaurant discovery, ordering, real-time tracking, and payment integration',
-      category: 'Food & Delivery',
-      difficulty: 'Advanced',
-      tags: ['React Native', 'TypeScript', 'Maps', 'Payment', 'Real-time'],
-      icon: <Coffee className="w-8 h-8 text-orange-400" />,
-      estimatedTime: '5-6 weeks',
-      platforms: ['React Native', 'iOS', 'Android'],
-      rating: 4.7,
-      downloads: 3892,
-      files: {
-        'App.tsx': {
-          content: `import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { store, persistor } from './src/store';
-import HomeScreen from './src/screens/HomeScreen';
-import SearchScreen from './src/screens/SearchScreen';
-import OrdersScreen from './src/screens/OrdersScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
-import RestaurantScreen from './src/screens/RestaurantScreen';
-import CartScreen from './src/screens/CartScreen';
-import CheckoutScreen from './src/screens/CheckoutScreen';
-import OrderTrackingScreen from './src/screens/OrderTrackingScreen';
-import { colors } from './src/theme/colors';
-
-const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
-
-const TabNavigator = () => {
-  return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: string;
-
-          switch (route.name) {
-            case 'Home':
-              iconName = focused ? 'home' : 'home-outline';
-              break;
-            case 'Search':
-              iconName = focused ? 'search' : 'search-outline';
-              break;
-            case 'Orders':
-              iconName = focused ? 'receipt' : 'receipt-outline';
-              break;
-            case 'Profile':
-              iconName = focused ? 'person' : 'person-outline';
-              break;
-            default:
-              iconName = 'home-outline';
-          }
-
-          return <Icon name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.gray,
-        headerShown: false,
-      })}
-    >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Search" component={SearchScreen} />
-      <Tab.Screen name="Orders" component={OrdersScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-    </Tab.Navigator>
-  );
-};
-
-const App = () => {
-  return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Main" component={TabNavigator} />
-            <Stack.Screen name="Restaurant" component={RestaurantScreen} />
-            <Stack.Screen name="Cart" component={CartScreen} />
-            <Stack.Screen name="Checkout" component={CheckoutScreen} />
-            <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </PersistGate>
-    </Provider>
-  );
-};
-
-export default App;`,
-          language: 'typescript'
-        },
-        'HomeScreen.tsx': {
-          content: `import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  FlatList,
-  Dimensions,
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { RootState } from '../store';
-import { fetchRestaurants, fetchCategories } from '../store/slices/restaurantSlice';
-import SearchBar from '../components/SearchBar';
-import CategoryCard from '../components/CategoryCard';
-import RestaurantCard from '../components/RestaurantCard';
-import PromoCard from '../components/PromoCard';
-import { colors } from '../theme/colors';
-import { Restaurant, Category } from '../types';
-
-const { width } = Dimensions.get('window');
-
-const HomeScreen = ({ navigation }: any) => {
-  const dispatch = useDispatch();
-  const { restaurants, categories, loading } = useSelector(
-    (state: RootState) => state.restaurant
-  );
-  const { user } = useSelector((state: RootState) => state.auth);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-
-  useEffect(() => {
-    dispatch(fetchRestaurants());
-    dispatch(fetchCategories());
-  }, [dispatch]);
-
-  const filteredRestaurants = selectedCategory === 'all' 
-    ? restaurants 
-    : restaurants.filter(restaurant => 
-        restaurant.categories.includes(selectedCategory)
-      );
-
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <View style={styles.headerTop}>
-        <View>
-          <Text style={styles.greeting}>Good morning,</Text>
-          <Text style={styles.userName}>{user?.name || 'Guest'}</Text>
-        </View>
-        <TouchableOpacity 
-          style={styles.cartButton}
-          onPress={() => navigation.navigate('Cart')}
-        >
-          <Icon name="bag-outline" size={24} color={colors.primary} />
-          <View style={styles.cartBadge}>
-            <Text style={styles.cartBadgeText}>2</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.locationContainer}>
-        <Icon name="location-outline" size={16} color={colors.gray} />
-        <Text style={styles.locationText}>Deliver to: Home</Text>
-        <Icon name="chevron-down-outline" size={16} color={colors.gray} />
-      </View>
-    </View>
-  );
-
-  const renderSearchAndPromo = () => (
-    <View style={styles.searchPromoContainer}>
-      <SearchBar
-        placeholder="Search for restaurants or dishes..."
-        onPress={() => navigation.navigate('Search')}
-      />
-      
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        style={styles.promoScroll}
-      >
-        <PromoCard
-          title="Free Delivery"
-          subtitle="On orders over $30"
-          backgroundColor={colors.primary}
-          image="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=300&h=150&fit=crop"
-        />
-        <PromoCard
-          title="20% Off"
-          subtitle="First order discount"
-          backgroundColor={colors.secondary}
-          image="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&h=150&fit=crop"
-        />
-      </ScrollView>
-    </View>
-  );
-
-  const renderCategories = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Categories</Text>
-      <FlatList
-        data={[{ id: 'all', name: 'All', icon: 'grid-outline' }, ...categories]}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <CategoryCard
-            category={item}
-            isSelected={selectedCategory === item.id}
-            onPress={() => setSelectedCategory(item.id)}
-          />
-        )}
-        contentContainerStyle={styles.categoriesList}
-      />
-    </View>
-  );
-
-  const renderPopularRestaurants = () => (
-    <View style={styles.section}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Popular Restaurants</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAllText}>See all</Text>
-        </TouchableOpacity>
-      </View>
-      
-      <FlatList
-        data={filteredRestaurants.slice(0, 5)}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <RestaurantCard
-            restaurant={item}
-            onPress={() => navigation.navigate('Restaurant', { restaurant: item })}
-            style={styles.popularRestaurantCard}
-          />
-        )}
-        contentContainerStyle={styles.restaurantsList}
-      />
-    </View>
-  );
-
-  const renderNearbyRestaurants = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Nearby Restaurants</Text>
-      {filteredRestaurants.map((restaurant) => (
-        <RestaurantCard
-          key={restaurant.id}
-          restaurant={restaurant}
-          onPress={() => navigation.navigate('Restaurant', { restaurant })}
-          style={styles.nearbyRestaurantCard}
-          horizontal
-        />
-      ))}
-    </View>
-  );
-
-  return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {renderHeader()}
-      {renderSearchAndPromo()}
-      {renderCategories()}
-      {renderPopularRestaurants()}
-      {renderNearbyRestaurants()}
-    </ScrollView>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    padding: 20,
-    paddingTop: 50,
-    backgroundColor: colors.white,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  greeting: {
-    fontSize: 16,
-    color: colors.gray,
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.dark,
-  },
-  cartButton: {
-    position: 'relative',
-    padding: 10,
-    backgroundColor: colors.lightGray,
-    borderRadius: 12,
-  },
-  cartBadge: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cartBadgeText: {
-    color: colors.white,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  locationText: {
-    marginLeft: 5,
-    marginRight: 5,
-    color: colors.gray,
-    fontSize: 14,
-  },
-  searchPromoContainer: {
-    padding: 20,
-    backgroundColor: colors.white,
-  },
-  promoScroll: {
-    marginTop: 15,
-  },
-  section: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.dark,
-  },
-  seeAllText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  categoriesList: {
-    paddingVertical: 10,
-  },
-  restaurantsList: {
-    paddingVertical: 10,
-  },
-  popularRestaurantCard: {
-    width: width * 0.7,
-    marginRight: 15,
-  },
-  nearbyRestaurantCard: {
-    marginBottom: 15,
-  },
-});
-
-export default HomeScreen;`,
-          language: 'typescript'
-        },
-        'types.ts': {
-          content: `export interface Restaurant {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  rating: number;
-  reviewCount: number;
-  deliveryTime: string;
-  deliveryFee: number;
-  minimumOrder: number;
-  categories: string[];
-  cuisine: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  isOpen: boolean;
-  menu: MenuItem[];
-  promotions?: Promotion[];
-}
-
-export interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  category: string;
-  isVegetarian: boolean;
-  isSpicy: boolean;
-  allergens: string[];
-  customizations?: Customization[];
-}
-
-export interface Customization {
-  id: string;
-  name: string;
-  type: 'single' | 'multiple';
-  required: boolean;
-  options: CustomizationOption[];
-}
-
-export interface CustomizationOption {
-  id: string;
-  name: string;
-  price: number;
-}
-
-export interface Category {
-  id: string;
-  name: string;
-  icon: string;
-  image?: string;
-}
-
-export interface CartItem {
-  id: string;
-  menuItem: MenuItem;
-  quantity: number;
-  customizations: SelectedCustomization[];
-  specialInstructions?: string;
-}
-
-export interface SelectedCustomization {
-  customizationId: string;
-  optionIds: string[];
-}
-
-export interface Order {
-  id: string;
-  restaurantId: string;
-  restaurant: Restaurant;
-  items: CartItem[];
-  subtotal: number;
-  deliveryFee: number;
-  tax: number;
-  total: number;
-  status: OrderStatus;
-  deliveryAddress: Address;
-  paymentMethod: PaymentMethod;
-  estimatedDeliveryTime: Date;
-  actualDeliveryTime?: Date;
-  driver?: Driver;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export enum OrderStatus {
-  PLACED = 'placed',
-  CONFIRMED = 'confirmed',
-  PREPARING = 'preparing',
-  READY = 'ready',
-  PICKED_UP = 'picked_up',
-  ON_THE_WAY = 'on_the_way',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled',
-}
-
-export interface Address {
-  id: string;
-  label: string;
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  latitude: number;
-  longitude: number;
-  instructions?: string;
-}
-
-export interface PaymentMethod {
-  id: string;
-  type: 'credit_card' | 'debit_card' | 'paypal' | 'apple_pay' | 'google_pay';
-  last4?: string;
-  brand?: string;
-  isDefault: boolean;
-}
-
-export interface Driver {
-  id: string;
-  name: string;
-  photo: string;
-  rating: number;
-  phone: string;
-  vehicle: {
-    type: string;
-    model: string;
-    licensePlate: string;
-  };
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-}
-
-export interface Promotion {
-  id: string;
+interface HelpContent {
   title: string;
   description: string;
-  type: 'percentage' | 'fixed_amount' | 'free_delivery';
-  value: number;
-  minimumOrder?: number;
-  validUntil: Date;
-  code?: string;
+  steps: string[];
+  tips: string[];
+  troubleshooting: { issue: string; solution: string }[];
+  requirements: string[];
+  estimatedTime: string;
+  automation?: {
+    available: boolean;
+    description: string;
+    action: string;
+  };
 }
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  photo?: string;
-  addresses: Address[];
-  paymentMethods: PaymentMethod[];
-  favoriteRestaurants: string[];
-  orderHistory: Order[];
-}`,
-          language: 'typescript'
+const DeploymentAssistant: React.FC<DeploymentAssistantProps> = ({
+  currentStep,
+  platform,
+  isVisible,
+  onClose,
+  deploymentStatus,
+  currentError
+}) => {
+  const [activeTab, setActiveTab] = useState<'help' | 'automation' | 'troubleshooting' | 'security'>('help');
+  const [showSecrets, setShowSecrets] = useState(false);
+  const [automationProgress, setAutomationProgress] = useState(0);
+
+  const getHelpContent = (): HelpContent => {
+    const stepKey = \`\${platform}-\${currentStep}\`;
+    
+    const helpDatabase: Record<string, HelpContent> = {
+      'android-rust-build': {
+        title: 'Building Rust Code for Android',
+        description: 'Compiling Rust code for all Android architectures (ARM64, ARM, x86, x86_64)',
+        steps: [
+          'Install Android NDK and configure environment',
+          'Add Android targets to Rust toolchain',
+          'Set up cross-compilation environment',
+          'Build for each target architecture',
+          'Copy libraries to Android project'
+        ],
+        tips: [
+          'Use cargo-ndk for easier cross-compilation',
+          'Enable LTO for smaller binary sizes',
+          'Use strip to reduce library size',
+          'Test on different architectures'
+        ],
+        troubleshooting: [
+          {
+            issue: 'NDK not found error',
+            solution: 'Set ANDROID_NDK_ROOT environment variable to NDK path'
+          },
+          {
+            issue: 'Linker errors',
+            solution: 'Ensure correct target triple and NDK version compatibility'
+          },
+          {
+            issue: 'Large binary size',
+            solution: 'Enable LTO and use release profile optimizations'
+          }
+        ],
+        requirements: [
+          'Android NDK r25c or later',
+          'Rust toolchain with Android targets',
+          'Properly configured environment variables'
+        ],
+        estimatedTime: '3-5 minutes',
+        automation: {
+          available: true,
+          description: 'Automatically install NDK, add targets, and build for all architectures',
+          action: 'auto-build-rust'
         }
       },
-      features: [
-        'Restaurant discovery and search',
-        'Real-time order tracking',
-        'Multiple payment options',
-        'GPS-based delivery',
-        'Push notifications',
-        'Favorites and order history',
-        'Rating and review system',
-        'Promo codes and discounts'
-      ],
-      useCase: 'Complete food delivery platform with restaurant management and real-time tracking',
-      techStack: ['React Native', 'TypeScript', 'Redux', 'React Navigation', 'Maps', 'Push Notifications']
-    },
-
-    {
-      id: 'react-native-crypto-wallet',
-      name: 'React Native Crypto Wallet',
-      description: 'Secure cryptocurrency wallet with portfolio tracking, trading, and DeFi integration',
-      category: 'Finance',
-      difficulty: 'Expert',
-      tags: ['React Native', 'Blockchain', 'Security', 'Charts', 'Biometrics'],
-      icon: <Wallet className="w-8 h-8 text-yellow-400" />,
-      estimatedTime: '6-8 weeks',
-      platforms: ['React Native', 'iOS', 'Android'],
-      rating: 4.6,
-      downloads: 2156,
-      files: {
-        'App.tsx': {
-          content: `import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
-import SplashScreen from 'react-native-splash-screen';
-import { store, persistor } from './src/store';
-import AuthNavigator from './src/navigation/AuthNavigator';
-import MainNavigator from './src/navigation/MainNavigator';
-import { useSelector } from 'react-redux';
-import { RootState } from './src/store';
-import BiometricAuth from './src/components/BiometricAuth';
-import { WalletProvider } from './src/context/WalletContext';
-import { SecurityProvider } from './src/context/SecurityContext';
-
-const Stack = createStackNavigator();
-
-const AppContent = () => {
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  const { isUnlocked } = useSelector((state: RootState) => state.security);
-
-  useEffect(() => {
-    SplashScreen.hide();
-  }, []);
-
-  if (isAuthenticated && !isUnlocked) {
-    return <BiometricAuth />;
-  }
-
-  return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <Stack.Screen name="Main" component={MainNavigator} />
-        ) : (
-          <Stack.Screen name="Auth" component={AuthNavigator} />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-};
-
-const App = () => {
-  return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <SecurityProvider>
-          <WalletProvider>
-            <AppContent />
-          </WalletProvider>
-        </SecurityProvider>
-      </PersistGate>
-    </Provider>
-  );
-};
-
-export default App;`,
-          language: 'typescript'
-        },
-        'WalletScreen.tsx': {
-          content: `import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-  Dimensions,
-} from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { LineChart } from 'react-native-chart-kit';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { RootState } from '../store';
-import { fetchWalletData, fetchPrices } from '../store/slices/walletSlice';
-import CryptoCard from '../components/CryptoCard';
-import PortfolioChart from '../components/PortfolioChart';
-import QuickActions from '../components/QuickActions';
-import { colors } from '../theme/colors';
-import { formatCurrency, formatPercentage } from '../utils/formatters';
-
-const { width } = Dimensions.get('window');
-
-const WalletScreen = ({ navigation }: any) => {
-  const dispatch = useDispatch();
-  const { 
-    portfolio, 
-    totalBalance, 
-    totalChange24h, 
-    totalChangePercentage24h,
-    loading 
-  } = useSelector((state: RootState) => state.wallet);
-  
-  const [refreshing, setRefreshing] = useState(false);
-  const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
-
-  useEffect(() => {
-    dispatch(fetchWalletData());
-    dispatch(fetchPrices());
-  }, [dispatch]);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await Promise.all([
-      dispatch(fetchWalletData()),
-      dispatch(fetchPrices())
-    ]);
-    setRefreshing(false);
-  };
-
-  const timeframes = [
-    { label: '1H', value: '1h' },
-    { label: '24H', value: '24h' },
-    { label: '7D', value: '7d' },
-    { label: '30D', value: '30d' },
-    { label: '1Y', value: '1y' },
-  ];
-
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <View style={styles.headerTop}>
-        <Text style={styles.greeting}>Portfolio</Text>
-        <TouchableOpacity 
-          style={styles.settingsButton}
-          onPress={() => navigation.navigate('Settings')}
-        >
-          <Icon name="settings-outline" size={24} color={colors.white} />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.balanceContainer}>
-        <Text style={styles.totalBalance}>
-          {formatCurrency(totalBalance)}
-        </Text>
-        <View style={styles.changeContainer}>
-          <Icon 
-            name={totalChange24h >= 0 ? "trending-up" : "trending-down"} 
-            size={16} 
-            color={totalChange24h >= 0 ? colors.success : colors.error} 
-          />
-          <Text style={[
-            styles.changeText,
-            { color: totalChange24h >= 0 ? colors.success : colors.error }
-          ]}>
-            {formatCurrency(Math.abs(totalChange24h))} ({formatPercentage(totalChangePercentage24h)})
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderTimeframeSelector = () => (
-    <View style={styles.timeframeContainer}>
-      {timeframes.map((timeframe) => (
-        <TouchableOpacity
-          key={timeframe.value}
-          style={[
-            styles.timeframeButton,
-            selectedTimeframe === timeframe.value && styles.timeframeButtonActive
-          ]}
-          onPress={() => setSelectedTimeframe(timeframe.value)}
-        >
-          <Text style={[
-            styles.timeframeText,
-            selectedTimeframe === timeframe.value && styles.timeframeTextActive
-          ]}>
-            {timeframe.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-
-  const renderPortfolioChart = () => (
-    <View style={styles.chartContainer}>
-      <PortfolioChart 
-        timeframe={selectedTimeframe}
-        data={portfolio}
-      />
-    </View>
-  );
-
-  const renderQuickActions = () => (
-    <View style={styles.quickActionsContainer}>
-      <QuickActions
-        onSend={() => navigation.navigate('Send')}
-        onReceive={() => navigation.navigate('Receive')}
-        onBuy={() => navigation.navigate('Buy')}
-        onSwap={() => navigation.navigate('Swap')}
-      />
-    </View>
-  );
-
-  const renderAssets = () => (
-    <View style={styles.assetsContainer}>
-      <View style={styles.assetsHeader}>
-        <Text style={styles.assetsTitle}>Your Assets</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('AllAssets')}>
-          <Text style={styles.seeAllText}>See all</Text>
-        </TouchableOpacity>
-      </View>
-      
-      {portfolio.map((asset) => (
-        <CryptoCard
-          key={asset.symbol}
-          asset={asset}
-          onPress={() => navigation.navigate('AssetDetail', { asset })}
-        />
-      ))}
-    </View>
-  );
-
-  const renderDeFiSection = () => (
-    <View style={styles.defiContainer}>
-      <Text style={styles.sectionTitle}>DeFi Opportunities</Text>
-      
-      <TouchableOpacity 
-        style={styles.defiCard}
-        onPress={() => navigation.navigate('Staking')}
-      >
-        <View style={styles.defiCardContent}>
-          <View style={styles.defiIcon}>
-            <Icon name="trending-up" size={24} color={colors.primary} />
-          </View>
-          <View style={styles.defiInfo}>
-            <Text style={styles.defiTitle}>Staking Rewards</Text>
-            <Text style={styles.defiSubtitle}>Earn up to 12% APY</Text>
-          </View>
-          <Icon name="chevron-forward" size={20} color={colors.gray} />
-        </View>
-      </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={styles.defiCard}
-        onPress={() => navigation.navigate('Lending')}
-      >
-        <View style={styles.defiCardContent}>
-          <View style={styles.defiIcon}>
-            <Icon name="wallet" size={24} color={colors.secondary} />
-          </View>
-          <View style={styles.defiInfo}>
-            <Text style={styles.defiTitle}>Lending</Text>
-            <Text style={styles.defiSubtitle}>Lend and earn interest</Text>
-          </View>
-          <Icon name="chevron-forward" size={20} color={colors.gray} />
-        </View>
-      </TouchableOpacity>
-    </View>
-  );
-
-  return (
-    <ScrollView 
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      'android-gradle-build': {
+        title: 'Building Android AAB/APK',
+        description: 'Creating signed Android App Bundle or APK for Google Play Store',
+        steps: [
+          'Configure signing in build.gradle',
+          'Set up keystore properties',
+          'Run Gradle build task',
+          'Verify signed output',
+          'Check bundle/APK integrity'
+        ],
+        tips: [
+          'Use AAB format for Play Store (smaller downloads)',
+          'Enable R8 code shrinking for smaller size',
+          'Test on multiple devices before release',
+          'Use build cache to speed up builds'
+        ],
+        troubleshooting: [
+          {
+            issue: 'Keystore not found',
+            solution: 'Ensure keystore path is correct in keystore.properties'
+          },
+          {
+            issue: 'Signing failed',
+            solution: 'Check keystore and key passwords are correct'
+          },
+          {
+            issue: 'Build timeout',
+            solution: 'Increase Gradle daemon heap size and enable parallel builds'
+          }
+        ],
+        requirements: [
+          'Valid Android signing keystore',
+          'Configured keystore.properties',
+          'Android SDK and build tools'
+        ],
+        estimatedTime: '2-4 minutes',
+        automation: {
+          available: true,
+          description: 'Automatically configure signing and build signed AAB',
+          action: 'auto-build-android'
+        }
+      },
+      'android-upload-playstore': {
+        title: 'Uploading to Google Play Store',
+        description: 'Publishing your app to Google Play Console for distribution',
+        steps: [
+          'Set up Google Play Console API access',
+          'Configure service account credentials',
+          'Upload AAB to Play Console',
+          'Set release track (internal/alpha/beta/production)',
+          'Submit for review'
+        ],
+        tips: [
+          'Start with internal testing track',
+          'Use staged rollouts for production',
+          'Prepare store listing before upload',
+          'Test thoroughly on internal track first'
+        ],
+        troubleshooting: [
+          {
+            issue: 'API access denied',
+            solution: 'Ensure service account has proper permissions in Play Console'
+          },
+          {
+            issue: 'Upload failed',
+            solution: 'Check AAB is properly signed and meets Play Store requirements'
+          },
+          {
+            issue: 'Version code conflict',
+            solution: 'Increment version code in build.gradle'
+          }
+        ],
+        requirements: [
+          'Google Play Console account',
+          'Service account with API access',
+          'Signed AAB file',
+          'App listing configured'
+        ],
+        estimatedTime: '5-10 minutes',
+        automation: {
+          available: true,
+          description: 'Automatically upload to Play Console using Fastlane',
+          action: 'auto-upload-playstore'
+        }
       }
-      showsVerticalScrollIndicator={false}
-    >
-      {renderHeader()}
-      {renderTimeframeSelector()}
-      {renderPortfolioChart()}
-      {renderQuickActions()}
-      {renderAssets()}
-      {renderDeFiSection()}
-    </ScrollView>
+    };
+
+    return helpDatabase[stepKey] || {
+      title: 'Deployment Step',
+      description: 'General deployment guidance',
+      steps: ['Follow the deployment process'],
+      tips: ['Check logs for detailed information'],
+      troubleshooting: [],
+      requirements: [],
+      estimatedTime: 'Variable',
+      automation: { available: false, description: '', action: '' }
+    };
+  };
+
+  const handleAutomation = async (action: string) => {
+    setAutomationProgress(0);
+    
+    // Simulate automation progress
+    const interval = setInterval(() => {
+      setAutomationProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 500);
+
+    // Here you would trigger the actual automation
+    console.log(\`Triggering automation: \${action}\`);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const helpContent = getHelpContent();
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed right-4 top-20 bottom-4 w-96 bg-gray-800 border border-gray-700 rounded-lg shadow-2xl z-50 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex items-center space-x-2">
+          <HelpCircle className="w-5 h-5 text-blue-400" />
+          <h3 className="font-semibold text-white">Deployment Assistant</h3>
+        </div>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-white transition-colors"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Status Indicator */}
+      <div className="p-4 border-b border-gray-700">
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            {platform === 'android' && <Smartphone className="w-4 h-4 text-green-400" />}
+            {platform === 'ios' && <Smartphone className="w-4 h-4 text-blue-400" />}
+            {platform === 'web' && <Monitor className="w-4 h-4 text-purple-400" />}
+            <span className="text-sm font-medium text-gray-300">{platform.toUpperCase()}</span>
+          </div>
+          <div className="flex-1">
+            <div className={\`text-xs px-2 py-1 rounded \${
+              deploymentStatus === 'success' ? 'bg-green-900/30 text-green-300' :
+              deploymentStatus === 'error' ? 'bg-red-900/30 text-red-300' :
+              deploymentStatus === 'building' || deploymentStatus === 'deploying' ? 'bg-blue-900/30 text-blue-300' :
+              'bg-gray-900/30 text-gray-300'
+            }\`}>
+              {deploymentStatus.toUpperCase()}
+            </div>
+          </div>
+        </div>
+        {currentError && (
+          <div className="mt-2 p-2 bg-red-900/20 border border-red-500/30 rounded text-red-300 text-xs">
+            {currentError}
+          </div>
+        )}
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex border-b border-gray-700">
+        {[
+          { id: 'help', label: 'Help', icon: Info },
+          { id: 'automation', label: 'Auto', icon: Zap },
+          { id: 'troubleshooting', label: 'Debug', icon: AlertTriangle },
+          { id: 'security', label: 'Security', icon: Shield }
+        ].map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id as any)}
+            className={\`flex-1 flex items-center justify-center space-x-1 px-3 py-2 text-xs transition-colors \${
+              activeTab === id 
+                ? 'bg-blue-600 text-white' 
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }\`}
+          >
+            <Icon className="w-3 h-3" />
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {activeTab === 'help' && (
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold text-white mb-2">{helpContent.title}</h4>
+              <p className="text-gray-300 text-sm mb-3">{helpContent.description}</p>
+              
+              <div className="flex items-center space-x-2 text-xs text-gray-400 mb-3">
+                <Clock className="w-3 h-3" />
+                <span>Est. time: {helpContent.estimatedTime}</span>
+              </div>
+            </div>
+
+            <div>
+              <h5 className="font-medium text-white mb-2">Steps:</h5>
+              <ol className="space-y-1">
+                {helpContent.steps.map((step, index) => (
+                  <li key={index} className="flex items-start space-x-2 text-sm text-gray-300">
+                    <span className="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                      {index + 1}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div>
+              <h5 className="font-medium text-white mb-2">Requirements:</h5>
+              <ul className="space-y-1">
+                {helpContent.requirements.map((req, index) => (
+                  <li key={index} className="flex items-center space-x-2 text-sm text-gray-300">
+                    <CheckCircle className="w-3 h-3 text-green-400 flex-shrink-0" />
+                    <span>{req}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h5 className="font-medium text-white mb-2">Pro Tips:</h5>
+              <ul className="space-y-1">
+                {helpContent.tips.map((tip, index) => (
+                  <li key={index} className="flex items-start space-x-2 text-sm text-gray-300">
+                    <Zap className="w-3 h-3 text-yellow-400 flex-shrink-0 mt-0.5" />
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'automation' && (
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold text-white mb-2">Automation Available</h4>
+              {helpContent.automation?.available ? (
+                <div className="space-y-3">
+                  <p className="text-gray-300 text-sm">{helpContent.automation.description}</p>
+                  
+                  {automationProgress > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs text-gray-400">
+                        <span>Progress</span>
+                        <span>{automationProgress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: \`\${automationProgress}%\` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  <button
+                    onClick={() => handleAutomation(helpContent.automation!.action)}
+                    disabled={automationProgress > 0 && automationProgress < 100}
+                    className="w-full flex items-center justify-center space-x-2 py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg transition-colors"
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span>{automationProgress > 0 && automationProgress < 100 ? 'Running...' : 'Run Automation'}</span>
+                  </button>
+                </div>
+              ) : (
+                <p className="text-gray-400 text-sm">No automation available for this step.</p>
+              )}
+            </div>
+
+            <div>
+              <h5 className="font-medium text-white mb-2">Quick Actions:</h5>
+              <div className="space-y-2">
+                <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                  <Download className="w-3 h-3" />
+                  <span>Download Build Scripts</span>
+                </button>
+                <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                  <FileText className="w-3 h-3" />
+                  <span>Generate Config Files</span>
+                </button>
+                <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                  <Terminal className="w-3 h-3" />
+                  <span>Open Terminal Commands</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'troubleshooting' && (
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold text-white mb-2">Common Issues</h4>
+              {helpContent.troubleshooting.length > 0 ? (
+                <div className="space-y-3">
+                  {helpContent.troubleshooting.map((item, index) => (
+                    <div key={index} className="bg-gray-700 rounded-lg p-3">
+                      <div className="flex items-start space-x-2 mb-2">
+                        <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+                        <h6 className="font-medium text-white text-sm">{item.issue}</h6>
+                      </div>
+                      <p className="text-gray-300 text-sm ml-6">{item.solution}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 text-sm">No known issues for this step.</p>
+              )}
+            </div>
+
+            <div>
+              <h5 className="font-medium text-white mb-2">Debug Tools:</h5>
+              <div className="space-y-2">
+                <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                  <Terminal className="w-3 h-3" />
+                  <span>View Build Logs</span>
+                </button>
+                <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                  <Settings className="w-3 h-3" />
+                  <span>Check Configuration</span>
+                </button>
+                <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                  <ExternalLink className="w-3 h-3" />
+                  <span>Open Documentation</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'security' && (
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold text-white mb-2">Security Checklist</h4>
+              <div className="space-y-2">
+                {[
+                  'Keystore properly secured',
+                  'Environment variables configured',
+                  'Secrets not in version control',
+                  'Code signing certificates valid',
+                  'API keys properly scoped'
+                ].map((item, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-gray-300 text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h5 className="font-medium text-white mb-2">Sensitive Data:</h5>
+              <div className="space-y-2">
+                <div className="bg-gray-700 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">Keystore Password</span>
+                    <button
+                      onClick={() => setShowSecrets(!showSecrets)}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      {showSecrets ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <code className="flex-1 text-xs bg-gray-800 p-2 rounded text-gray-300">
+                      {showSecrets ? 'your_keystore_password' : '••••••••••••••••'}
+                    </code>
+                    <button
+                      onClick={() => copyToClipboard('your_keystore_password')}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h5 className="font-medium text-white mb-2">Security Actions:</h5>
+              <div className="space-y-2">
+                <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                  <Key className="w-3 h-3" />
+                  <span>Rotate Signing Keys</span>
+                </button>
+                <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                  <Shield className="w-3 h-3" />
+                  <span>Audit Permissions</span>
+                </button>
+                <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                  <Upload className="w-3 h-3" />
+                  <span>Backup Keystore</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    padding: 20,
-    paddingTop: 50,
-    backgroundColor: colors.primary,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  greeting: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
-  settingsButton: {
-    padding: 8,
-  },
-  balanceContainer: {
-    alignItems: 'center',
-  },
-  totalBalance: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: colors.white,
-    marginBottom: 8,
-  },
-  changeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  changeText: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  timeframeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: colors.white,
-  },
-  timeframeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  timeframeButtonActive: {
-    backgroundColor: colors.primary,
-  },
-  timeframeText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.gray,
-  },
-  timeframeTextActive: {
-    color: colors.white,
-  },
-  chartContainer: {
-    backgroundColor: colors.white,
-    paddingVertical: 20,
-  },
-  quickActionsContainer: {
-    backgroundColor: colors.white,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  assetsContainer: {
-    backgroundColor: colors.white,
-    marginTop: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  assetsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  assetsTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.dark,
-  },
-  seeAllText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  defiContainer: {
-    backgroundColor: colors.white,
-    marginTop: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.dark,
-    marginBottom: 15,
-  },
-  defiCard: {
-    backgroundColor: colors.lightGray,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-  },
-  defiCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  defiIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  defiInfo: {
-    flex: 1,
-  },
-  defiTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.dark,
-    marginBottom: 4,
-  },
-  defiSubtitle: {
-    fontSize: 14,
-    color: colors.gray,
-  },
-});
-
-export default WalletScreen;`,
+export default DeploymentAssistant;`,
           language: 'typescript'
-        }
-      },
-      features: [
-        'Multi-currency wallet support',
-        'Real-time price tracking',
-        'Portfolio analytics',
-        'DeFi integration (staking, lending)',
-        'Biometric security',
-        'Hardware wallet support',
-        'Trading and swapping',
-        'Transaction history'
-      ],
-      useCase: 'Professional cryptocurrency wallet with advanced trading and DeFi capabilities',
-      techStack: ['React Native', 'TypeScript', 'Redux', 'Biometrics', 'Charts', 'Blockchain APIs']
-    },
+        },
+        'AutomationPanel.tsx': {
+          content: `import React, { useState } from 'react';
+import { 
+  Zap, 
+  Play, 
+  Pause, 
+  CheckCircle, 
+  XCircle, 
+  Clock, 
+  Terminal,
+  Download,
+  Settings,
+  RefreshCw,
+  AlertTriangle
+} from 'lucide-react';
+import { useDeploymentAutomation } from '../hooks/useDeploymentAutomation';
 
-    // Additional Mobile Templates
-    {
-      id: 'flutter-video-streaming',
-      name: 'Flutter Video Streaming',
-      description: 'Netflix-style video streaming app with offline downloads, personalized recommendations, and social features',
-      category: 'Entertainment',
-      difficulty: 'Advanced',
-      tags: ['Flutter', 'Video', 'Streaming', 'Offline', 'AI'],
-      icon: <Video className="w-8 h-8 text-red-400" />,
-      estimatedTime: '5-7 weeks',
-      platforms: ['Flutter', 'iOS', 'Android'],
-      rating: 4.8,
-      downloads: 4567,
-      files: {
-        'main.dart': {
-          content: `import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
-import 'screens/splash_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/video_player_screen.dart';
-import 'screens/downloads_screen.dart';
-import 'screens/profile_screen.dart';
-import 'providers/video_provider.dart';
-import 'providers/download_provider.dart';
-import 'providers/user_provider.dart';
-import 'utils/app_theme.dart';
-
-void main() {
-  runApp(const VideoStreamingApp());
+interface AutomationPanelProps {
+  platform: string;
+  isVisible: boolean;
+  onClose: () => void;
 }
 
-class VideoStreamingApp extends StatelessWidget {
-  const VideoStreamingApp({Key? key}) : super(key: key);
+const AutomationPanel: React.FC<AutomationPanelProps> = ({ platform, isVisible, onClose }) => {
+  const { runAutomation, automationSteps, isRunning, progress } = useDeploymentAutomation();
+  const [selectedAutomation, setSelectedAutomation] = useState<string>('');
 
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => VideoProvider()),
-        ChangeNotifierProvider(create: (_) => DownloadProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-      ],
-      child: MaterialApp(
-        title: 'StreamFlix',
-        theme: AppTheme.darkTheme,
-        home: const SplashScreen(),
-        debugShowCheckedModeBanner: false,
-        routes: {
-          '/home': (context) => const HomeScreen(),
-          '/player': (context) => const VideoPlayerScreen(),
-          '/downloads': (context) => const DownloadsScreen(),
-          '/profile': (context) => const ProfileScreen(),
-        },
-      ),
-    );
-  }
-}`,
-          language: 'dart'
-        }
-      },
-      features: [
-        'HD/4K video streaming',
-        'Offline video downloads',
-        'Personalized recommendations',
-        'Multiple user profiles',
-        'Chromecast support',
-        'Subtitle support',
-        'Parental controls',
-        'Social sharing features'
-      ],
-      useCase: 'Professional video streaming platform with Netflix-like features and offline capabilities',
-      techStack: ['Flutter', 'Dart', 'Video Player', 'Provider', 'HTTP', 'SQLite']
-    },
-
+  const automationOptions = [
     {
-      id: 'ios-swiftui-ar-shopping',
-      name: 'iOS AR Shopping App',
-      description: 'Augmented reality shopping experience with 3D product visualization and virtual try-on features',
-      category: 'AR/Shopping',
-      difficulty: 'Expert',
-      tags: ['SwiftUI', 'ARKit', 'RealityKit', '3D', 'Shopping'],
-      icon: <Smartphone className="w-8 h-8 text-purple-400" />,
-      estimatedTime: '6-8 weeks',
-      platforms: ['iOS'],
-      rating: 4.9,
-      downloads: 1234,
-      files: {
-        'ContentView.swift': {
-          content: `import SwiftUI
-import ARKit
-import RealityKit
-
-struct ContentView: View {
-    @StateObject private var arManager = ARManager()
-    @StateObject private var shoppingCart = ShoppingCart()
-    @State private var selectedTab = 0
-    
-    var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView()
-                .tabItem {
-                    Image(systemName: "house.fill")
-                    Text("Home")
-                }
-                .tag(0)
-            
-            ARView()
-                .tabItem {
-                    Image(systemName: "camera.viewfinder")
-                    Text("AR Try-On")
-                }
-                .tag(1)
-            
-            CartView()
-                .tabItem {
-                    Image(systemName: "cart.fill")
-                    Text("Cart")
-                }
-                .tag(2)
-            
-            ProfileView()
-                .tabItem {
-                    Image(systemName: "person.fill")
-                    Text("Profile")
-                }
-                .tag(3)
-        }
-        .environmentObject(arManager)
-        .environmentObject(shoppingCart)
-    }
-}`,
-          language: 'swift'
-        }
-      },
-      features: [
-        'AR product visualization',
-        'Virtual try-on for clothing',
-        '3D product models',
-        'Room placement preview',
-        'Social AR sharing',
-        'Size recommendation AI',
-        'Real-time lighting',
-        'Multi-user AR sessions'
-      ],
-      useCase: 'Revolutionary shopping experience using augmented reality for product visualization',
-      techStack: ['SwiftUI', 'ARKit', 'RealityKit', 'Core ML', 'Vision', 'Metal']
+      id: 'full-deployment',
+      name: 'Full Deployment Pipeline',
+      description: 'Complete automated deployment from build to store upload',
+      estimatedTime: '15-20 minutes',
+      steps: ['Build Rust', 'Build App', 'Sign & Package', 'Upload to Store'],
+      icon: <Zap className="w-5 h-5 text-orange-400" />
     },
-
     {
-      id: 'android-kotlin-iot-home',
-      name: 'Android IoT Smart Home',
-      description: 'Comprehensive smart home control app with device management, automation, and energy monitoring',
-      category: 'IoT/Smart Home',
-      difficulty: 'Advanced',
-      tags: ['Kotlin', 'IoT', 'Bluetooth', 'WiFi', 'Automation'],
-      icon: <Settings className="w-8 h-8 text-blue-400" />,
-      estimatedTime: '4-6 weeks',
-      platforms: ['Android'],
-      rating: 4.7,
-      downloads: 2890,
-      files: {
-        'MainActivity.kt': {
-          content: `package com.rustyclint.smarthome
-
-import android.Manifest
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
-import android.content.pm.PackageManager
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.rustyclint.smarthome.ui.theme.SmartHomeTheme
-import com.rustyclint.smarthome.ui.screens.MainScreen
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class MainActivity : ComponentActivity() {
-    
-    private val bluetoothManager by lazy {
-        getSystemService(BluetoothManager::class.java)
-    }
-    
-    private val bluetoothAdapter by lazy {
-        bluetoothManager?.adapter
-    }
-    
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.values.all { it }
-        if (allGranted) {
-            initializeConnections()
-        }
-    }
-    
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        
-        requestPermissions()
-        
-        setContent {
-            SmartHomeTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MainScreen()
-                }
-            }
-        }
-    }
-    
-    private fun requestPermissions() {
-        val permissions = arrayOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_WIFI_STATE,
-            Manifest.permission.CHANGE_WIFI_STATE
-        )
-        
-        val permissionsToRequest = permissions.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
-        
-        if (permissionsToRequest.isNotEmpty()) {
-            permissionLauncher.launch(permissionsToRequest.toTypedArray())
-        } else {
-            initializeConnections()
-        }
-    }
-    
-    private fun initializeConnections() {
-        // Initialize Bluetooth and WiFi connections
-        // Start device discovery
-    }
-}`,
-          language: 'kotlin'
-        }
-      },
-      features: [
-        'Device discovery and pairing',
-        'Voice control integration',
-        'Energy usage monitoring',
-        'Automation rules engine',
-        'Security camera integration',
-        'Weather-based automation',
-        'Remote access via cloud',
-        'Family member management'
-      ],
-      useCase: 'Complete smart home management system with IoT device control and automation',
-      techStack: ['Kotlin', 'Jetpack Compose', 'Bluetooth', 'WiFi', 'MQTT', 'Room', 'Hilt']
+      id: 'build-only',
+      name: 'Build & Package Only',
+      description: 'Build and package app without uploading to store',
+      estimatedTime: '8-12 minutes',
+      steps: ['Build Rust', 'Build App', 'Sign & Package'],
+      icon: <Settings className="w-5 h-5 text-blue-400" />
     },
-
     {
-      id: 'react-native-language-learning',
-      name: 'React Native Language Learning',
-      description: 'Interactive language learning app with speech recognition, AI tutoring, and gamification',
-      category: 'Education',
-      difficulty: 'Advanced',
-      tags: ['React Native', 'AI', 'Speech', 'Gamification', 'Education'],
-      icon: <BookOpen className="w-8 h-8 text-indigo-400" />,
-      estimatedTime: '5-6 weeks',
-      platforms: ['React Native', 'iOS', 'Android'],
-      rating: 4.8,
-      downloads: 3456,
-      files: {
-        'App.tsx': {
-          content: `import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Provider } from 'react-redux';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { store } from './src/store';
-import LessonsScreen from './src/screens/LessonsScreen';
-import PracticeScreen from './src/screens/PracticeScreen';
-import ProgressScreen from './src/screens/ProgressScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
-import { colors } from './src/theme/colors';
-
-const Tab = createBottomTabNavigator();
-
-const App = () => {
-  return (
-    <Provider store={store}>
-      <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            tabBarIcon: ({ focused, color, size }) => {
-              let iconName: string;
-
-              switch (route.name) {
-                case 'Lessons':
-                  iconName = focused ? 'book' : 'book-outline';
-                  break;
-                case 'Practice':
-                  iconName = focused ? 'mic' : 'mic-outline';
-                  break;
-                case 'Progress':
-                  iconName = focused ? 'stats-chart' : 'stats-chart-outline';
-                  break;
-                case 'Profile':
-                  iconName = focused ? 'person' : 'person-outline';
-                  break;
-                default:
-                  iconName = 'book-outline';
-              }
-
-              return <Icon name={iconName} size={size} color={color} />;
-            },
-            tabBarActiveTintColor: colors.primary,
-            tabBarInactiveTintColor: colors.gray,
-            headerShown: false,
-          })}
-        >
-          <Tab.Screen name="Lessons" component={LessonsScreen} />
-          <Tab.Screen name="Practice" component={PracticeScreen} />
-          <Tab.Screen name="Progress" component={ProgressScreen} />
-          <Tab.Screen name="Profile" component={ProfileScreen} />
-        </Tab.Navigator>
-      </NavigationContainer>
-    </Provider>
-  );
-};
-
-export default App;`,
-          language: 'typescript'
-        }
-      },
-      features: [
-        'Interactive lessons with AI',
-        'Speech recognition practice',
-        'Pronunciation feedback',
-        'Gamified learning paths',
-        'Offline lesson downloads',
-        'Progress tracking',
-        'Social learning features',
-        'Adaptive difficulty'
-      ],
-      useCase: 'Comprehensive language learning platform with AI-powered tutoring and speech recognition',
-      techStack: ['React Native', 'TypeScript', 'Speech Recognition', 'AI/ML', 'Redux', 'Animations']
+      id: 'rust-build',
+      name: 'Rust Build Only',
+      description: 'Build Rust code for target platform',
+      estimatedTime: '3-5 minutes',
+      steps: ['Setup Environment', 'Add Targets', 'Build Libraries'],
+      icon: <Terminal className="w-5 h-5 text-green-400" />
     }
   ];
 
-  const categories = ['all', 'Social', 'Finance', 'E-commerce', 'Health & Fitness', 'Travel', 'Entertainment', 'Food & Delivery', 'AR/Shopping', 'IoT/Smart Home', 'Education'];
-  const difficulties = ['all', 'Beginner', 'Intermediate', 'Advanced', 'Expert'];
-  const platforms = ['all', 'iOS', 'Android', 'Flutter', 'React Native'];
-
-  const filteredTemplates = templates.filter(template => {
-    const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
-    const matchesDifficulty = selectedDifficulty === 'all' || template.difficulty === selectedDifficulty;
-    const matchesPlatform = selectedPlatform === 'all' || template.platforms.includes(selectedPlatform as any);
-    
-    return matchesSearch && matchesCategory && matchesDifficulty && matchesPlatform;
-  });
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Beginner': return 'text-green-400 bg-green-900/20';
-      case 'Intermediate': return 'text-yellow-400 bg-yellow-900/20';
-      case 'Advanced': return 'text-orange-400 bg-orange-900/20';
-      case 'Expert': return 'text-red-400 bg-red-900/20';
-      default: return 'text-gray-400 bg-gray-900/20';
-    }
+  const handleRunAutomation = async (automationId: string) => {
+    setSelectedAutomation(automationId);
+    await runAutomation(automationId, platform);
   };
 
-  const getPlatformIcon = (platform: string) => {
-    switch (platform) {
-      case 'iOS': return <Smartphone className="w-4 h-4 text-blue-400" />;
-      case 'Android': return <Smartphone className="w-4 h-4 text-green-400" />;
-      case 'Flutter': return <Tablet className="w-4 h-4 text-cyan-400" />;
-      case 'React Native': return <Monitor className="w-4 h-4 text-purple-400" />;
-      case 'Web': return <Globe className="w-4 h-4 text-orange-400" />;
-      default: return <Code className="w-4 h-4 text-gray-400" />;
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="w-4 h-4 text-green-400" />;
+      case 'failed':
+        return <XCircle className="w-4 h-4 text-red-400" />;
+      case 'running':
+        return <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-400" />;
     }
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div className="bg-gray-800 rounded-lg max-w-7xl w-full h-[90vh] flex flex-col border border-gray-700">
-        {/* Header */}
-        <div className="p-6 border-b border-gray-700">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-orange-600 rounded-lg">
-                <Smartphone className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">Mobile Development Templates</h2>
-                <p className="text-gray-400">Choose from 10+ professional mobile app templates</p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors text-xl"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+    <div className="fixed left-4 top-20 bottom-4 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-2xl z-50 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex items-center space-x-2">
+          <Zap className="w-5 h-5 text-orange-400" />
+          <h3 className="font-semibold text-white">Automation Center</h3>
+        </div>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-white transition-colors"
+        >
+          ✕
+        </button>
+      </div>
 
-          {/* Search and Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search templates..."
-                className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-orange-500 focus:outline-none"
+      {/* Platform Info */}
+      <div className="p-4 border-b border-gray-700">
+        <div className="text-sm text-gray-400 mb-1">Target Platform</div>
+        <div className="text-lg font-semibold text-white capitalize">{platform}</div>
+      </div>
+
+      {/* Automation Options */}
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="space-y-4">
+          <h4 className="font-medium text-white">Available Automations</h4>
+          
+          {automationOptions.map((option) => (
+            <div
+              key={option.id}
+              className={\`p-4 rounded-lg border transition-all cursor-pointer \${
+                selectedAutomation === option.id
+                  ? 'border-orange-500 bg-orange-900/20'
+                  : 'border-gray-600 bg-gray-700 hover:border-gray-500'
+              }\`}
+              onClick={() => setSelectedAutomation(option.id)}
+            >
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 mt-1">
+                  {option.icon}
+                </div>
+                <div className="flex-1">
+                  <h5 className="font-medium text-white mb-1">{option.name}</h5>
+                  <p className="text-gray-300 text-sm mb-2">{option.description}</p>
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span>Est. time: {option.estimatedTime}</span>
+                    <span>{option.steps.length} steps</span>
+                  </div>
+                </div>
+              </div>
+              
+              {selectedAutomation === option.id && (
+                <div className="mt-3 pt-3 border-t border-gray-600">
+                  <div className="space-y-1">
+                    {option.steps.map((step, index) => (
+                      <div key={index} className="flex items-center space-x-2 text-sm text-gray-300">
+                        <div className="w-4 h-4 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white">
+                          {index + 1}
+                        </div>
+                        <span>{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <button
+                    onClick={() => handleRunAutomation(option.id)}
+                    disabled={isRunning}
+                    className="w-full mt-3 flex items-center justify-center space-x-2 py-2 px-4 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 text-white rounded-lg transition-colors"
+                  >
+                    {isRunning ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Running...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4" />
+                        <span>Run Automation</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Progress Section */}
+        {isRunning && (
+          <div className="mt-6 p-4 bg-gray-700 rounded-lg">
+            <div className="flex items-center justify-between mb-3">
+              <h5 className="font-medium text-white">Automation Progress</h5>
+              <span className="text-sm text-gray-400">{Math.round(progress)}%</span>
+            </div>
+            
+            <div className="w-full bg-gray-600 rounded-full h-2 mb-4">
+              <div 
+                className="bg-orange-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: \`\${progress}%\` }}
               />
             </div>
             
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-orange-500 focus:outline-none"
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category}
-                </option>
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {automationSteps.map((step) => (
+                <div key={step.id} className="flex items-center space-x-2 text-sm">
+                  {getStatusIcon(step.status)}
+                  <span className={\`\${
+                    step.status === 'completed' ? 'text-green-300' :
+                    step.status === 'failed' ? 'text-red-300' :
+                    step.status === 'running' ? 'text-blue-300' :
+                    'text-gray-400'
+                  }\`}>
+                    {step.name}
+                  </span>
+                  {step.duration && (
+                    <span className="text-xs text-gray-500">
+                      ({(step.duration / 1000).toFixed(1)}s)
+                    </span>
+                  )}
+                </div>
               ))}
-            </select>
-            
-            <select
-              value={selectedDifficulty}
-              onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-orange-500 focus:outline-none"
-            >
-              {difficulties.map(difficulty => (
-                <option key={difficulty} value={difficulty}>
-                  {difficulty === 'all' ? 'All Levels' : difficulty}
-                </option>
-              ))}
-            </select>
-            
-            <select
-              value={selectedPlatform}
-              onChange={(e) => setSelectedPlatform(e.target.value)}
-              className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-orange-500 focus:outline-none"
-            >
-              {platforms.map(platform => (
-                <option key={platform} value={platform}>
-                  {platform === 'all' ? 'All Platforms' : platform}
-                </option>
-              ))}
-            </select>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Actions */}
+        <div className="mt-6">
+          <h5 className="font-medium text-white mb-3">Quick Actions</h5>
+          <div className="space-y-2">
+            <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+              <Download className="w-3 h-3" />
+              <span>Download Build Scripts</span>
+            </button>
+            <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+              <Settings className="w-3 h-3" />
+              <span>Configure Environment</span>
+            </button>
+            <button className="w-full flex items-center space-x-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+              <Terminal className="w-3 h-3" />
+              <span>Open Terminal</span>
+            </button>
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
 
-        {/* Templates Grid */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTemplates.map((template) => (
-              <div
-                key={template.id}
-                className="bg-gray-700 rounded-lg border border-gray-600 hover:border-orange-500 transition-all duration-300 transform hover:scale-105 cursor-pointer"
-                onClick={() => onSelectTemplate(template)}
-              >
-                <div className="p-6">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
+export default AutomationPanel;`,
+          language: 'typescript'
+        },
+        'useDeploymentAutomation.ts': {
+          content: `import { useState, useCallback } from 'react';
+
+interface AutomationStep {
+  id: string;
+  name: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  command?: string;
+  output?: string;
+  duration?: number;
+}
+
+interface UseDeploymentAutomationReturn {
+  runAutomation: (action: string, platform: string) => Promise<void>;
+  automationSteps: AutomationStep[];
+  isRunning: boolean;
+  progress: number;
+}
+
+export const useDeploymentAutomation = (): UseDeploymentAutomationReturn => {
+  const [automationSteps, setAutomationSteps] = useState<AutomationStep[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const updateStep = (stepId: string, updates: Partial<AutomationStep>) => {
+    setAutomationSteps(prev => prev.map(step => 
+      step.id === stepId ? { ...step, ...updates } : step
+    ));
+  };
+
+  const executeCommand = async (command: string, stepId: string): Promise<string> => {
+    updateStep(stepId, { status: 'running', command });
+    
+    // Simulate command execution
+    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+    
+    // Mock command outputs based on the command
+    let output = '';
+    
+    if (command.includes('rustup target add')) {
+      output = \`info: downloading component 'rust-std' for 'aarch64-linux-android'
+info: installing component 'rust-std' for 'aarch64-linux-android'
+info: downloading component 'rust-std' for 'armv7-linux-androideabi'
+info: installing component 'rust-std' for 'armv7-linux-androideabi'\`;
+    } else if (command.includes('cargo build')) {
+      output = \`   Compiling rustyclint v0.1.0
+    Finished release [optimized] target(s) in 45.67s\`;
+    } else if (command.includes('gradlew')) {
+      output = \`> Task :app:bundleRelease
+BUILD SUCCESSFUL in 2m 34s
+1 actionable task: 1 executed\`;
+    } else if (command.includes('wasm-pack')) {
+      output = \`[INFO]: Checking for the Wasm target...
+[INFO]: Compiling to Wasm...
+[INFO]: Optimizing wasm binaries with wasm-opt...
+[INFO]: Done in 23.45s\`;
+    } else if (command.includes('xcodebuild')) {
+      output = \`** BUILD SUCCEEDED **
+Archive: /path/to/App.xcarchive\`;
+    }
+    
+    updateStep(stepId, { status: 'completed', output });
+    return output;
+  };
+
+  const getAutomationSteps = (action: string, platform: string): AutomationStep[] => {
+    switch (action) {
+      case 'auto-build-rust':
+        if (platform === 'android') {
+          return [
+            { id: 'install-ndk', name: 'Install Android NDK', status: 'pending' },
+            { id: 'add-targets', name: 'Add Android Targets', status: 'pending' },
+            { id: 'build-aarch64', name: 'Build ARM64', status: 'pending' },
+            { id: 'build-armv7', name: 'Build ARMv7', status: 'pending' },
+            { id: 'build-x86', name: 'Build x86', status: 'pending' },
+            { id: 'build-x86_64', name: 'Build x86_64', status: 'pending' },
+            { id: 'copy-libs', name: 'Copy Libraries', status: 'pending' }
+          ];
+        }
+        break;
+      
+      case 'auto-build-android':
+        return [
+          { id: 'check-keystore', name: 'Verify Keystore', status: 'pending' },
+          { id: 'configure-signing', name: 'Configure Signing', status: 'pending' },
+          { id: 'gradle-clean', name: 'Clean Project', status: 'pending' },
+          { id: 'gradle-build', name: 'Build AAB', status: 'pending' },
+          { id: 'verify-signature', name: 'Verify Signature', status: 'pending' }
+        ];
+      
+      case 'auto-build-wasm':
+        return [
+          { id: 'install-wasm-pack', name: 'Install wasm-pack', status: 'pending' },
+          { id: 'add-wasm-target', name: 'Add WASM Target', status: 'pending' },
+          { id: 'build-wasm', name: 'Build WebAssembly', status: 'pending' },
+          { id: 'optimize-wasm', name: 'Optimize Binary', status: 'pending' },
+          { id: 'generate-bindings', name: 'Generate JS Bindings', status: 'pending' }
+        ];
+      
+      case 'auto-build-ios':
+        return [
+          { id: 'check-certificates', name: 'Check Certificates', status: 'pending' },
+          { id: 'configure-signing', name: 'Configure Code Signing', status: 'pending' },
+          { id: 'build-rust-ios', name: 'Build Rust for iOS', status: 'pending' },
+          { id: 'xcode-build', name: 'Build with Xcode', status: 'pending' },
+          { id: 'create-archive', name: 'Create Archive', status: 'pending' },
+          { id: 'export-ipa', name: 'Export IPA', status: 'pending' }
+        ];
+      
+      case 'auto-upload-playstore':
+        return [
+          { id: 'check-credentials', name: 'Check API Credentials', status: 'pending' },
+          { id: 'validate-aab', name: 'Validate AAB', status: 'pending' },
+          { id: 'upload-aab', name: 'Upload to Play Console', status: 'pending' },
+          { id: 'set-track', name: 'Set Release Track', status: 'pending' },
+          { id: 'submit-review', name: 'Submit for Review', status: 'pending' }
+        ];
+      
+      default:
+        return [];
+    }
+    
+    return [];
+  };
+
+  const runAutomation = useCallback(async (action: string, platform: string) => {
+    setIsRunning(true);
+    setProgress(0);
+    
+    const steps = getAutomationSteps(action, platform);
+    setAutomationSteps(steps);
+    
+    try {
+      for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        setProgress((i / steps.length) * 100);
+        
+        // Execute the automation step
+        const command = getCommandForStep(step.id, platform);
+        await executeCommand(command, step.id);
+        
+        // Small delay between steps
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      setProgress(100);
+    } catch (error) {
+      console.error('Automation failed:', error);
+      // Mark current step as failed
+      const currentStepIndex = automationSteps.findIndex(s => s.status === 'running');
+      if (currentStepIndex >= 0) {
+        updateStep(automationSteps[currentStepIndex].id, { 
+          status: 'failed', 
+          output: \`Error: \${error}\` 
+        });
+      }
+    } finally {
+      setIsRunning(false);
+    }
+  }, [automationSteps]);
+
+  const getCommandForStep = (stepId: string, platform: string): string => {
+    const commands: Record<string, string> = {
+      'install-ndk': 'echo "Installing Android NDK..."',
+      'add-targets': 'rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android',
+      'build-aarch64': 'cargo build --target aarch64-linux-android --release',
+      'build-armv7': 'cargo build --target armv7-linux-androideabi --release',
+      'build-x86': 'cargo build --target i686-linux-android --release',
+      'build-x86_64': 'cargo build --target x86_64-linux-android --release',
+      'copy-libs': 'echo "Copying native libraries to Android project..."',
+      'check-keystore': 'echo "Verifying Android keystore..."',
+      'configure-signing': 'echo "Configuring Android signing..."',
+      'gradle-clean': 'cd android && ./gradlew clean',
+      'gradle-build': 'cd android && ./gradlew bundleRelease',
+      'verify-signature': 'echo "Verifying AAB signature..."',
+      'install-wasm-pack': 'cargo install wasm-pack',
+      'add-wasm-target': 'rustup target add wasm32-unknown-unknown',
+      'build-wasm': 'wasm-pack build --target web --release',
+      'optimize-wasm': 'wasm-opt -Oz --enable-mutable-globals pkg/rustyclint_bg.wasm -o pkg/rustyclint_bg.wasm',
+      'generate-bindings': 'echo "Generating JavaScript bindings..."',
+      'check-certificates': 'echo "Checking iOS certificates..."',
+      'build-rust-ios': 'cargo build --target aarch64-apple-ios --release',
+      'xcode-build': 'xcodebuild -project ios/App.xcodeproj -scheme App -configuration Release build',
+      'create-archive': 'xcodebuild -project ios/App.xcodeproj -scheme App -configuration Release archive',
+      'export-ipa': 'xcodebuild -exportArchive -archivePath build/App.xcarchive -exportPath build/',
+      'check-credentials': 'echo "Checking Google Play API credentials..."',
+      'validate-aab': 'echo "Validating AAB file..."',
+      'upload-aab': 'fastlane supply --aab android/app/build/outputs/bundle/release/app-release.aab',
+      'set-track': 'echo "Setting release track to internal..."',
+      'submit-review': 'echo "Submitting for review..."'
+    };
+    
+    return commands[stepId] || \`echo "Executing \${stepId}..."\`;
+  };
+
+  return {
+    runAutomation,
+    automationSteps,
+    isRunning,
+    progress
+  };
+};`,
+          language: 'typescript'
+        },
+        'android-automation.sh': {
+          content: `#!/bin/bash
+
+# Android Deployment Automation Script
+# Provides intelligent automation for Android deployment
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Logging functions
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+log_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Progress tracking
+TOTAL_STEPS=0
+CURRENT_STEP=0
+
+update_progress() {
+    CURRENT_STEP=$((CURRENT_STEP + 1))
+    local percentage=$((CURRENT_STEP * 100 / TOTAL_STEPS))
+    echo "PROGRESS:$percentage"
+}
+
+# Check prerequisites
+check_prerequisites() {
+    log_info "Checking prerequisites..."
+    
+    # Check if we're in the right directory
+    if [ ! -d "android" ]; then
+        log_error "Android directory not found. Run this from your project root."
+        exit 1
+    fi
+    
+    # Check for Rust
+    if ! command -v cargo &> /dev/null; then
+        log_error "Rust/Cargo not found. Please install Rust."
+        exit 1
+    fi
+    
+    # Check for Java
+    if ! command -v java &> /dev/null; then
+        log_error "Java not found. Please install Java JDK."
+        exit 1
+    fi
+    
+    # Check for Android SDK
+    if [ -z "$ANDROID_HOME" ] && [ -z "$ANDROID_SDK_ROOT" ]; then
+        log_warning "ANDROID_HOME or ANDROID_SDK_ROOT not set. Attempting to detect..."
+        
+        # Common Android SDK locations
+        POSSIBLE_PATHS=(
+            "$HOME/Android/Sdk"
+            "$HOME/Library/Android/sdk"
+            "/usr/local/android-sdk"
+            "/opt/android-sdk"
+        )
+        
+        for path in "${POSSIBLE_PATHS[@]}"; do
+            if [ -d "$path" ]; then
+                export ANDROID_HOME="$path"
+                export ANDROID_SDK_ROOT="$path"
+                log_success "Found Android SDK at: $path"
+                break
+            fi
+        done
+        
+        if [ -z "$ANDROID_HOME" ]; then
+            log_error "Android SDK not found. Please install Android SDK."
+            exit 1
+        fi
+    fi
+    
+    log_success "Prerequisites check passed"
+}
+
+# Setup Android NDK
+setup_ndk() {
+    log_info "Setting up Android NDK..."
+    
+    # Check if NDK is already available
+    if [ -n "$ANDROID_NDK_ROOT" ] && [ -d "$ANDROID_NDK_ROOT" ]; then
+        log_success "NDK already configured at: $ANDROID_NDK_ROOT"
+        return
+    fi
+    
+    # Try to find NDK in SDK directory
+    if [ -d "$ANDROID_HOME/ndk" ]; then
+        # Find the latest NDK version
+        NDK_VERSION=$(ls "$ANDROID_HOME/ndk" | sort -V | tail -n 1)
+        if [ -n "$NDK_VERSION" ]; then
+            export ANDROID_NDK_ROOT="$ANDROID_HOME/ndk/$NDK_VERSION"
+            log_success "Found NDK version: $NDK_VERSION"
+        fi
+    fi
+    
+    if [ -z "$ANDROID_NDK_ROOT" ]; then
+        log_warning "NDK not found. Attempting to install..."
+        
+        # Install NDK using sdkmanager
+        if command -v sdkmanager &> /dev/null; then
+            sdkmanager "ndk;25.2.9519653"
+            export ANDROID_NDK_ROOT="$ANDROID_HOME/ndk/25.2.9519653"
+        else
+            log_error "NDK not found and sdkmanager not available. Please install NDK manually."
+            exit 1
+        fi
+    fi
+    
+    update_progress
+}
+
+# Add Rust targets for Android
+add_rust_targets() {
+    log_info "Adding Rust targets for Android..."
+    
+    local targets=(
+        "aarch64-linux-android"
+        "armv7-linux-androideabi"
+        "i686-linux-android"
+        "x86_64-linux-android"
+    )
+    
+    for target in "${targets[@]}"; do
+        log_info "Adding target: $target"
+        rustup target add "$target"
+    done
+    
+    log_success "All Android targets added"
+    update_progress
+}
+
+# Build Rust code for Android
+build_rust_android() {
+    log_info "Building Rust code for Android architectures..."
+    
+    # Set up environment for cross-compilation
+    export CC_aarch64_linux_android="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"
+    export CC_armv7_linux_androideabi="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang"
+    export CC_i686_linux_android="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android21-clang"
+    export CC_x86_64_linux_android="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android21-clang"
+    
+    # Detect OS for NDK path
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        NDK_HOST="darwin-x86_64"
+    else
+        NDK_HOST="linux-x86_64"
+    fi
+    
+    # Update CC paths for detected OS
+    export CC_aarch64_linux_android="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/$NDK_HOST/bin/aarch64-linux-android21-clang"
+    export CC_armv7_linux_androideabi="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/$NDK_HOST/bin/armv7a-linux-androideabi21-clang"
+    export CC_i686_linux_android="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/$NDK_HOST/bin/i686-linux-android21-clang"
+    export CC_x86_64_linux_android="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/$NDK_HOST/bin/x86_64-linux-android21-clang"
+    
+    local targets=(
+        "aarch64-linux-android"
+        "armv7-linux-androideabi"
+        "i686-linux-android"
+        "x86_64-linux-android"
+    )
+    
+    for target in "${targets[@]}"; do
+        log_info "Building for target: $target"
+        cargo build --target "$target" --release
+        
+        if [ $? -eq 0 ]; then
+            log_success "Build successful for $target"
+        else
+            log_error "Build failed for $target"
+            exit 1
+        fi
+    done
+    
+    update_progress
+}
+
+# Copy native libraries to Android project
+copy_native_libraries() {
+    log_info "Copying native libraries to Android project..."
+    
+    # Create jniLibs directories
+    mkdir -p android/app/src/main/jniLibs/{arm64-v8a,armeabi-v7a,x86,x86_64}
+    
+    # Copy libraries
+    cp target/aarch64-linux-android/release/librustyclint.so android/app/src/main/jniLibs/arm64-v8a/ 2>/dev/null || log_warning "ARM64 library not found"
+    cp target/armv7-linux-androideabi/release/librustyclint.so android/app/src/main/jniLibs/armeabi-v7a/ 2>/dev/null || log_warning "ARMv7 library not found"
+    cp target/i686-linux-android/release/librustyclint.so android/app/src/main/jniLibs/x86/ 2>/dev/null || log_warning "x86 library not found"
+    cp target/x86_64-linux-android/release/librustyclint.so android/app/src/main/jniLibs/x86_64/ 2>/dev/null || log_warning "x86_64 library not found"
+    
+    log_success "Native libraries copied"
+    update_progress
+}
+
+# Verify keystore
+verify_keystore() {
+    log_info "Verifying Android keystore..."
+    
+    local keystore_path="android/keystore/release.keystore"
+    local properties_path="android/keystore.properties"
+    
+    if [ ! -f "$keystore_path" ]; then
+        log_error "Keystore not found at: $keystore_path"
+        log_info "Run ./scripts/generate-android-keystore.sh to create one"
+        exit 1
+    fi
+    
+    if [ ! -f "$properties_path" ]; then
+        log_error "Keystore properties not found at: $properties_path"
+        exit 1
+    fi
+    
+    # Load keystore properties
+    source "$properties_path"
+    
+    # Verify keystore can be accessed
+    if keytool -list -keystore "$keystore_path" -storepass "$storePassword" -alias "$keyAlias" &>/dev/null; then
+        log_success "Keystore verification passed"
+    else
+        log_error "Keystore verification failed. Check passwords and alias."
+        exit 1
+    fi
+    
+    update_progress
+}
+
+# Build Android AAB
+build_android_aab() {
+    log_info "Building Android App Bundle (AAB)..."
+    
+    cd android
+    
+    # Clean previous builds
+    ./gradlew clean
+    
+    # Build signed AAB
+    ./gradlew bundleRelease
+    
+    if [ $? -eq 0 ]; then
+        log_success "AAB build successful"
+        
+        # Check output file
+        local aab_path="app/build/outputs/bundle/release/app-release.aab"
+        if [ -f "$aab_path" ]; then
+            local size=$(du -h "$aab_path" | cut -f1)
+            log_success "AAB created: $aab_path (Size: $size)"
+        else
+            log_error "AAB file not found at expected location"
+            exit 1
+        fi
+    else
+        log_error "AAB build failed"
+        exit 1
+    fi
+    
+    cd ..
+    update_progress
+}
+
+# Verify AAB signature
+verify_aab_signature() {
+    log_info "Verifying AAB signature..."
+    
+    local aab_path="android/app/build/outputs/bundle/release/app-release.aab"
+    
+    if command -v bundletool &> /dev/null; then
+        bundletool validate --bundle="$aab_path"
+        if [ $? -eq 0 ]; then
+            log_success "AAB signature verification passed"
+        else
+            log_error "AAB signature verification failed"
+            exit 1
+        fi
+    else
+        log_warning "bundletool not found. Skipping AAB validation."
+    fi
+    
+    update_progress
+}
+
+# Upload to Google Play (optional)
+upload_to_play_store() {
+    log_info "Checking for Google Play upload configuration..."
+    
+    if [ -f "android/fastlane/Fastfile" ] && [ -n "$GOOGLE_PLAY_SERVICE_ACCOUNT" ]; then
+        log_info "Uploading to Google Play Store..."
+        
+        cd android
+        fastlane deploy
+        
+        if [ $? -eq 0 ]; then
+            log_success "Upload to Google Play Store successful"
+        else
+            log_error "Upload to Google Play Store failed"
+            exit 1
+        fi
+        
+        cd ..
+    else
+        log_warning "Google Play upload not configured. Skipping upload."
+        log_info "To enable upload:"
+        log_info "1. Set up Fastlane configuration"
+        log_info "2. Set GOOGLE_PLAY_SERVICE_ACCOUNT environment variable"
+    fi
+    
+    update_progress
+}
+
+# Generate deployment report
+generate_report() {
+    log_info "Generating deployment report..."
+    
+    local report_file="deployment-report-$(date +%Y%m%d-%H%M%S).txt"
+    
+    cat > "$report_file" << EOF
+Android Deployment Report
+========================
+Date: $(date)
+Platform: Android
+Build Type: Release
+
+Files Generated:
+- AAB: android/app/build/outputs/bundle/release/app-release.aab
+
+Native Libraries:
+- ARM64: $([ -f "android/app/src/main/jniLibs/arm64-v8a/librustyclint.so" ] && echo "✓" || echo "✗")
+- ARMv7: $([ -f "android/app/src/main/jniLibs/armeabi-v7a/librustyclint.so" ] && echo "✓" || echo "✗")
+- x86: $([ -f "android/app/src/main/jniLibs/x86/librustyclint.so" ] && echo "✓" || echo "✗")
+- x86_64: $([ -f "android/app/src/main/jniLibs/x86_64/librustyclint.so" ] && echo "✓" || echo "✗")
+
+Build Status: SUCCESS
+Total Steps: $TOTAL_STEPS
+Completed Steps: $CURRENT_STEP
+
+Next Steps:
+1. Test the AAB on internal track
+2. Upload to Google Play Console
+3. Submit for review
+
+EOF
+
+    log_success "Report generated: $report_file"
+}
+
+# Main automation function
+run_automation() {
+    local automation_type="$1"
+    
+    case "$automation_type" in
+        "full")
+            TOTAL_STEPS=8
+            log_info "Starting full Android deployment automation..."
+            check_prerequisites
+            setup_ndk
+            add_rust_targets
+            build_rust_android
+            copy_native_libraries
+            verify_keystore
+            build_android_aab
+            verify_aab_signature
+            upload_to_play_store
+            ;;
+        "build")
+            TOTAL_STEPS=6
+            log_info "Starting Android build automation..."
+            check_prerequisites
+            setup_ndk
+            add_rust_targets
+            build_rust_android
+            copy_native_libraries
+            verify_keystore
+            build_android_aab
+            ;;
+        "rust")
+            TOTAL_STEPS=3
+            log_info "Starting Rust build automation..."
+            check_prerequisites
+            setup_ndk
+            add_rust_targets
+            build_rust_android
+            ;;
+        *)
+            log_error "Unknown automation type: $automation_type"
+            log_info "Available types: full, build, rust"
+            exit 1
+            ;;
+    esac
+    
+    generate_report
+    log_success "Android automation completed successfully!"
+}
+
+# Script entry point
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <automation_type>"
+    echo "Types: full, build, rust"
+    exit 1
+fi
+
+run_automation "$1"`,
+          language: 'bash'
+        }
+      },
+      features: [
+        'Visual deployment progress tracking',
+        'Step-by-step deployment assistant',
+        'Automated build and deployment scripts',
+        'Intelligent troubleshooting',
+        'Security best practices',
+        'CI/CD integration'
+      ],
+      useCase: 'For teams that need a robust, visual deployment pipeline for Android apps with progress tracking and automation.',
+      techStack: ['React', 'TypeScript', 'Android', 'Gradle', 'Bash', 'CI/CD']
+    },
+    {
+      id: 'ios-deployment-pipeline',
+      name: 'iOS Deployment Pipeline',
+      description: 'Complete deployment pipeline for iOS apps with visual progress tracking and automation',
+      category: 'deployment',
+      difficulty: 'Advanced',
+      tags: ['iOS', 'CI/CD', 'Deployment', 'Automation'],
+      icon: <Smartphone className="w-8 h-8 text-blue-400" />,
+      estimatedTime: '60 minutes',
+      files: {},
+      features: [
+        'Visual deployment progress tracking',
+        'Step-by-step deployment assistant',
+        'Automated build and deployment scripts',
+        'Code signing management',
+        'App Store Connect integration',
+        'TestFlight distribution'
+      ],
+      useCase: 'For teams that need a robust, visual deployment pipeline for iOS apps with progress tracking and automation.',
+      techStack: ['React', 'TypeScript', 'iOS', 'Xcode', 'Bash', 'CI/CD']
+    },
+    {
+      id: 'web-deployment-pipeline',
+      name: 'Web Deployment Pipeline',
+      description: 'Complete deployment pipeline for web apps with visual progress tracking and automation',
+      category: 'deployment',
+      difficulty: 'Intermediate',
+      tags: ['Web', 'CI/CD', 'Deployment', 'Automation'],
+      icon: <Globe className="w-8 h-8 text-purple-400" />,
+      estimatedTime: '45 minutes',
+      files: {},
+      features: [
+        'Visual deployment progress tracking',
+        'Step-by-step deployment assistant',
+        'Automated build and deployment scripts',
+        'CDN configuration',
+        'Multi-environment support',
+        'Performance optimization'
+      ],
+      useCase: 'For teams that need a robust, visual deployment pipeline for web apps with progress tracking and automation.',
+      techStack: ['React', 'TypeScript', 'Vite', 'Netlify/Vercel', 'GitHub Actions']
+    }
+  ];
+
+  const filteredTemplates = templates.filter(template => {
+    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
+    const matchesSearch = searchQuery === '' || 
+      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    return matchesCategory && matchesSearch;
+  });
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-gray-800 rounded-lg max-w-6xl w-full p-6 border border-gray-700 my-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Project Templates</h2>
+            <p className="text-gray-400">Start with a pre-configured template to accelerate your development</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors text-xl"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="flex gap-6">
+          {/* Sidebar */}
+          <div className="w-64 flex-shrink-0">
+            <div className="mb-6">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search templates..."
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-white mb-3">Categories</h3>
+              <div className="space-y-2">
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`flex items-center space-x-2 w-full px-3 py-2 rounded-lg transition-colors ${
+                      selectedCategory === category.id
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-300 hover:bg-gray-700'
+                    }`}
+                  >
+                    {category.icon}
+                    <span>{category.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">Difficulty</h3>
+              <div className="space-y-2">
+                {['Beginner', 'Intermediate', 'Advanced', 'Expert'].map((level) => (
+                  <label key={level} className="flex items-center space-x-2 text-gray-300">
+                    <input type="checkbox" className="rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500" />
+                    <span>{level}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Templates Grid */}
+          <div className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredTemplates.map((template) => (
+                <div
+                  key={template.id}
+                  className="bg-gray-700 rounded-lg p-6 border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer"
+                  onClick={() => setSelectedTemplate(template)}
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-gray-800 rounded-lg">
                       {template.icon}
-                      <div>
-                        <h3 className="text-lg font-semibold text-white">{template.name}</h3>
-                        <span className={`inline-block px-2 py-1 rounded text-xs ${getDifficultyColor(template.difficulty)}`}>
-                          {template.difficulty}
-                        </span>
-                      </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="text-sm text-gray-300">{template.rating}</span>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-gray-300 text-sm mb-4 line-clamp-3">{template.description}</p>
-
-                  {/* Platforms */}
-                  <div className="flex items-center space-x-2 mb-4">
-                    {template.platforms.map((platform, index) => (
-                      <div key={index} className="flex items-center space-x-1">
-                        {getPlatformIcon(platform)}
-                        <span className="text-xs text-gray-400">{platform}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {template.tags.slice(0, 3).map((tag, index) => (
-                      <span key={index} className="px-2 py-1 bg-gray-600 text-gray-300 rounded text-xs">
-                        {tag}
-                      </span>
-                    ))}
-                    {template.tags.length > 3 && (
-                      <span className="px-2 py-1 bg-gray-600 text-gray-400 rounded text-xs">
-                        +{template.tags.length - 3} more
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Stats */}
-                  <div className="flex items-center justify-between text-sm text-gray-400">
-                    <div className="flex items-center space-x-1">
-                      <Clock className="w-4 h-4" />
-                      <span>{template.estimatedTime}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Download className="w-4 h-4" />
-                      <span>{template.downloads.toLocaleString()}</span>
-                    </div>
-                  </div>
-
-                  {/* Features Preview */}
-                  <div className="mt-4 pt-4 border-t border-gray-600">
-                    <p className="text-xs text-gray-500 mb-2">Key Features:</p>
-                    <div className="space-y-1">
-                      {template.features.slice(0, 3).map((feature, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <CheckCircle className="w-3 h-3 text-green-400" />
-                          <span className="text-xs text-gray-300">{feature}</span>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-white mb-2">{template.name}</h3>
+                      <p className="text-gray-300 text-sm mb-3">{template.description}</p>
+                      
+                      <div className="flex items-center space-x-4 text-sm text-gray-400 mb-3">
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{template.estimatedTime}</span>
                         </div>
-                      ))}
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 text-yellow-400" />
+                          <span>{template.difficulty}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {template.tags.map((tag) => (
+                          <span key={tag} className="px-2 py-1 bg-gray-600 text-gray-300 rounded text-xs">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-                {/* Action Button */}
-                <div className="px-6 pb-6">
-                  <button className="w-full flex items-center justify-center space-x-2 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors">
-                    <Play className="w-4 h-4" />
-                    
-                    <span>Use Template</span>
-                  </button>
+        {/* Template Details Modal */}
+        {selectedTemplate && (
+          <div className="fixed inset-0 bg-black/80 z-60 flex items-center justify-center p-4">
+            <div className="bg-gray-800 rounded-lg max-w-4xl w-full p-6 border border-gray-700">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                  <div className="p-4 bg-gray-700 rounded-lg">
+                    {selectedTemplate.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">{selectedTemplate.name}</h3>
+                    <p className="text-gray-400">{selectedTemplate.description}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedTemplate(null)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-white mb-3">Features</h4>
+                  <ul className="space-y-2">
+                    {selectedTemplate.features.map((feature, index) => (
+                      <li key={index} className="flex items-start space-x-2 text-gray-300">
+                        <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-white mb-3">Tech Stack</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedTemplate.techStack.map((tech) => (
+                      <span key={tech} className="px-3 py-1 bg-blue-900/30 text-blue-300 rounded-full text-sm">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  <h4 className="text-lg font-semibold text-white mt-6 mb-3">Use Case</h4>
+                  <p className="text-gray-300">{selectedTemplate.useCase}</p>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {filteredTemplates.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12">
-              <Search className="w-12 h-12 text-gray-500 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No templates found</h3>
-              <p className="text-gray-400 text-center max-w-md">
-                Try adjusting your search or filters to find what you're looking for.
-              </p>
+              <div className="bg-gray-700 rounded-lg p-4 mb-6">
+                <h4 className="text-lg font-semibold text-white mb-3">Included Files</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {Object.keys(selectedTemplate.files).map((fileName) => (
+                    <div key={fileName} className="flex items-center space-x-2 text-gray-300">
+                      <Code className="w-4 h-4 text-blue-400" />
+                      <span>{fileName}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => setSelectedTemplate(null)}
+                  className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    onSelectTemplate(selectedTemplate);
+                    setSelectedTemplate(null);
+                    onClose();
+                  }}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  Use Template
+                </button>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
