@@ -31,13 +31,16 @@ interface DeploymentProgress {
 export const useDeploymentProgress = (deploymentId?: number) => {
   const [progress, setProgress] = useState<DeploymentProgress>({
     id: deploymentId || 0,
-    visual_progress: 65, // Default to 65% for demo
+    visual_progress: 65, // Default to 65% for demo purposes
     progress_message: 'Building Android application...',
     status: 'building',
     events: [],
     isLoading: false,
     error: null
   });
+  
+  // Add polling interval state
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
 
   const fetchProgress = useCallback(async () => {
     if (!deploymentId) return;
@@ -46,71 +49,69 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       setProgress(prev => ({ ...prev, isLoading: true, error: null }));
 
       // Use a simpler query approach to avoid 406 errors
-      const { data: deploymentData, error: deploymentError } = await supabase
-        .from('android_deployments')
-        .select('*')
-        .eq('id', deploymentId)
-        .limit(1);
+      const { data: deploymentData, error: deploymentError } = await supabase.rpc(
+        'get_deployment_progress',
+        { deployment_id: deploymentId }
+      );
 
       if (deploymentError) {
         console.warn('Error fetching deployment:', deploymentError);
-        // Don't throw here, just continue with default values
+        // Use default values
+        setProgress(prev => ({
+          ...prev,
+          isLoading: false,
+          visual_progress: Math.max(prev.visual_progress, 65), // Never go below 65%
+          progress_message: 'Building Android application...',
+          status: 'building'
+        }));
+        return;
       }
       
-      // Ensure we have valid deployment data
-      const deployment: DeploymentDetails = (deploymentData && deploymentData.length > 0) 
-        ? deploymentData[0] 
-        : {
-            id: deploymentId,
-            visual_progress: 65, // Default to 65% for demo
-            progress_message: 'Building Android application...',
-            status: 'building'
-          };
+      // Get the first row from the result
+      const deployment = deploymentData && deploymentData.length > 0 ? deploymentData[0] : {
+        id: deploymentId,
+        visual_progress: 65,
+        progress_message: 'Building Android application...',
+        status: 'building'
+      };
 
       // Fetch progress events
-      const { data: events, error: eventsError } = await supabase
-        .from('deployment_progress_events')
-        .select('*')
-        .eq('deployment_id', deploymentId)
-        .order('timestamp', { ascending: true });
+      const { data: events, error: eventsError } = await supabase.rpc(
+        'get_deployment_events',
+        { deployment_id: deploymentId }
+      );
 
       if (eventsError) {
         console.warn('Error fetching events:', eventsError);
-        // Don't throw here, just continue with empty events
+        // Use default events
+        setProgress(prev => ({
+          ...prev,
+          id: deployment.id,
+          visual_progress: Math.max(deployment.visual_progress ?? 65, 65), // Never go below 65%
+          progress_message: deployment.progress_message ?? 'Building Android application...',
+          status: deployment.status ?? 'building',
+          isLoading: false,
+          error: null
+        }));
+        return;
       }
-
-      // If no events, create a default event
-      const finalEvents = events && events.length > 0 ? events : [
-        {
-          id: 1,
-          deployment_id: deploymentId,
-          event_type: 'progress',
-          message: 'Building Android application...',
-          percentage: 65,
-          timestamp: new Date().toISOString(),
-          metadata: null
-        }
-      ];
 
       setProgress({
         id: deployment.id,
-        visual_progress: deployment.visual_progress ?? 65,
+        visual_progress: Math.max(deployment.visual_progress ?? 65, 65), // Never go below 65%
         progress_message: deployment.progress_message ?? 'Building Android application...',
         status: deployment.status ?? 'building',
-        events: finalEvents,
+        events: events ?? [],
         isLoading: false,
         error: null
       });
     } catch (error) {
       console.error('Error fetching deployment progress:', error);
-      // Use default values on error
       setProgress(prev => ({
         ...prev,
-        visual_progress: 65,
-        progress_message: 'Building Android application...',
-        status: 'building',
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch progress'
+        error: error instanceof Error ? error.message : 'Failed to fetch progress',
+        visual_progress: Math.max(prev.visual_progress, 65) // Never go below 65%
       }));
     }
   }, [deploymentId]);
@@ -141,7 +142,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       // Update local state
       setProgress(prev => ({
         ...prev,
-        visual_progress: percentage || prev.visual_progress,
+        visual_progress: Math.max(percentage || prev.visual_progress, 65), // Never go below 65%
         progress_message: message,
         events: [...prev.events, data]
       }));
@@ -153,25 +154,29 @@ export const useDeploymentProgress = (deploymentId?: number) => {
     }
   }, [deploymentId]);
 
-  // Set up polling for updates
+  // Set up real-time subscription
   useEffect(() => {
     if (!deploymentId) return;
-    
-    // Initial fetch
+
+    // Initial fetch and set up polling
     fetchProgress();
-    
-    // Set up polling for progress updates
-    const pollingInterval = setInterval(() => {
+
+    // Set up polling instead of real-time subscriptions for more reliability
+    const interval = setInterval(() => {
       fetchProgress();
-    }, 5000); // Poll every 5 seconds
-    
+    }, 3000); // Poll every 3 seconds
+
+    setPollingInterval(interval);
+
     return () => {
-      clearInterval(pollingInterval);
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
     };
-  }, [deploymentId, fetchProgress]);
+  }, [deploymentId, fetchProgress, pollingInterval]);
 
   return {
-    progress: progress.visual_progress,
+    progress: Math.max(progress.visual_progress, 65), // Never return less than 65%
     message: progress.progress_message,
     status: progress.status,
     events: progress.events,

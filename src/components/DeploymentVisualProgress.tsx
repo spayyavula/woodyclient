@@ -20,17 +20,18 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
   showDetails = true,
   animate = true
 }) => {
-  const [animatedProgress, setAnimatedProgress] = useState(0);
+  // Start with at least 65% progress for demo purposes
+  const [animatedProgress, setAnimatedProgress] = useState(Math.max(progress, 65));
 
   useEffect(() => {
     if (!animate) {
-      setAnimatedProgress(progress);
+      setAnimatedProgress(Math.max(progress, 65));
       return;
     }
     
     // Ensure progress is never below 65% for demo purposes
     const actualProgress = Math.max(progress, 65);
-
+    const end = Math.max(progress, 65); // Never go below 65%
     // Animate progress smoothly
     const start = animatedProgress;
     const end = actualProgress;
@@ -117,23 +118,23 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
       <div className="relative h-3 bg-gray-700 rounded-full overflow-hidden shadow-inner">
         {/* Progress bar with gradient and animation */}
         <div 
-          className={`absolute top-0 left-0 h-full bg-gradient-to-r ${status === 'pending' ? getPlatformColor() : getStatusColor()} transition-all duration-300 rounded-full flex items-center`}
+          className={`absolute top-0 left-0 h-full bg-gradient-to-r ${status === 'pending' ? getPlatformColor() : getStatusColor()} transition-all duration-300 rounded-full`}
           style={{ width: `${animatedProgress}%` }}
         >
           {/* Shimmer effect */}
           <div 
-            className="absolute inset-0 bg-white/10 rounded-full"
+            className="absolute inset-0 rounded-full overflow-hidden"
             style={{
               backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
               backgroundSize: '200% 100%',
               animation: animate ? 'shimmer 2s infinite' : 'none'
             }}
-          />
+          ></div>
         </div>
       </div>
       
       {showDetails && message && (
-        <div className="mt-2 text-sm text-gray-300">{message}</div>
+        <div className="mt-2 text-sm text-gray-300">{message || "Building Android application..."}</div>
       )}
     </div>
   );

@@ -99,14 +99,15 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
   const displayProgress = hasData ? Math.max(progress, 65) : simulatedData.progress;
   const displayMessage = hasData ? message || 'Building Android application...' : simulatedData.message;
   const displayStatus = hasData ? status || 'building' : simulatedData.status;
-  const displayEvents = hasData && events.length > 0 ? events : simulatedData.events;
+  // Ensure we always have events to display
+  const displayEvents = (hasData && events && events.length > 0) ? events : simulatedData.events;
 
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isActive, setIsActive] = useState(false);
 
   // Start timer when deployment is active
   useEffect(() => {
-    if (status === 'building' || status === 'signing' || status === 'uploading') {
+    if (displayStatus === 'building' || displayStatus === 'signing' || displayStatus === 'uploading') {
       if (!isActive) {
         setIsActive(true);
         // Reset timer when starting a new active state
@@ -118,7 +119,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
     } else {
       setIsActive(false);
     }
-  }, [status]);
+  }, [displayStatus]);
 
   // Handle timer
   useEffect(() => {
@@ -222,8 +223,8 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
                 {getStatusIcon(status)}
                 <div>
                   <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(status)}`}>
-                    {status.toUpperCase()}
-                  </div>
+                <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(displayStatus)}`}>
+                  {displayStatus.toUpperCase()}
                 </div>
               </div>
               
@@ -240,7 +241,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
               <DeploymentVisualProgress
                 progress={displayProgress}
                 status={displayStatus}
-                message={displayMessage}
+                message={displayMessage || "Building Android application..."}
                 message={displayMessage}
                 platform="android"
                 animate={true}
@@ -251,7 +252,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
             <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
               <h3 className="text-lg font-semibold text-white mb-4">Deployment Status</h3>
               
-              {status === 'pending' && (
+              {displayStatus === 'pending' && (
                 <div className="flex flex-col items-center justify-center py-6">
                   <Clock className="w-16 h-16 text-yellow-400 mb-4" />
                   <h4 className="text-xl font-semibold text-white mb-2">Waiting to Start</h4>
@@ -265,7 +266,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
                 </div>
               )}
               
-              {(status === 'building' || status === 'signing' || status === 'uploading') && (
+              {(displayStatus === 'building' || displayStatus === 'signing' || displayStatus === 'uploading') && (
                 <div className="flex flex-col items-center justify-center py-6">
                   <RefreshCw className="w-16 h-16 text-blue-400 animate-spin mb-4" />
                   <h4 className="text-xl font-semibold text-white mb-2">
@@ -284,7 +285,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
                 </div>
               )}
               
-              {status === 'completed' && (
+              {displayStatus === 'completed' && (
                 <div className="flex flex-col items-center justify-center py-6">
                   <CheckCircle className="w-16 h-16 text-green-400 mb-4" />
                   <h4 className="text-xl font-semibold text-white mb-2">Deployment Successful!</h4>
@@ -304,12 +305,12 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
                 </div>
               )}
               
-              {status === 'failed' && (
+              {displayStatus === 'failed' && (
                 <div className="flex flex-col items-center justify-center py-6">
                   <XCircle className="w-16 h-16 text-red-400 mb-4" />
                   <h4 className="text-xl font-semibold text-white mb-2">Deployment Failed</h4>
                   <p className="text-red-300 mb-6 text-center max-w-md">
-                    {message || "There was an error during the deployment process."}
+                    {displayMessage || "There was an error during the deployment process."}
                   </p>
                   <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                     <RefreshCw className="w-4 h-4" />
