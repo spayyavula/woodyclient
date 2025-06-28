@@ -1211,7 +1211,7 @@ async fn main() {
     let mut price = 150.0;
     for i in 0..1000 {
         // Simulate price movement
-        price += (Math.random() - 0.5) * 2.0;
+        price += (rand::random::<f64>() - 0.5) * 2.0;
         
         let market_data = MarketData {
             symbol: "AAPL".to_string(),
