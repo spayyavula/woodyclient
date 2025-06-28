@@ -19,7 +19,7 @@ import {
   RefreshCw,
   Play,
   Pause,
-  X as CloseIcon
+  X
 } from 'lucide-react';
 
 interface Integration {
@@ -160,7 +160,7 @@ const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ isVisible, onClos
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors text-xl"
           >
-            <CloseIcon className="w-6 h-6" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 

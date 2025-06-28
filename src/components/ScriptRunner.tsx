@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Terminal, 
   Play, 
-  XCircle, 
+  X, 
   Download, 
   RefreshCw,
   Smartphone,
@@ -360,7 +360,7 @@ const ScriptRunner: React.FC<ScriptRunnerProps> = ({ onClose }) => {
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors text-xl"
           >
-            ✕
+            <X className="w-6 h-6" />
           </button>
         )}
       </div>
@@ -553,7 +553,7 @@ const ScriptRunner: React.FC<ScriptRunnerProps> = ({ onClose }) => {
                   onClick={() => setIsRunning(false)}
                   className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                 >
-                  <XCircle className="w-4 h-4" />
+                  <X className="w-4 h-4" />
                   <span>Stop Execution</span>
                 </button>
               )}

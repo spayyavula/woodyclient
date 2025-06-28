@@ -15,7 +15,7 @@ import {
   Home,
   ArrowLeft,
   MoreHorizontal,
-  X as CloseIcon
+  X
 } from 'lucide-react';
 
 interface MobilePreviewProps {
@@ -324,7 +324,7 @@ const MobilePreview: React.FC<MobilePreviewProps> = ({
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
           >
-            <CloseIcon className="w-6 h-6" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 

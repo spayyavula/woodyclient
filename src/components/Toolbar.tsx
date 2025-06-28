@@ -61,6 +61,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onShowStripeTests,
   onShowIntegrations
 }) => {
+  const [showBuildLogs, setShowBuildLogs] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = React.useState('android');
   const [showDeploymentModal, setShowDeploymentModal] = React.useState(false);
   const [isBuilding, setIsBuilding] = React.useState(false);
@@ -267,6 +268,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
             <span>Integrations</span>
           </button>
           <button 
+            onClick={() => setShowBuildLogs(true)}
+            className="flex items-center px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium transition-colors"
+            title="View Build Logs"
+          >
+            <Terminal className="w-4 h-4 mr-2" />
+            <span>Build Logs</span>
+          </button>
+          <button 
             onClick={() => setShowAutomationPanel(true)}
             className="flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
             title="Automation Center"
@@ -369,6 +378,18 @@ const Toolbar: React.FC<ToolbarProps> = ({
         onClose={() => setShowDeploymentModal(false)}
         initialPlatform={selectedPlatform as any}
       />
+      
+      {/* Build Logs Viewer */}
+      {showBuildLogs && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-6xl">
+            <AndroidBuildLogs
+              isLive={isBuilding}
+              onClose={() => setShowBuildLogs(false)}
+            />
+          </div>
+        </div>
+      )}
       
       {/* Automation Panel */}
       <AutomationPanel
