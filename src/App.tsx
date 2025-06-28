@@ -19,6 +19,7 @@ import ProjectTemplates from './components/ProjectTemplates';
 import MobilePreview from './components/MobilePreview';
 import DemoMode from './components/DemoMode';
 import StripeTestSuite from './components/StripeTestSuite';
+import IntegrationsPanel from './components/IntegrationsPanel';
 
 interface Tab {
   id: string;
@@ -55,6 +56,7 @@ function App() {
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
   const [showStripeTests, setShowStripeTests] = useState(false);
+  const [showIntegrations, setShowIntegrations] = useState(false);
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);
   const [isCollaborationVisible, setIsCollaborationVisible] = useState(false);
   const [isMarketplaceVisible, setIsMarketplaceVisible] = useState(false);
@@ -463,6 +465,7 @@ console.log('Hello from ${fileName}!');`;
         onShowTemplates={() => setShowTemplates(true)}
         onShowMobilePreview={() => setShowMobilePreview(true)}
         onShowStripeTests={() => setShowStripeTests(true)}
+        onShowIntegrations={() => setShowIntegrations(true)}
       />
       
       <div className="flex flex-1 overflow-hidden">
@@ -532,6 +535,13 @@ console.log('Hello from ${fileName}!');`;
         buildStatus={buildStatus}
         collaboratorCount={3}
       />
+
+      {showIntegrations && (
+        <IntegrationsPanel 
+          isVisible={showIntegrations}
+          onClose={() => setShowIntegrations(false)}
+        />
+      )}
 
       {/* Modals */}
       {showPricing && (

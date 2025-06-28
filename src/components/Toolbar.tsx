@@ -34,6 +34,7 @@ interface ToolbarProps {
   onShowTemplates: () => void;
   onShowMobilePreview: () => void;
   onShowStripeTests: () => void;
+  onShowIntegrations: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({ 
@@ -48,6 +49,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onShowTemplates,
   onShowMobilePreview,
   onShowStripeTests
+  onShowIntegrations
 }) => {
   const [selectedPlatform, setSelectedPlatform] = React.useState('android');
 
@@ -130,6 +132,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
           >
             <TestTube className="w-4 h-4 mr-1" />
             <span>Test Stripe</span>
+          </button>
+          <button 
+            onClick={onShowIntegrations}
+            className="flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm font-medium transition-colors"
+            title="Integrations"
+          >
+            <Link className="w-4 h-4 mr-1" />
+            <span>Integrations</span>
           </button>
         </div>
       </div>
