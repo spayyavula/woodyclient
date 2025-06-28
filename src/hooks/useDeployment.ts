@@ -1114,36 +1114,31 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
   const getOverallProgress = useCallback((): number => {
     if (steps.length === 0) return 0;
 
-    // Weight steps by their complexity/duration
-    const weights = steps.map(step => {
-      // Assign weights based on metadata or default to 1
-      const estimatedTime = step.metadata?.estimatedTime || '';
-      if (estimatedTime.includes('5-10') || estimatedTime.includes('5-8')) return 2;
-      if (estimatedTime.includes('3-5') || estimatedTime.includes('4-6')) return 1.5;
-      return 1;
-    });
-
-    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-
-    // Calculate weighted progress
-    let totalProgress = 0;
-
-    // Add completed steps
-    for (let i = 0; i < currentStep; i++) {
-      if (steps[i].status === 'completed') {
-        totalProgress += weights[i];
-      }
+    // Count completed steps
+    const completedSteps = steps.filter(step => step.status === 'completed').length;
+    
+    // Add progress from current step if it's running
+    let currentStepProgress = 0;
+    if (currentStep < steps.length && steps[currentStep].status === 'running') {
+      currentStepProgress = (steps[currentStep].progress || 0) / 100;
     }
 
-    if (totalWeight === 0) return 0;
-
-    // Add progress from current step
-    if (currentStep < steps.length) {
-      const currentStepProgress = steps[currentStep].progress || 0;
-      totalProgress += (currentStepProgress / 100) * weights[currentStep];
+    // Calculate overall progress
+    if (steps.length === 1) {
+      // If there's only one step, its progress is the overall progress
+      return steps[0].progress || 0;
     }
-
-    return (totalProgress / totalWeight) * 100;
+    
+    // Calculate progress as completed steps + partial progress on current step
+    const stepValue = 100 / steps.length;
+    let progress = completedSteps * stepValue;
+    
+    // Add partial progress from current step
+    if (currentStep < steps.length && currentStep >= completedSteps) {
+      progress += currentStepProgress * stepValue;
+    }
+    
+    return Math.min(progress, 100);
   }, [steps, currentStep]);
 
 

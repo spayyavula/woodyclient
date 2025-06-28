@@ -91,6 +91,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
   // Use simulated data if no real data is available
   const hasData = events && events.length > 0;
   const simulatedData = simulateDeployment(deploymentId);
+  const isCompleted = status === 'completed' || status === 'failed';
   
   // Use real data if available, otherwise use simulated data
   const displayProgress = hasData ? progress : simulatedData.progress;
@@ -104,7 +105,11 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
   // Start timer when deployment is active
   useEffect(() => {
     if (status === 'building' || status === 'signing' || status === 'uploading') {
-      setIsActive(true);
+      if (!isActive) {
+        setIsActive(true);
+        // Reset timer when starting a new active state
+        setTimeElapsed(0);
+      }
     } else {
       setIsActive(false);
     }
@@ -113,13 +118,11 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
   // Handle timer
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     if (isActive) {
       interval = setInterval(() => {
         setTimeElapsed(prev => prev + 1);
       }, 1000);
-    } else if (!isActive && timeElapsed !== 0) {
-      clearInterval(interval);
     }
     
     return () => clearInterval(interval);
