@@ -1,4 +1,5 @@
 import React from 'react';
+import DeploymentModal from './DeploymentModal';
 import { 
   Play, 
   Square, 
@@ -55,9 +56,70 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onShowIntegrations
 }) => {
   const [selectedPlatform, setSelectedPlatform] = React.useState('android');
+  const [showDeploymentModal, setShowDeploymentModal] = React.useState(false);
+  const [isBuilding, setIsBuilding] = React.useState(false);
+  const [buildOutput, setBuildOutput] = React.useState<string[]>([]);
+
+  const handleBuild = async () => {
+    setIsBuilding(true);
+    setBuildOutput([]);
+    
+    // Simulate build process with real commands
+    const commands = [
+      'rustyclint scan --deep',
+      'cargo build --release',
+      'cargo test',
+      'rustyclint audit --compliance'
+    ];
+    
+    for (const command of commands) {
+      setBuildOutput(prev => [...prev, `$ ${command}`]);
+      
+      // Simulate command execution time
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+      
+      // Add realistic output
+      if (command.includes('rustyclint scan')) {
+        setBuildOutput(prev => [...prev, 
+          '🔍 Analyzing 47,392 lines of code...',
+          '⚡ Performance: 10.2M lines/second',
+          '✅ Analysis complete in 0.08s',
+          '⚠️  2 medium-risk issues found',
+          '🔧 3 optimizations suggested'
+        ]);
+      } else if (command.includes('cargo build')) {
+        setBuildOutput(prev => [...prev,
+          '   Compiling rustyclint v0.1.0',
+          '    Finished release [optimized] target(s) in 3.42s'
+        ]);
+      } else if (command.includes('cargo test')) {
+        setBuildOutput(prev => [...prev,
+          'running 8 tests',
+          'test result: ok. 8 passed; 0 failed; 0 ignored'
+        ]);
+      } else if (command.includes('rustyclint audit')) {
+        setBuildOutput(prev => [...prev,
+          '🛡️  Security Score: 98/100 (Excellent)',
+          '✅ SOC 2 Type II compliant',
+          '✅ GDPR data protection verified'
+        ]);
+      }
+    }
+    
+    setBuildOutput(prev => [...prev, '🎉 Build completed successfully!']);
+    setIsBuilding(false);
+    
+    // Trigger the original onRun callback
+    onRun();
+  };
+
+  const handleDeploy = () => {
+    setShowDeploymentModal(true);
+  };
 
   return (
-    <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
+    <>
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
       <div className="flex items-center space-x-1">
         <div className="flex items-center space-x-1 mr-4">
           <button className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors">
@@ -104,21 +166,44 @@ const Toolbar: React.FC<ToolbarProps> = ({
         
         <div className="flex items-center space-x-1">
           <button 
-            onClick={onRun}
+            onClick={handleBuild}
+            disabled={isBuilding}
             className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 rounded-lg text-white text-sm font-medium transition-all transform hover:scale-105 shadow-lg"
+            className={`flex items-center px-4 py-2 rounded-lg text-white text-sm font-medium transition-all transform hover:scale-105 shadow-lg ${
+              isBuilding 
+                ? 'bg-gray-600 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700'
+            }`}
             title="Build & Analyze Code"
           >
-            <Hammer className="w-4 h-4 mr-2" />
-            <span>Build & Analyze</span>
+            {isBuilding ? (
+              <>
+                <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Building...</span>
+              </>
+            ) : (
+              <>
+                <Hammer className="w-4 h-4 mr-2" />
+                <span>Build & Analyze</span>
+              </>
+            )}
           </button>
           <button 
+            onClick={() => setIsBuilding(false)}
+            disabled={!isBuilding}
             className="flex items-center px-3 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-white text-sm font-medium transition-colors"
+            className={`flex items-center px-3 py-2 rounded-lg text-white text-sm font-medium transition-colors ${
+              isBuilding 
+                ? 'bg-red-600 hover:bg-red-700' 
+                : 'bg-gray-600 hover:bg-gray-700 cursor-not-allowed opacity-50'
+            }`}
             title="Stop Build"
           >
             <Square className="w-4 h-4 mr-1" />
-            <span>Stop</span>
+            <span>{isBuilding ? 'Stop' : 'Stopped'}</span>
           </button>
           <button 
+            onClick={handleDeploy}
             className="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-medium transition-colors"
             title="Deploy to Production"
           >
@@ -214,6 +299,44 @@ const Toolbar: React.FC<ToolbarProps> = ({
         </button>
       </div>
     </div>
+      
+      {/* Build Output Overlay */}
+      {isBuilding && buildOutput.length > 0 && (
+        <div className="fixed bottom-4 right-4 w-96 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl z-40">
+          <div className="flex items-center justify-between p-3 border-b border-gray-700">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
+              <span className="text-white font-medium">Building...</span>
+            </div>
+            <button 
+              onClick={() => setBuildOutput([])}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="p-3 max-h-64 overflow-y-auto">
+            <div className="font-mono text-sm space-y-1">
+              {buildOutput.map((line, index) => (
+                <div 
+                  key={index} 
+                  className={line.startsWith('$') ? 'text-green-400' : 'text-gray-300'}
+                >
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deployment Modal */}
+      <DeploymentModal 
+        isVisible={showDeploymentModal}
+        onClose={() => setShowDeploymentModal(false)}
+        initialPlatform={selectedPlatform as any}
+      />
+    </>
   );
 };
 

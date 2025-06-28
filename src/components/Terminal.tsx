@@ -31,6 +31,25 @@ const Terminal: React.FC<TerminalProps> = ({ isVisible, onToggle }) => {
   cargo build    - Build the project
   cargo run      - Run the project
   cargo test     - Run tests
+  
+  # iOS Deployment Commands
+  ios build      - Build for iOS device and simulator
+  ios archive    - Create iOS archive for distribution
+  ios export     - Export IPA file
+  ios upload     - Upload to App Store Connect
+  ios deploy     - Full iOS deployment pipeline
+  
+  # Android Deployment Commands
+  android build  - Build Android APK/AAB
+  android sign   - Sign APK with release keystore
+  android upload - Upload to Google Play Console
+  android deploy - Full Android deployment pipeline
+  
+  # Flutter Deployment Commands
+  flutter ios    - Build and deploy Flutter iOS app
+  flutter android - Build and deploy Flutter Android app
+  flutter deploy - Deploy to both platforms
+  
  rustyclint scan - Run security analysis
  rustyclint fix  - Auto-fix vulnerabilities
  rustyclint bench - Performance benchmark
@@ -55,6 +74,228 @@ Hello, rustyclint!
 rustyclint Initialized
 Security Engine: Active
 Performance Mode: Optimized`;
+        break;
+      case 'ios build':
+        output = `🍎 Building for iOS...
+
+📦 Building Rust code for iOS targets:
+   Compiling for aarch64-apple-ios (device)
+   Compiling for x86_64-apple-ios (simulator)
+   Creating universal binary with lipo
+
+🔨 Building iOS app with Xcode:
+   xcodebuild -project ios/App.xcodeproj -scheme App -configuration Release
+   
+✅ iOS build completed successfully!
+   Device binary: target/aarch64-apple-ios/release/libapp.a
+   Simulator binary: target/x86_64-apple-ios/release/libapp.a
+   Universal binary: libapp-universal.a
+   iOS app: build/Release-iphoneos/App.app`;
+        break;
+      case 'ios archive':
+        output = `📦 Creating iOS archive...
+
+🔨 Running xcodebuild archive:
+   xcodebuild -project ios/App.xcodeproj -scheme App -configuration Release -destination "generic/platform=iOS" archive -archivePath build/App.xcarchive
+
+✅ Archive created successfully!
+   Archive path: build/App.xcarchive
+   
+📋 Archive contents:
+   - App.app (iOS application)
+   - dSYMs (debug symbols)
+   - Info.plist (metadata)`;
+        break;
+      case 'ios export':
+        output = `📤 Exporting IPA file...
+
+🔨 Running xcodebuild exportArchive:
+   xcodebuild -exportArchive -archivePath build/App.xcarchive -exportPath build/ -exportOptionsPlist ios/ExportOptions.plist
+
+✅ IPA exported successfully!
+   IPA file: build/App.ipa
+   Size: 45.2 MB
+   
+📋 Export details:
+   - Distribution method: App Store
+   - Code signing: Automatic
+   - Bitcode: Enabled
+   - Symbols: Included`;
+        break;
+      case 'ios upload':
+        output = `☁️  Uploading to App Store Connect...
+
+🔑 Authenticating with App Store Connect API:
+   Using API key: ${process.env.APP_STORE_API_KEY || 'XXXXXXXXXX'}
+   Issuer ID: ${process.env.APP_STORE_ISSUER_ID || 'XXXXXXXXXX'}
+
+📤 Uploading IPA:
+   xcrun altool --upload-app --type ios --file build/App.ipa
+   
+✅ Upload completed successfully!
+   Build number: 1.0.0 (42)
+   Status: Processing
+   
+📋 Next steps:
+   1. Wait for processing to complete (5-15 minutes)
+   2. Add build to App Store Connect
+   3. Submit for App Store review`;
+        break;
+      case 'ios deploy':
+        output = `🚀 Starting full iOS deployment pipeline...
+
+Step 1/5: Building Rust code for iOS
+✅ aarch64-apple-ios target built
+✅ x86_64-apple-ios target built
+✅ Universal binary created
+
+Step 2/5: Building iOS app with Xcode
+✅ Xcode build completed
+
+Step 3/5: Creating archive
+✅ Archive created: build/App.xcarchive
+
+Step 4/5: Exporting IPA
+✅ IPA exported: build/App.ipa (45.2 MB)
+
+Step 5/5: Uploading to App Store Connect
+✅ Upload completed successfully!
+
+🎉 iOS deployment completed!
+   Build: 1.0.0 (42)
+   Status: Processing on App Store Connect
+   ETA for review: 24-48 hours`;
+        break;
+      case 'android build':
+        output = `🤖 Building for Android...
+
+📦 Building Rust code for Android targets:
+   Compiling for aarch64-linux-android
+   Compiling for armv7-linux-androideabi
+   Compiling for i686-linux-android
+   Compiling for x86_64-linux-android
+
+🔨 Building Android APK with Gradle:
+   ./gradlew assembleRelease
+   
+✅ Android build completed successfully!
+   APK: android/app/build/outputs/apk/release/app-release.apk
+   Size: 38.7 MB
+   Min SDK: 21 (Android 5.0)
+   Target SDK: 34 (Android 14)`;
+        break;
+      case 'android sign':
+        output = `🔐 Signing Android APK...
+
+🔑 Using release keystore:
+   Keystore: android/app/release.keystore
+   Alias: release-key
+   
+🔨 Signing APK:
+   jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore android/app/release.keystore android/app/build/outputs/apk/release/app-release-unsigned.apk release-key
+   
+📦 Aligning APK:
+   zipalign -v 4 app-release-unsigned.apk app-release.apk
+   
+✅ APK signed and aligned successfully!
+   Signed APK: android/app/build/outputs/apk/release/app-release.apk
+   Size: 38.7 MB
+   Signature: SHA-256`;
+        break;
+      case 'android upload':
+        output = `☁️  Uploading to Google Play Console...
+
+🔑 Authenticating with Google Play API:
+   Service account: play-console-api@project.iam.gserviceaccount.com
+   
+📤 Uploading APK:
+   fastlane supply --apk android/app/build/outputs/apk/release/app-release.apk
+   
+✅ Upload completed successfully!
+   Version code: 42
+   Version name: 1.0.0
+   Track: internal
+   
+📋 Next steps:
+   1. Test on internal track
+   2. Promote to production
+   3. Submit for Google Play review`;
+        break;
+      case 'android deploy':
+        output = `🚀 Starting full Android deployment pipeline...
+
+Step 1/4: Building Rust code for Android
+✅ All Android targets built successfully
+
+Step 2/4: Building APK with Gradle
+✅ APK built: app-release-unsigned.apk (38.7 MB)
+
+Step 3/4: Signing and aligning APK
+✅ APK signed and aligned: app-release.apk
+
+Step 4/4: Uploading to Google Play Console
+✅ Upload completed successfully!
+
+🎉 Android deployment completed!
+   Version: 1.0.0 (42)
+   Track: internal
+   Status: Available for testing`;
+        break;
+      case 'flutter ios':
+        output = `🎯 Building Flutter iOS app...
+
+🌉 Generating Rust-Flutter bridge:
+   flutter_rust_bridge_codegen --rust-input src/api.rs --dart-output lib/bridge_generated.dart
+   
+📦 Building Flutter iOS:
+   flutter build ios --release
+   
+🔨 Building with Xcode:
+   xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release -destination generic/platform=iOS archive
+   
+✅ Flutter iOS build completed!
+   Archive: build/ios/archive/Runner.xcarchive
+   IPA: build/ios/ipa/Runner.ipa
+   Size: 52.3 MB`;
+        break;
+      case 'flutter android':
+        output = `🎯 Building Flutter Android app...
+
+🌉 Generating Rust-Flutter bridge:
+   flutter_rust_bridge_codegen --rust-input src/api.rs --dart-output lib/bridge_generated.dart
+   
+📦 Building Flutter Android:
+   flutter build apk --release
+   
+✅ Flutter Android build completed!
+   APK: build/app/outputs/flutter-apk/app-release.apk
+   Size: 41.2 MB
+   Architecture: arm64-v8a, armeabi-v7a, x86_64`;
+        break;
+      case 'flutter deploy':
+        output = `🚀 Starting Flutter multi-platform deployment...
+
+Step 1/6: Generating Rust-Flutter bridge
+✅ Bridge code generated successfully
+
+Step 2/6: Building Flutter iOS
+✅ iOS build completed (52.3 MB)
+
+Step 3/6: Building Flutter Android  
+✅ Android build completed (41.2 MB)
+
+Step 4/6: Deploying to iOS App Store
+✅ iOS deployment completed
+
+Step 5/6: Deploying to Google Play
+✅ Android deployment completed
+
+Step 6/6: Finalizing deployment
+✅ All platforms deployed successfully!
+
+🎉 Flutter deployment completed!
+   iOS: Available on App Store Connect
+   Android: Available on Google Play Console`;
         break;
       case 'rustyclint scan':
         output = `🔍 Security Analysis Starting...
@@ -292,7 +533,20 @@ Successfully installed torch-2.1.0+cu118 torchvision-0.16.0+cu118 tensorflow-2.1
         output = 'CUDA available: True';
         break;
       case 'ls':
-        output = 'Cargo.toml  Cargo.lock  README.md  src/  security/  tests/  benchmarks/  target/  rustyclint.toml  integrations/  github-config.yml  supabase-schema.sql  zapier-workflows.json  main.py  requirements.txt  security_scanner.py  performance_analyzer.py  compliance_checker.py  setup.py';
+        output = `Cargo.toml  Cargo.lock  README.md  src/  security/  tests/  benchmarks/  target/  rustyclint.toml  
+ios/  android/  flutter/  
+integrations/  github-config.yml  supabase-schema.sql  zapier-workflows.json  
+build/  dist/  
+main.py  requirements.txt  security_scanner.py  performance_analyzer.py  compliance_checker.py  setup.py
+
+iOS Deployment Files:
+ios/App.xcodeproj  ios/ExportOptions.plist  ios/Info.plist
+
+Android Deployment Files:
+android/app/build.gradle  android/app/release.keystore  android/gradle.properties
+
+Flutter Deployment Files:
+flutter/pubspec.yaml  flutter/lib/main.dart  flutter/lib/bridge_generated.dart`;
         break;
       case 'clear':
         setHistory([TERMINAL_CONSTANTS.WELCOME]);
