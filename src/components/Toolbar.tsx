@@ -413,7 +413,44 @@ const Toolbar: React.FC<ToolbarProps> = ({
               ))}
             </div>
             {error && (
-                  ✕ 
+              <div className="text-red-400 mt-2">
+                ✕ {error}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Deployment Modal */}
+      <DeploymentModal 
+        isVisible={showDeploymentModal}
+        onClose={() => setShowDeploymentModal(false)}
+        initialPlatform={selectedPlatform as any}
+      />
+      
+      {/* Build Logs Viewer */}
+      {showBuildLogs && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-6xl">
+            <AndroidBuildLogs
+              isLive={isBuilding}
+              onClose={() => setShowBuildLogs(false)}
+            />
+          </div>
+        </div>
+      )}
+      
+      {/* Automation Panel */}
+      <AutomationPanel
+        platform={selectedPlatform}
+        isVisible={showAutomationPanel}
+        onClose={() => setShowAutomationPanel(false)}
+      />
+    </>
+  );
+};
+
+export default Toolbar;
                 {error}
               </div>
             )}
