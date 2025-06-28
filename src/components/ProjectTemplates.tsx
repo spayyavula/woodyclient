@@ -1522,10 +1522,10 @@ impl RiskManager {
         format!(
             "📊 RISK MANAGEMENT REPORT
 ============================
-Portfolio Value: ${:.2}
-Total P&L: ${:.2}
-1-Day VaR (95%): ${:.2}
-10-Day VaR (95%): ${:.2}
+Portfolio Value: \${:.2}
+Total P&L: \${:.2}
+1-Day VaR (95%): \${:.2}
+10-Day VaR (95%): \${:.2}
 Max Drawdown: {:.2}%
 Leverage: {:.2}x
 Largest Position: {:.1}%
