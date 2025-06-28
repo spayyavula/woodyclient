@@ -80,12 +80,6 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
               backgroundSize: '200% 100%',
               animation: 'shimmer 2s infinite'
             }}></div>
-          >
-            <div className="absolute inset-0 bg-white/10 rounded-full" style={{
-              backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
-              backgroundSize: '200% 100%',
-              animation: 'shimmer 2s infinite'
-            }}></div>
           </div>
         </div>
       </div>
@@ -157,5 +151,3 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
 };
 
 export default DeploymentProgressBar;
-
-export default DeploymentProgressBar
