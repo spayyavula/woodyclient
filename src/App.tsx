@@ -58,6 +58,7 @@ function App() {
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);
   const [isCollaborationVisible, setIsCollaborationVisible] = useState(false);
   const [isMarketplaceVisible, setIsMarketplaceVisible] = useState(false);
+  const [authListenerEnabled, setAuthListenerEnabled] = useState(false);
   
   const [tabs, setTabs] = useState<Tab[]>([
     {
@@ -199,26 +200,31 @@ mod tests {
     }
 
     // Always start with no user to show landing page
-    // This ensures the landing page is always displayed first
+    // Authentication will be handled by the landing page
     setUser(null);
     setLoading(false);
 
-    // Listen for auth changes
+    // Listen for auth changes only when enabled
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Only update user state if we have a valid session and Supabase is configured
-      if (isSupabaseConfigured && session?.user) {
+      // Only update user state if auth listener is enabled and we have a valid session
+      if (authListenerEnabled && isSupabaseConfigured && session?.user) {
         setUser(session.user);
+      } else if (authListenerEnabled && !session?.user) {
+        setUser(null);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [authListenerEnabled]);
 
   const handleLogin = async (email: string, password: string) => {
     setAuthLoading(true);
     setAuthError(null);
+    
+    // Enable auth listener before attempting login
+    setAuthListenerEnabled(true);
 
     // Handle demo mode
     if (!isSupabaseConfigured) {
@@ -254,6 +260,9 @@ mod tests {
   const handleSignup = async (email: string, password: string) => {
     setAuthLoading(true);
     setAuthError(null);
+    
+    // Enable auth listener before attempting signup
+    setAuthListenerEnabled(true);
 
     if (password.length < 6) {
       setAuthError('Password must be at least 6 characters long');
@@ -297,6 +306,7 @@ mod tests {
 
 
   const handleLogout = async () => {
+    setAuthListenerEnabled(false);
     await supabase.auth.signOut();
     setUser(null);
     setShowProfile(false);
