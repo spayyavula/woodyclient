@@ -52,7 +52,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
 
     try {
       // Use the RPC function to get deployment progress with fallback
-      const { data: deploymentData, error: deploymentError } = await supabase
+      let { data: deploymentData, error: deploymentError } = await supabase
         .rpc('get_deployment_progress', { p_deployment_id: deploymentId })
         .single();
 
@@ -76,7 +76,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       };
 
       // Use the RPC function to get events with fallback
-      const { data: events, error: eventsError } = await supabase
+      let { data: events, error: eventsError } = await supabase
         .rpc('get_deployment_events', { p_deployment_id: deploymentId });
 
       if (eventsError) {
