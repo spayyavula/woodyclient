@@ -40,6 +40,7 @@ interface ToolbarProps {
   onShowTemplates: () => void;
   onShowMobilePreview: () => void;
   onShowStripeTests: () => void;
+  onShowHelloWorld: () => void;
   onShowIntegrations: () => void;
 }
 
@@ -54,6 +55,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onRun, 
   onShowTemplates,
   onShowMobilePreview,
+  onShowHelloWorld,
   onShowStripeTests,
   onShowIntegrations
 }) => {
@@ -229,6 +231,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
           >
             <Eye className="w-4 h-4 mr-2" />
             <span>Preview</span>
+          </button>
+          <button 
+            onClick={onShowHelloWorld}
+            className="flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white text-sm font-medium transition-colors"
+            title="Hello World App"
+          >
+            <Smartphone className="w-4 h-4 mr-2" />
+            <span>Hello World</span>
           </button>
           <button 
             onClick={onShowStripeTests}
