@@ -74,12 +74,6 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
           <div 
             className={`h-full bg-gradient-to-r ${getPlatformColor(platform)} transition-all duration-500 relative`}
             style={{ width: `${getOverallProgress()}%` }}
-          >
-            <div className="absolute inset-0 bg-white/10 rounded-full" style={{
-              backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
-              backgroundSize: '200% 100%',
-              animation: 'shimmer 2s infinite'
-            }}></div>
           </div>
         </div>
       </div>
