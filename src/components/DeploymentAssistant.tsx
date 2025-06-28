@@ -333,7 +333,7 @@ const DeploymentAssistant: React.FC<DeploymentAssistantProps> = ({
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <div className={`p-1.5 rounded-full ${
+            <div className={`p-1.5 rounded-full flex items-center justify-center ${
               platform === 'android' ? 'bg-green-900/30' : 
               platform === 'ios' ? 'bg-blue-900/30' : 
               'bg-purple-900/30'
@@ -348,13 +348,13 @@ const DeploymentAssistant: React.FC<DeploymentAssistantProps> = ({
             <div className={`text-xs px-2 py-1 rounded ${
               deploymentStatus === 'success' ? 'bg-green-900/30 text-green-300' :
               deploymentStatus === 'error' ? 'bg-red-900/30 text-red-300' :
-              deploymentStatus === 'building' || deploymentStatus === 'deploying' ? 'bg-blue-900/30 text-blue-300' :
+              deploymentStatus === 'building' || deploymentStatus === 'deploying' || deploymentStatus === 'configuring' ? 'bg-blue-900/30 text-blue-300' :
               'bg-gray-900/30 text-gray-300'
             } flex items-center justify-center`}>
               <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
                 deploymentStatus === 'success' ? 'bg-green-400' :
                 deploymentStatus === 'error' ? 'bg-red-400' :
-                deploymentStatus === 'building' || deploymentStatus === 'deploying' ? 'bg-blue-400 animate-pulse' :
+                deploymentStatus === 'building' || deploymentStatus === 'deploying' || deploymentStatus === 'configuring' ? 'bg-blue-400 animate-pulse' :
                 'bg-gray-400'
               }`}></div>
               {deploymentStatus.toUpperCase()}

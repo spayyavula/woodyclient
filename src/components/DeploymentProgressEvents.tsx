@@ -10,12 +10,13 @@ import {
 } from 'lucide-react';
 
 interface ProgressEvent {
-  id: number;
+  id?: number;
   event_type: 'start' | 'progress' | 'success' | 'error' | 'warning' | 'info';
   message: string;
   percentage?: number;
   timestamp: string;
   metadata?: any;
+  deployment_id?: number;
 }
 
 interface DeploymentProgressEventsProps {
@@ -103,7 +104,7 @@ const DeploymentProgressEvents: React.FC<DeploymentProgressEventsProps> = ({
         ) : (
           <div className="space-y-2">
             {events.map((event) => (
-              <div key={event.id} className="flex items-start space-x-2">
+              <div key={event.id || `${event.timestamp}-${event.message}`} className="flex items-start space-x-2">
                 {getEventIcon(event.event_type)}
                 <div className="flex-1 min-w-0">
                   <div className={`${getEventColor(event.event_type)}`}>

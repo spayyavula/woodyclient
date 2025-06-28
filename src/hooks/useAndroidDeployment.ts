@@ -39,14 +39,14 @@ export const useAndroidDeployment = (): UseAndroidDeploymentReturn => {
   const callDeploymentFunction = async (action: string, data: any) => {
     setLoading(true);
     setError(null);
-
+    
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
         throw new Error('Not authenticated');
       }
-
+      
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/android-deployment`, {
         method: 'POST',
         headers: {
@@ -58,12 +58,12 @@ export const useAndroidDeployment = (): UseAndroidDeploymentReturn => {
           ...data,
         }),
       });
-
+      
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to call deployment function');
       }
-
+      
       return await response.json();
     } catch (err: any) {
       setError(err.message || 'An error occurred');

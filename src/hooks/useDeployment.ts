@@ -1113,7 +1113,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
   // Calculate overall progress with weighted steps
   const getOverallProgress = useCallback((): number => {
     if (steps.length === 0) return 0;
-    
+
     // Weight steps by their complexity/duration
     const weights = steps.map(step => {
       // Assign weights based on metadata or default to 1
@@ -1122,27 +1122,27 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
       if (estimatedTime.includes('3-5') || estimatedTime.includes('4-6')) return 1.5;
       return 1;
     });
-    
+
     const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-    
+
     // Calculate weighted progress
     let totalProgress = 0;
-    
+
     // Add completed steps
     for (let i = 0; i < currentStep; i++) {
       if (steps[i].status === 'completed') {
         totalProgress += weights[i];
       }
     }
-    
+
     if (totalWeight === 0) return 0;
-    
+
     // Add progress from current step
     if (currentStep < steps.length) {
       const currentStepProgress = steps[currentStep].progress || 0;
       totalProgress += (currentStepProgress / 100) * weights[currentStep];
     }
-    
+
     return (totalProgress / totalWeight) * 100;
   }, [steps, currentStep]);
 

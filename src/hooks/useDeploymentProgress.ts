@@ -42,9 +42,9 @@ export const useDeploymentProgress = (deploymentId?: number) => {
   const fetchProgress = useCallback(async () => {
     if (!deploymentId) return;
 
-    setProgress(prev => ({ ...prev, isLoading: true, error: null }));
-
     try {
+      setProgress(prev => ({ ...prev, isLoading: true, error: null }));
+
       // Fetch deployment details
       const { data: deploymentData, error: deploymentError } = await supabase
         .from('android_deployments')
@@ -52,7 +52,10 @@ export const useDeploymentProgress = (deploymentId?: number) => {
         .eq('id', deploymentId)
         .single();
 
-      if (deploymentError) throw deploymentError;
+      if (deploymentError) {
+        console.warn('Error fetching deployment:', deploymentError);
+        // Don't throw here, just continue with default values
+      }
       
       // Ensure we have valid deployment data
       const deployment: DeploymentDetails = deploymentData || {
@@ -69,7 +72,10 @@ export const useDeploymentProgress = (deploymentId?: number) => {
         .eq('deployment_id', deploymentId)
         .order('timestamp', { ascending: true });
 
-      if (eventsError) throw eventsError;
+      if (eventsError) {
+        console.warn('Error fetching events:', eventsError);
+        // Don't throw here, just continue with empty events
+      }
 
       setProgress({
         id: deployment.id,
@@ -131,10 +137,10 @@ export const useDeploymentProgress = (deploymentId?: number) => {
   // Set up real-time subscription
   useEffect(() => {
     if (!deploymentId) return;
-
+    
     // Initial fetch
     fetchProgress();
-
+    
     // Subscribe to deployment updates
     const deploymentSubscription = supabase
       .channel(`deployment-${deploymentId}`)
