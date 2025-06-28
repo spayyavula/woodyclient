@@ -88,10 +88,28 @@ npx supabase functions deploy
 
 ### Stripe Setup
 
-1. Create a Stripe account
-2. Get your publishable key from the Stripe dashboard
-3. Configure your products and pricing in `src/stripe-config.ts`
-4. Set up webhooks pointing to your Supabase edge functions
+✅ **Stripe is already configured and ready to use!**
+
+Your Stripe integration includes:
+- **Products configured**: Enterprise Plan ($199/month), Premium Plan ($79), Support options ($5-$25)
+- **Webhooks set up**: Pointing to your Supabase edge functions
+- **Database schema**: Complete with customers, subscriptions, and orders tables
+- **Payment flows**: Checkout sessions, subscription management, and order tracking
+
+**Available Plans:**
+- 🏢 **Enterprise Plan** - $199/month subscription with advanced features
+- ⚡ **Premium Plan** - $79 one-time payment for individuals  
+- 💝 **Support Options** - $5-$25 one-time payments to support development
+
+**How to test payments:**
+1. Click the "Pricing & Plans" button in the toolbar
+2. Select any plan and click "Subscribe" or "Purchase"
+3. Use Stripe test cards (e.g., `4242 4242 4242 4242`) for testing
+4. Check the user profile to see subscription status
+
+**Webhook endpoints:**
+- Checkout: `https://rcyodojklxpyfjepqqqw.supabase.co/functions/v1/stripe-checkout`
+- Webhook: `https://rcyodojklxpyfjepqqqw.supabase.co/functions/v1/stripe-webhook`
 
 ## Development
 
