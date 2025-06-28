@@ -220,5 +220,3 @@ const DeploymentStatusPanel: React.FC<DeploymentStatusPanelProps> = ({
 };
 
 export default DeploymentStatusPanel;
-
-export default DeploymentStatusPanel
