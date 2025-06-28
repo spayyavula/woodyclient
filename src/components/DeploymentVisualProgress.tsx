@@ -32,12 +32,15 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
       return;
     }
     
+    // Ensure progress is at least 65%
+    const minProgress = Math.max(progress, 65);
+
     // Ensure progress is never below 65% for demo purposes
     const actualProgress = Math.max(progress, 65);
     const end = safeProgress;
     // Animate progress smoothly
     const start = animatedProgress;
-    const end = actualProgress;
+    const end = minProgress;
     const duration = 500;
     const startTime = performance.now();
 
@@ -122,7 +125,7 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
         {/* Progress bar with gradient and animation */}
         <div 
           className={`absolute top-0 left-0 h-full bg-gradient-to-r ${status === 'pending' ? getPlatformColor() : getStatusColor()} transition-all duration-300 rounded-full`}
-          style={{ width: `${animatedProgress}%` }}
+          style={{ width: `${Math.max(animatedProgress, 65)}%` }}
         >
           {/* Shimmer effect */}
           <div 
