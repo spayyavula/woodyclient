@@ -198,31 +198,19 @@ mod tests {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Check for existing session
-    const checkSession = async () => {
-      try {
-        if (isSupabaseConfigured) {
-          const { data: { session } } = await supabase.auth.getSession();
-          setUser(session?.user ?? null);
-        } else {
-          // In demo mode, always start with no user to show landing page
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSession();
+    // Always start with no user to show landing page
+    // This ensures the landing page is always displayed first
+    setUser(null);
+    setLoading(false);
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      // Only update user state if we have a valid session and Supabase is configured
+      if (isSupabaseConfigured && session?.user) {
+        setUser(session.user);
+      }
     });
 
     return () => subscription.unsubscribe();

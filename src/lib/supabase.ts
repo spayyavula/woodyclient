@@ -12,8 +12,8 @@ export const isSupabaseConfigured = supabaseUrl &&
   supabaseUrl.includes('supabase.co');
 
 // Use real Supabase if configured, otherwise use safe demo values
-const finalUrl = isSupabaseConfigured ? supabaseUrl : 'https://demo.supabase.co';
-const finalKey = isSupabaseConfigured ? supabaseAnonKey : 'demo-key';
+const finalUrl = isSupabaseConfigured ? supabaseUrl : 'https://localhost:54321';
+const finalKey = isSupabaseConfigured ? supabaseAnonKey : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
 if (!isSupabaseConfigured) {
   console.warn('Supabase not configured. Running in demo mode.');
