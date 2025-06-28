@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 import { X as CloseIcon } from 'lucide-react';
 import { useDeployment, DeploymentConfig, DeploymentStep } from '../hooks/useDeployment';
+import DeploymentAssistant from './DeploymentAssistant';
+import { useDeploymentAutomation } from '../hooks/useDeploymentAutomation';
 
 interface DeploymentModalProps {
   isVisible: boolean;
@@ -67,6 +69,11 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
     cpuUsage: 0,
     networkSpeed: 0
   });
+  const [showAssistant, setShowAssistant] = useState(true);
+  const [assistantCurrentStep, setAssistantCurrentStep] = useState('');
+  const [deploymentError, setDeploymentError] = useState<string | null>(null);
+  
+  const { runAutomation, automationSteps, isRunning: automationRunning } = useDeploymentAutomation();
 
   // Simulate real-time metrics during deployment
   useEffect(() => {
@@ -96,7 +103,26 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
 
   const handleConfirmDeployment = () => {
     setShowPreDeployCheck(false);
+    setAssistantCurrentStep('rust-build');
     startDeployment(config);
+  };
+
+  // Update assistant step based on current deployment step
+  useEffect(() => {
+    if (steps.length > 0 && currentStep < steps.length) {
+      const step = steps[currentStep];
+      setAssistantCurrentStep(step.id);
+      
+      if (step.status === 'failed') {
+        setDeploymentError(step.output || 'Deployment step failed');
+      } else {
+        setDeploymentError(null);
+      }
+    }
+  }, [currentStep, steps]);
+
+  const handleRunAutomation = async (action: string) => {
+    await runAutomation(action, config.platform);
   };
 
   const getStepIcon = (step: DeploymentStep) => {
@@ -966,6 +992,22 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
           </div>
         </div>
       </div>
+      
+      {/* Deployment Assistant */}
+      <DeploymentAssistant
+        currentStep={assistantCurrentStep}
+        platform={config.platform}
+        isVisible={showAssistant}
+        onClose={() => setShowAssistant(false)}
+        deploymentStatus={
+          isDeploying ? 'deploying' :
+          isConfiguring ? 'configuring' :
+          steps.some(s => s.status === 'failed') ? 'error' :
+          steps.every(s => s.status === 'completed') && steps.length > 0 ? 'success' :
+          'idle'
+        }
+        currentError={deploymentError}
+      />
     </div>
   );
 };

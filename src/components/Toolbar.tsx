@@ -25,6 +25,7 @@ import {
   Wrench
 } from 'lucide-react';
 import SubscriptionStatus from './SubscriptionStatus';
+import AutomationPanel from './AutomationPanel';
 
 interface ToolbarProps {
   user?: any;
@@ -59,6 +60,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const [showDeploymentModal, setShowDeploymentModal] = React.useState(false);
   const [isBuilding, setIsBuilding] = React.useState(false);
   const [buildOutput, setBuildOutput] = React.useState<string[]>([]);
+  const [showAutomationPanel, setShowAutomationPanel] = React.useState(false);
 
   const handleBuild = async () => {
     setIsBuilding(true);
@@ -243,6 +245,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
             <Link className="w-4 h-4 mr-2" />
             <span>Integrations</span>
           </button>
+          <button 
+            onClick={() => setShowAutomationPanel(true)}
+            className="flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+            title="Automation Center"
+          >
+            <Zap className="w-4 h-4 mr-2" />
+            <span>Automate</span>
+          </button>
         </div>
       </div>
 
@@ -337,6 +347,13 @@ const Toolbar: React.FC<ToolbarProps> = ({
         isVisible={showDeploymentModal}
         onClose={() => setShowDeploymentModal(false)}
         initialPlatform={selectedPlatform as any}
+      />
+      
+      {/* Automation Panel */}
+      <AutomationPanel
+        platform={selectedPlatform}
+        isVisible={showAutomationPanel}
+        onClose={() => setShowAutomationPanel(false)}
       />
     </>
   );
