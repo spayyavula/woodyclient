@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Smartphone, Globe, Gamepad2, Wifi, DollarSign, MessageSquare, Database, Brain, Zap, Eye, Target, TrendingUp, Cpu, Network, BarChart3, Bot, Camera, Mic, FileText, Activity, Layers, GitBranch, Cloud, Shield, Rocket, Server, Monitor, Thermometer, Lock, Radio, Gauge, Home, Car, Factory, Lightbulb, Wrench, Package, Container, Settings, Code, Terminal, HardDrive, Workflow, Timer, AlertTriangle, CheckCircle, Search, Microscope, Atom, Dna, Beaker, Calculator, PieChart, LineChart, Headphones, Video, Image, Music, Palette, Brush, Sparkles, Wand2, Fingerprint, ScanLine, Radar, Satellite, MapPin, Navigation, Compass, Route, Truck, Plane, Ship, Train, Building, Store, ShoppingBag, CreditCard, Coins, TrendingDown, Users, UserCheck, Heart, Stethoscope, Pill, TestTube, Syringe, Ban as Bandage, BookOpen, GraduationCap, School, Library, Bookmark, PenTool, Edit, Type, AlignLeft, Calendar, Clock, AlarmPlus as Alarm, Watch as Stopwatch, Hourglass, Sun, Moon, CloudRain, Snowflake, Wind, Umbrella, TreePine, Leaf, Flower, Sprout, Recycle, Battery, Plug, Power, Fuel, Flame, Droplets, Waves, Mountain, Scan as Volcano, Globe2, Earth, Star, Telescope, Rocket as RocketIcon, Orbit, Atom as AtomIcon, Dna as DnaIcon, Microscope as MicroscopeIcon, FlaskConical, TestTube2, Pipette, Scale, Ruler, Triangle, Square, Circle, Hexagon, Pentagon, Diamond, Hash, Binary, Braces, Brackets, Parentheses, Quote, AtSign, Percent, Plus, Minus, Equal, EqualNot as NotEqual, Theater as GreaterThan, Shapes as LessThan, Infinity, Pi, Sigma, Delete as Delta, Lamp as Lambda, Vegan as Omega, Album as Alpha, Bed as Beta, Drama as Gamma, Sheet as Theta, Ship as Phi, Music as Psi, Ship as Chi, Ghost as Rho, Tag as Tau, Music as Mu, Nut as Nu, AArrowDown as Xi, MicrowaveIcon as Omicron, FileUpIcon as Upsilon, HandMetal as Zeta, Star as Eta, Bot as Iota, Map as Kappa } from 'lucide-react';
+import { X, Smartphone, Globe, Gamepad2, TrendingUp, BarChart3, Bot, Camera, Shield, Brain } from 'lucide-react';
 
 interface Template {
   id: string;
@@ -84,7 +84,7 @@ impl NeuralNetwork {
     
     pub fn train(&mut self, data: &[(Tensor, Tensor)], epochs: usize, learning_rate: f64) -> Result<()> {
         for epoch in 0..epochs {
-            let mut total_loss = 0.0;
+            let total_loss = 0.0;
             for (input, target) in data {
                 let output = self.forward(input)?;
                 // Calculate loss and backpropagate
@@ -608,8 +608,7 @@ async fn main() {
         let mut price = 150.0;
         loop {
             price += ((counter % 100) as f64 / 100.0 - 0.5) * 2.0; // Deterministic for demo
-            price += ((i % 100) as f64 / 100.0 - 0.5) * 2.0; // Deterministic for demo
-        loop {
+            
             let market_data = MarketData {
                 symbol: "AAPL".to_string(),
                 bid_price: price,
