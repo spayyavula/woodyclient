@@ -1225,7 +1225,7 @@ async fn main() {
         // Print performance every 100 iterations
         if i % 100 == 0 {
             let summary = engine.get_performance_summary();
-            println!("📊 Performance: PnL: \\${{:.2}}, Trades: {}", 
+            println!("📊 Performance: PnL: ${:.2}, Trades: {}", 
                     summary.total_pnl, summary.trade_count);
         }
         
@@ -1522,10 +1522,10 @@ impl RiskManager {
         format!(
             "📊 RISK MANAGEMENT REPORT
 ============================
-Portfolio Value: $${metrics.total_portfolio_value:.2}
-Total P&L: $${metrics.total_pnl:.2}
-1-Day VaR (95%): $${metrics.var_1d:.2}
-10-Day VaR (95%): $${metrics.var_10d:.2}
+Portfolio Value: ${:.2}
+Total P&L: ${:.2}
+1-Day VaR (95%): ${:.2}
+10-Day VaR (95%): ${:.2}
 Max Drawdown: {:.2}%
 Leverage: {:.2}x
 Largest Position: {:.1}%
@@ -1691,11 +1691,11 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       final int result = await platform.invokeMethod('heavyCalculation', {'input': 1000000});
       setState(() {
-        _result = 'Rust calculation result: \$result';
+        _result = 'Rust calculation result: $result';
       });
     } on PlatformException catch (e) {
       setState(() {
-        _result = 'Error: \${e.message}';
+        _result = 'Error: ${e.message}';
       });
     }
   }
