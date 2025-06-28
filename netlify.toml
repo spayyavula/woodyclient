@@ -15,7 +15,7 @@
 # Environment variable configuration
 [build.environment]
   # Set Node version
-  NODE_VERSION = "18"
+  NODE_VERSION = "20.11.1"
 
 # Production context: all deploys from the Production branch set in your site's
 # deploy contexts will inherit these settings.
