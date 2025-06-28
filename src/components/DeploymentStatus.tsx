@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle, 
-  XCircle, 
-  Clock, 
+  XCircle,
+  Clock,
   RefreshCw, 
   ExternalLink,
   Download,

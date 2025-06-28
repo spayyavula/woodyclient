@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Clock } from 'lucide-react';
 
 interface DeploymentProgressBarProps {
   steps: Array<{

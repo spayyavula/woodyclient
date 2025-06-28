@@ -4,7 +4,7 @@ import {
   XCircle, 
   AlertTriangle, 
   Info, 
-  Clock, 
+  Clock,
   RefreshCw,
   ArrowDown
 } from 'lucide-react';
