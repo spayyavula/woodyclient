@@ -46,6 +46,7 @@ interface ToolbarProps {
   onShowTemplates: () => void;
   onShowMobilePreview: () => void;
   onShowStripeTests: () => void;
+  onShowDeploymentTemplates: () => void;
   onShowScriptRunner: () => void;
   onShowIntegrations: () => void;
 }
@@ -62,6 +63,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onShowConfigCheck,
   onShowTemplates,
   onShowDeploymentStatus,
+  onShowDeploymentTemplates,
   onShowMobilePreview,
   onShowScriptRunner,
   onShowStripeTests,
@@ -235,6 +237,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
           >
             <Smartphone className="w-4 h-4 mr-2" />
             <span>Deploy</span>
+          </button>
+          <button 
+            onClick={onShowDeploymentTemplates}
+            className="flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-medium transition-colors"
+            title="Deployment Templates"
+          >
+            <Rocket className="w-4 h-4 mr-2" />
+            <span>Deploy Templates</span>
           </button>
           <button 
             className="flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-medium transition-colors"

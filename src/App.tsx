@@ -23,6 +23,7 @@ import StripeTestSuite from './components/StripeTestSuite';
 import IntegrationsPanel from './components/IntegrationsPanel';
 import ConfigurationChecker from './components/ConfigurationChecker';
 import DeploymentStatusPanel from './components/DeploymentStatusPanel';
+import DeploymentTemplateSelector from './components/DeploymentTemplateSelector';
 
 interface Tab {
   id: string;
@@ -61,6 +62,7 @@ function App() {
   const [showStripeTests, setShowStripeTests] = useState(false);
   const [showIntegrations, setShowIntegrations] = useState(false);
   const [showDeploymentStatus, setShowDeploymentStatus] = useState(false);
+  const [showDeploymentTemplates, setShowDeploymentTemplates] = useState(false);
   const [showScriptRunner, setShowScriptRunner] = useState(false);
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);
   const [isCollaborationVisible, setIsCollaborationVisible] = useState(false);
@@ -487,6 +489,7 @@ console.log('Hello from ${fileName}!');`;
         onShowMobilePreview={() => setShowMobilePreview(true)}
         onShowStripeTests={() => setShowStripeTests(true)}
         onShowConfigCheck={() => setShowConfigCheck(true)}
+        onShowDeploymentTemplates={() => setShowDeploymentTemplates(true)}
         onShowDeploymentStatus={() => setShowDeploymentStatus(true)}
         onShowIntegrations={() => setShowIntegrations(true)}
         onShowScriptRunner={() => setShowScriptRunner(true)}
@@ -608,6 +611,12 @@ console.log('Hello from ${fileName}!');`;
         <ConfigurationChecker
           isVisible={showConfigCheck}
           onClose={() => setShowConfigCheck(false)}
+        />
+      )}
+
+      {showDeploymentTemplates && (
+        <DeploymentTemplateSelector 
+          onClose={() => setShowDeploymentTemplates(false)}
         />
       )}
 
