@@ -342,28 +342,16 @@ const DeploymentAssistant: React.FC<DeploymentAssistantProps> = ({
               {platform === 'ios' && <Smartphone className="w-3 h-3 text-blue-400" />}
               {platform === 'web' && <Monitor className="w-3 h-3 text-purple-400" />}
             </div>
-              'bg-purple-900/30'
-            }`}>
-              {platform === 'android' && <Smartphone className="w-3 h-3 text-green-400" />}
-              {platform === 'ios' && <Smartphone className="w-3 h-3 text-blue-400" />}
-              {platform === 'web' && <Monitor className="w-3 h-3 text-purple-400" />}
-            </div>
             <span className="text-sm font-medium text-gray-300">{platform.toUpperCase()}</span>
           </div>
           <div className="flex-1">
-            <div className={\`text-xs px-2 py-1 rounded ${
+            <div className={`text-xs px-2 py-1 rounded ${
               deploymentStatus === 'success' ? 'bg-green-900/30 text-green-300' :
               deploymentStatus === 'error' ? 'bg-red-900/30 text-red-300' :
               deploymentStatus === 'building' || deploymentStatus === 'deploying' ? 'bg-blue-900/30 text-blue-300' :
               'bg-gray-900/30 text-gray-300'
             } flex items-center justify-center`}>
-              <div className={\`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                deploymentStatus === 'success' ? 'bg-green-400' :
-                deploymentStatus === 'error' ? 'bg-red-400' :
-                deploymentStatus === 'building' || deploymentStatus === 'deploying' ? 'bg-blue-400 animate-pulse' :
-                'bg-gray-400'
-              }`}></div>
-              <div className={\`w-1.5 h-1.5 rounded-full mr-1.5 ${
+              <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
                 deploymentStatus === 'success' ? 'bg-green-400' :
                 deploymentStatus === 'error' ? 'bg-red-400' :
                 deploymentStatus === 'building' || deploymentStatus === 'deploying' ? 'bg-blue-400 animate-pulse' :
@@ -435,7 +423,7 @@ const DeploymentAssistant: React.FC<DeploymentAssistantProps> = ({
           <button
             key={id}
             onClick={() => setActiveTab(id as any)}
-            className={\`flex-1 flex items-center justify-center space-x-1 px-3 py-2 text-xs transition-colors ${
+            className={`flex-1 flex items-center justify-center space-x-1 px-3 py-2 text-xs transition-colors ${
               activeTab === id 
                 ? 'bg-blue-600 text-white' 
                 : 'text-gray-300 hover:text-white hover:bg-gray-700'
@@ -518,7 +506,7 @@ const DeploymentAssistant: React.FC<DeploymentAssistantProps> = ({
                       <div className="w-full bg-gray-700 rounded-full h-2">
                         <div 
                           className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: \`${automationProgress}%` }}
+                          style={{ width: `${automationProgress}%` }}
                         />
                       </div>
                     </div>
@@ -669,6 +657,6 @@ const DeploymentAssistant: React.FC<DeploymentAssistantProps> = ({
       </div>
     </div>
   );
-export default DeploymentAssistant;
+};
 
-export default DeploymentAssistant
+export default DeploymentAssistant;
