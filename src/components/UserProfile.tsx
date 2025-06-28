@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 import { User, Crown, Calendar, CreditCard, LogOut, Settings } from 'lucide-react';
-import { getProductByPriceId } from '../stripe-config';
+import { useSubscription } from '../hooks/useSubscription';
+import SubscriptionStatus from './SubscriptionStatus';
 
 interface UserProfileProps {
   user: any;
@@ -9,54 +9,8 @@ interface UserProfileProps {
   onLogout: () => void;
 }
 
-interface Subscription {
-  subscription_status: string;
-  price_id: string | null;
-  current_period_end: number | null;
-  cancel_at_period_end: boolean;
-  payment_method_brand: string | null;
-  payment_method_last4: string | null;
-}
-
 const UserProfile: React.FC<UserProfileProps> = ({ user, onClose, onLogout }) => {
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchSubscription();
-  }, []);
-
-  const fetchSubscription = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('stripe_user_subscriptions')
-        .select('*')
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching subscription:', error);
-      } else {
-        setSubscription(data);
-      }
-    } catch (err) {
-      console.error('Error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getSubscriptionStatus = () => {
-    if (!subscription) return 'Free Plan';
-    
-    if (subscription.price_id) {
-      const product = getProductByPriceId(subscription.price_id);
-      if (product) {
-        return product.name;
-      }
-    }
-    
-    return 'Free Plan';
-  };
+  const { subscription, loading } = useSubscription();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -108,32 +62,25 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onClose, onLogout }) =>
               <h4 className="font-semibold text-white">Subscription</h4>
             </div>
             
-            {loading ? (
-              <div className="text-gray-400">Loading subscription info...</div>
-            ) : (
-              <div className="space-y-2">
+            <SubscriptionStatus />
+            
+            {!loading && subscription && subscription.subscription_status && (
+              <div className="mt-4 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Plan:</span>
-                  <span className="text-white font-medium">{getSubscriptionStatus()}</span>
+                  <span className="text-gray-300">Status:</span>
+                  <span className={`px-2 py-1 rounded text-xs ${getStatusColor(subscription.subscription_status)}`}>
+                    {subscription.subscription_status.replace('_', ' ').toUpperCase()}
+                  </span>
                 </div>
                 
-                {subscription && subscription.subscription_status && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300">Status:</span>
-                    <span className={`px-2 py-1 rounded text-xs ${getStatusColor(subscription.subscription_status)}`}>
-                      {subscription.subscription_status.replace('_', ' ').toUpperCase()}
-                    </span>
-                  </div>
-                )}
-                
-                {subscription && subscription.current_period_end && (
+                {subscription.current_period_end && (
                   <div className="flex items-center justify-between">
                     <span className="text-gray-300">Next billing:</span>
                     <span className="text-white">{formatDate(subscription.current_period_end)}</span>
                   </div>
                 )}
                 
-                {subscription && subscription.cancel_at_period_end && (
+                {subscription.cancel_at_period_end && (
                   <div className="text-yellow-400 text-sm">
                     Subscription will cancel at period end
                   </div>

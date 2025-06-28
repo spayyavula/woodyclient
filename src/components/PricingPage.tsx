@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { stripeProducts, StripeProduct } from '../stripe-config';
-import { supabase } from '../lib/supabase';
+import { stripeProducts } from '../stripe-config';
+import PaymentButton from './PaymentButton';
 import { Check, Crown, Coffee, Heart, Users, Zap } from 'lucide-react';
 
 interface PricingPageProps {
@@ -8,52 +8,6 @@ interface PricingPageProps {
 }
 
 const PricingPage: React.FC<PricingPageProps> = ({ onClose }) => {
-  const [loading, setLoading] = useState<string | null>(null);
-  const [error, setError] = useState('');
-
-  const handlePurchase = async (product: StripeProduct) => {
-    setLoading(product.priceId);
-    setError('');
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        setError('Please sign in to make a purchase');
-        setLoading(null);
-        return;
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          price_id: product.priceId,
-          mode: product.mode,
-          success_url: `${window.location.origin}/success`,
-          cancel_url: `${window.location.origin}/pricing`,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout session');
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
-    } finally {
-      setLoading(null);
-    }
-  };
-
   const getProductIcon = (name: string) => {
     switch (name) {
       case 'Enterprise Plan':
@@ -133,12 +87,6 @@ const PricingPage: React.FC<PricingPageProps> = ({ onClose }) => {
           </button>
         </div>
 
-        {error && (
-          <div className="bg-red-900/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
-
         {/* Subscription Plans */}
         {subscriptionProducts.length > 0 && (
           <div className="mb-12">
@@ -178,17 +126,13 @@ const PricingPage: React.FC<PricingPageProps> = ({ onClose }) => {
                     ))}
                   </ul>
 
-                  <button
-                    onClick={() => handlePurchase(product)}
-                    disabled={loading === product.priceId}
-                    className="w-full py-3 px-4 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+                  <PaymentButton
+                    product={product}
+                    className="w-full"
+                    variant="primary"
                   >
-                    {loading === product.priceId ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      'Subscribe Now'
-                    )}
-                  </button>
+                    Subscribe Now
+                  </PaymentButton>
                 </div>
               ))}
             </div>
@@ -225,17 +169,14 @@ const PricingPage: React.FC<PricingPageProps> = ({ onClose }) => {
                     ))}
                   </ul>
 
-                  <button
-                    onClick={() => handlePurchase(product)}
-                    disabled={loading === product.priceId}
-                    className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+                  <PaymentButton
+                    product={product}
+                    className="w-full"
+                    variant="secondary"
+                    size="sm"
                   >
-                    {loading === product.priceId ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      'Purchase'
-                    )}
-                  </button>
+                    Purchase
+                  </PaymentButton>
                 </div>
               ))}
             </div>

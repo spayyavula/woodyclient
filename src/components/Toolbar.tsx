@@ -19,6 +19,7 @@ import {
   CreditCard,
   Eye
 } from 'lucide-react';
+import SubscriptionStatus from './SubscriptionStatus';
 
 interface ToolbarProps {
   user?: any;
@@ -125,6 +126,9 @@ const Toolbar: React.FC<ToolbarProps> = ({
       <div className="flex items-center space-x-1">
         {user && (
           <>
+            <div className="mr-4">
+              <SubscriptionStatus />
+            </div>
             <button 
               onClick={onShowPricing}
               className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors"
