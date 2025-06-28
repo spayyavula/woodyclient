@@ -1555,7 +1555,7 @@ async fn main() {
     // Simulate trading activity
     for i in 0..100 {
         // Update market data
-        let price = 150.0 + (i as f64 * 0.1) + (rand::random::<f64>() - 0.5) * 10.0;
+        let price = 150.0 + (i as f64 * 0.1) + ((i % 100) as f64 / 100.0 - 0.5) * 10.0;
         risk_manager.update_market_data("AAPL".to_string(), price);
         
         // Update position
