@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
+import LandingPage from './components/LandingPage';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
 import SuccessPage from './components/SuccessPage';
@@ -44,6 +45,8 @@ interface Template {
 function App() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
@@ -241,6 +244,93 @@ mod tests {
     }
   }, []);
 
+  const handleLogin = async (email: string, password: string) => {
+    setAuthLoading(true);
+    setAuthError(null);
+
+    // Check if we're in demo mode
+    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
+                      import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321' ||
+                      import.meta.env.VITE_SUPABASE_URL.includes('your-production-project');
+    
+    if (isDemoMode) {
+      // In demo mode, simulate successful login
+      setTimeout(() => {
+        setUser({ 
+          id: 'demo-user', 
+          email: email,
+          created_at: new Date().toISOString(),
+          last_sign_in_at: new Date().toISOString()
+        });
+        setAuthLoading(false);
+      }, 1000);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setAuthError(error.message);
+      }
+    } catch (err: any) {
+      setAuthError('Unable to connect to authentication service. Please try again later.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleSignup = async (email: string, password: string) => {
+    setAuthLoading(true);
+    setAuthError(null);
+
+    if (password.length < 6) {
+      setAuthError('Password must be at least 6 characters long');
+      setAuthLoading(false);
+      return;
+    }
+
+    // Check if we're in demo mode
+    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
+                      import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321' ||
+                      import.meta.env.VITE_SUPABASE_URL.includes('your-production-project');
+    
+    if (isDemoMode) {
+      // In demo mode, simulate successful signup
+      setTimeout(() => {
+        setUser({ 
+          id: 'demo-user', 
+          email: email,
+          created_at: new Date().toISOString(),
+          last_sign_in_at: new Date().toISOString()
+        });
+        setAuthLoading(false);
+      }, 1000);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: undefined, // Disable email confirmation
+        },
+      });
+
+      if (error) {
+        setAuthError(error.message);
+      }
+    } catch (err: any) {
+      setAuthError('Unable to connect to authentication service. Please try again later.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   const handleAuthSuccess = () => {
     // User will be set automatically by the auth state change listener
   };
@@ -377,15 +467,12 @@ console.log('Hello from ${fileName}!');`;
   }
 
   if (!user) {
-    return authMode === 'login' ? (
-      <LoginPage 
-        onSuccess={handleAuthSuccess}
-        onSwitchToSignup={() => setAuthMode('signup')}
-      />
-    ) : (
-      <SignupPage 
-        onSuccess={handleAuthSuccess}
-        onSwitchToLogin={() => setAuthMode('login')}
+    return (
+      <LandingPage 
+        onLogin={handleLogin}
+        onSignup={handleSignup}
+        loading={authLoading}
+        error={authError}
       />
     );
   }
