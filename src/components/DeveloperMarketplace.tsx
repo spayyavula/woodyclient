@@ -800,6 +800,7 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
                   <label className="block text-sm font-medium text-gray-300 mb-2">Project Title</label>
                   <input
                     type="text"
+                    autoComplete="off"
                     placeholder="Describe your project..."
                     className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-green-500 focus:outline-none"
                   />
@@ -808,6 +809,7 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
                   <label className="block text-sm font-medium text-gray-300 mb-2">Budget</label>
                   <input
                     type="number"
+                    autoComplete="off"
                     placeholder="$500"
                     className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-green-500 focus:outline-none"
                   />

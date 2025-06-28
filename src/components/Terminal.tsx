@@ -294,6 +294,7 @@ Successfully installed torch-2.1.0+cu118 torchvision-0.16.0+cu118 tensorflow-2.1
           <span>$ </span>
           <input
             type="text"
+            autoComplete="off"
             value={currentCommand}
             onChange={(e) => setCurrentCommand(e.target.value)}
             onKeyDown={handleKeyDown}

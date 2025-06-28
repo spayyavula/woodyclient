@@ -325,6 +325,7 @@ fn example_function() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
+                    autoComplete="off"
                     placeholder="Type a message..."
                     className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows={2}
