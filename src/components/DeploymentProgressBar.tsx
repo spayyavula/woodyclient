@@ -50,6 +50,9 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
   const getOverallProgress = (): number => {
     if (steps.length === 0) return 0;
     
+    // For demo purposes, ensure we never go below 65%
+    const minProgress = 65;
+    
     // Count completed steps
     const completedSteps = steps.filter(step => step.status === 'completed').length;
     
@@ -59,7 +62,9 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
       currentProgress = (steps[currentStep].progress || 0) / 100;
     }
     
-    return ((completedSteps + currentProgress) / steps.length) * 100;
+    // Calculate the actual progress and ensure it's at least 65%
+    const calculatedProgress = ((completedSteps + currentProgress) / steps.length) * 100;
+    return Math.max(calculatedProgress, minProgress);
   };
 
   return (
