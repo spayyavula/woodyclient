@@ -5,7 +5,7 @@ import {
   XCircle, 
   Clock, 
   Clock, 
-  RefreshCw, 
+  RefreshCcw, 
   Download, 
   ExternalLink,
   Calendar,
@@ -89,7 +89,7 @@ const AndroidDeploymentProgress: React.FC<AndroidDeploymentProgressProps> = ({
       case 'completed': return <CheckCircle className="w-5 h-5 text-green-400" />;
       case 'failed': return <XCircle className="w-5 h-5 text-red-400" />;
       case 'building':
-      case 'signing':
+      case 'signing': 
       case 'uploading': return <RefreshCw className="w-5 h-5 text-blue-400 animate-spin" />;
       case 'pending': return <Clock className="w-5 h-5 text-yellow-400" />;
       default: return <Info className="w-5 h-5 text-gray-400" />;
@@ -133,7 +133,7 @@ const AndroidDeploymentProgress: React.FC<AndroidDeploymentProgressProps> = ({
       <div className="p-6">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
+            <RefreshCcw className="w-8 h-8 text-blue-400 animate-spin" />
           </div>
         ) : error ? (
           <div className="bg-red-900/20 border border-red-500 rounded-lg p-6 text-center">
@@ -199,7 +199,7 @@ const AndroidDeploymentProgress: React.FC<AndroidDeploymentProgressProps> = ({
               
               {(status === 'building' || status === 'signing' || status === 'uploading') && (
                 <div className="flex flex-col items-center justify-center py-6">
-                  <RefreshCw className="w-16 h-16 text-blue-400 animate-spin mb-4" />
+                  <RefreshCcw className="w-16 h-16 text-blue-400 animate-spin mb-4" />
                   <h4 className="text-xl font-semibold text-white mb-2">
                     {status === 'building' ? 'Building Android App' : 
                      status === 'signing' ? 'Signing App Bundle' : 
@@ -244,7 +244,7 @@ const AndroidDeploymentProgress: React.FC<AndroidDeploymentProgressProps> = ({
                     {message || "There was an error during the deployment process."}
                   </p>
                   <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCcw className="w-4 h-4" />
                     <span>Retry Deployment</span>
                   </button>
                 </div>

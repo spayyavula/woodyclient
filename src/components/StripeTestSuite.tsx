@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { 
   TestTube, 
   Play, 
-  CheckCircle, 
+  CheckCircle,
   XCircle, 
-  Clock, 
+  Clock,
   CreditCard, 
   AlertTriangle,
-  RefreshCw,
+  RefreshCcw,
   Download,
   Eye,
   Zap,
@@ -144,9 +144,9 @@ const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose })
       case 'passed':
         return <CheckCircle className="w-4 h-4 text-green-400" />;
       case 'failed':
-        return <XCircle className="w-4 h-4 text-red-400" />;
+        return <XCircle className="w-4 h-4 text-red-400" />; 
       case 'running':
-        return <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />;
+        return <RefreshCcw className="w-4 h-4 text-blue-400 animate-spin" />;
       default:
         return <Clock className="w-4 h-4 text-gray-400" />;
     }
@@ -294,7 +294,7 @@ const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose })
                 >
                   {isRunning ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <RefreshCcw className="w-4 h-4 animate-spin" />
                       <span>Running Tests...</span>
                     </>
                   ) : (
@@ -309,7 +309,7 @@ const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose })
                   onClick={clearResults}
                   className="w-full flex items-center justify-center space-x-2 p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCcw className="w-4 h-4" />
                   <span>Clear Results</span>
                 </button>
               </div>
@@ -393,7 +393,7 @@ const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose })
                         >
                           {isTestRunning ? (
                             <>
-                              <RefreshCw className="w-3 h-3 animate-spin" />
+                              <RefreshCcw className="w-3 h-3 animate-spin" />
                               <span>Running</span>
                             </>
                           ) : (

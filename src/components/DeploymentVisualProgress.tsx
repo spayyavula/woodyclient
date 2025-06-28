@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, Clock, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Clock, RefreshCcw } from 'lucide-react';
 
 interface DeploymentVisualProgressProps {
   progress: number;
@@ -64,7 +64,7 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
       case 'signing':
       case 'uploading':
       case 'running':
-        return <RefreshCw className="w-5 h-5 text-blue-400 animate-spin" />;
+        return <RefreshCcw className="w-5 h-5 text-blue-400 animate-spin" />;
       default:
         return <AlertTriangle className="w-5 h-5 text-gray-400" />;
     }

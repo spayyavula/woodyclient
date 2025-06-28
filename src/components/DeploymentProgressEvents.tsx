@@ -5,7 +5,7 @@ import {
   AlertTriangle, 
   Info, 
   Clock,
-  RefreshCw,
+  RefreshCcw,
   ArrowDown
 } from 'lucide-react';
 
@@ -53,7 +53,7 @@ const DeploymentProgressEvents: React.FC<DeploymentProgressEventsProps> = ({
       case 'start':
         return <Clock className="w-4 h-4 text-purple-400 flex-shrink-0" />;
       case 'progress':
-        return <RefreshCw className="w-4 h-4 text-blue-400 animate-spin flex-shrink-0" />;
+        return <RefreshCcw className="w-4 h-4 text-blue-400 animate-spin flex-shrink-0" />;
       default:
         return <Info className="w-4 h-4 text-gray-400 flex-shrink-0" />;
     }
