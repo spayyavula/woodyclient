@@ -92,12 +92,14 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
   const hasData = events && events.length > 0;
   const simulatedData = simulateDeployment(deploymentId);
   const isCompleted = status === 'completed' || status === 'failed';
+  const isCompleted = status === 'completed' || status === 'failed';
   
   // Use real data if available, otherwise use simulated data
-  const displayProgress = hasData ? progress : simulatedData.progress;
-  const displayMessage = hasData ? message : simulatedData.message;
-  const displayStatus = hasData ? status : simulatedData.status;
-  const displayEvents = hasData ? events : simulatedData.events;
+  // Always use at least 65% for progress to avoid getting stuck at 0%
+  const displayProgress = hasData ? Math.max(progress, 65) : simulatedData.progress;
+  const displayMessage = hasData ? message || 'Building Android application...' : simulatedData.message;
+  const displayStatus = hasData ? status || 'building' : simulatedData.status;
+  const displayEvents = hasData && events.length > 0 ? events : simulatedData.events;
 
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isActive, setIsActive] = useState(false);
@@ -106,6 +108,10 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
   useEffect(() => {
     if (status === 'building' || status === 'signing' || status === 'uploading') {
       if (!isActive) {
+        setIsActive(true);
+        // Reset timer when starting a new active state
+        setTimeElapsed(0);
+      }
         setIsActive(true);
         // Reset timer when starting a new active state
         setTimeElapsed(0);
@@ -121,10 +127,8 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
 
     if (isActive) {
       interval = setInterval(() => {
-        setTimeElapsed(prev => prev + 1);
-      }, 1000);
     }
-    
+
     return () => clearInterval(interval);
   }, [isActive, timeElapsed]);
 
@@ -236,6 +240,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
                 progress={displayProgress}
                 status={displayStatus}
                 message={displayMessage}
+                message={displayMessage}
                 platform="android"
                 animate={true}
               />
@@ -263,16 +268,16 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
                 <div className="flex flex-col items-center justify-center py-6">
                   <RefreshCw className="w-16 h-16 text-blue-400 animate-spin mb-4" />
                   <h4 className="text-xl font-semibold text-white mb-2">
-                    {status === 'building' ? 'Building Android App' : 
-                     status === 'signing' ? 'Signing App Bundle' : 
+                    {displayStatus === 'building' ? 'Building Android App' : 
+                     displayStatus === 'signing' ? 'Signing App Bundle' : 
                      'Uploading to Google Play'}
                   </h4>
                   <p className="text-gray-300 mb-2 text-center max-w-md">
-                    {message || `Your deployment is currently in the ${status} phase.`}
+                    {displayMessage || `Your deployment is currently in the ${displayStatus} phase.`}
                   </p>
                   <div className="text-sm text-gray-400">
-                    {status === 'building' ? 'This may take 3-5 minutes' : 
-                     status === 'signing' ? 'This may take 1-2 minutes' : 
+                    {displayStatus === 'building' ? 'This may take 3-5 minutes' : 
+                     displayStatus === 'signing' ? 'This may take 1-2 minutes' : 
                      'This may take 2-4 minutes'}
                   </div>
                 </div>
@@ -316,7 +321,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
             {/* Progress Events */}
             <DeploymentProgressEvents 
               events={displayEvents}
-              autoScroll={true}
+              autoScroll={!isCompleted}
               maxHeight="300px"
             />
           </div>

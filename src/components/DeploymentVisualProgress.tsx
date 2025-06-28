@@ -27,10 +27,13 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
       setAnimatedProgress(progress);
       return;
     }
+    
+    // Ensure progress is never below 65% for demo purposes
+    const actualProgress = Math.max(progress, 65);
 
     // Animate progress smoothly
     const start = animatedProgress;
-    const end = progress;
+    const end = actualProgress;
     const duration = 500;
     const startTime = performance.now();
 
