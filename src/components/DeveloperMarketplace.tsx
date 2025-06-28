@@ -402,11 +402,11 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-green-600 rounded-lg">
-                <Users className="w-6 h-6 text-white" />
+                <Globe className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Developer Marketplace</h2>
-                <p className="text-gray-400">Connect with expert developers worldwide</p>
+                <h2 className="text-2xl font-bold text-white">Global Developer Marketplace</h2>
+                <p className="text-gray-400">Connect with 50,000+ expert developers across 180+ countries</p>
               </div>
             </div>
             <button
@@ -421,9 +421,9 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
           <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
             {[
               { id: 'browse', label: 'Browse Experts', icon: Search },
-              { id: 'requests', label: 'Help Requests', icon: MessageSquare },
+              { id: 'requests', label: 'Global Requests', icon: MessageSquare },
               { id: 'my-jobs', label: 'My Jobs', icon: Briefcase },
-              { id: 'earnings', label: 'Earnings', icon: DollarSign }
+              { id: 'earnings', label: 'Global Earnings', icon: DollarSign }
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -448,6 +448,29 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
               {/* Filters Sidebar */}
               <div className="w-80 bg-gray-900 p-6 border-r border-gray-700 overflow-y-auto">
                 <h3 className="text-lg font-semibold text-white mb-4">Filters</h3>
+                
+                {/* Global Stats */}
+                <div className="mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                  <h4 className="text-sm font-medium text-blue-300 mb-2">🌍 Global Network</h4>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-white">50K+</div>
+                      <div className="text-gray-400">Developers</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-white">180+</div>
+                      <div className="text-gray-400">Countries</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-white">24/7</div>
+                      <div className="text-gray-400">Coverage</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-white">15+</div>
+                      <div className="text-gray-400">Timezones</div>
+                    </div>
+                  </div>
+                </div>
                 
                 {/* Search */}
                 <div className="mb-6">
@@ -499,10 +522,10 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium text-gray-300">Quick Filters</h4>
                   {[
-                    { label: 'Online Now', count: 24 },
-                    { label: 'Top Rated', count: 12 },
-                    { label: 'Fast Response', count: 18 },
-                    { label: 'Enterprise Ready', count: 8 }
+                    { label: 'Online Now (Global)', count: 2847 },
+                    { label: 'Top Rated Worldwide', count: 1203 },
+                    { label: 'Fast Response (<1h)', count: 1876 },
+                    { label: 'Enterprise Ready', count: 892 }
                   ].map(filter => (
                     <label key={filter.label} className="flex items-center space-x-2 cursor-pointer">
                       <input type="checkbox" className="rounded border-gray-600 bg-gray-700" />
@@ -516,7 +539,10 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
               {/* Developers List */}
               <div className="flex-1 p-6 overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-white">Available Developers ({developers.length})</h3>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Global Developer Network</h3>
+                    <p className="text-sm text-gray-400">Showing {developers.length} of 50,000+ developers worldwide</p>
+                  </div>
                   <div className="flex items-center space-x-2">
                     <select className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 text-sm">
                       <option>Best Match</option>
@@ -629,11 +655,34 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
           {activeTab === 'requests' && (
             <div className="p-6 overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-white">Help Requests ({helpRequests.length})</h3>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Global Help Requests</h3>
+                  <p className="text-sm text-gray-400">Active requests from developers worldwide ({helpRequests.length})</p>
+                </div>
                 <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
                   <MessageSquare className="w-4 h-4" />
-                  <span>Post Request</span>
+                  <span>Post Global Request</span>
                 </button>
+              </div>
+              
+              {/* Global Request Stats */}
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-400">2,847</div>
+                  <div className="text-xs text-gray-400">Active Requests</div>
+                </div>
+                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-green-400">156</div>
+                  <div className="text-xs text-gray-400">Countries</div>
+                </div>
+                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-purple-400">89%</div>
+                  <div className="text-xs text-gray-400">Success Rate</div>
+                </div>
+                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-orange-400">4.2h</div>
+                  <div className="text-xs text-gray-400">Avg Response</div>
+                </div>
               </div>
 
               <div className="grid gap-6">
@@ -699,21 +748,21 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
           {activeTab === 'my-jobs' && (
             <div className="p-6 overflow-y-auto">
               <div className="text-center py-12">
-                <Briefcase className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No Active Jobs</h3>
-                <p className="text-gray-400 mb-6">Start browsing experts or post a help request to get started</p>
+                <Globe className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">Join the Global Marketplace</h3>
+                <p className="text-gray-400 mb-6">Connect with developers worldwide or post requests to our global community</p>
                 <div className="flex justify-center space-x-4">
                   <button 
                     onClick={() => setActiveTab('browse')}
                     className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
                   >
-                    Browse Experts
+                    Browse Global Experts
                   </button>
                   <button 
                     onClick={() => setActiveTab('requests')}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                   >
-                    Post Request
+                    Post Global Request
                   </button>
                 </div>
               </div>
@@ -722,6 +771,29 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
 
           {activeTab === 'earnings' && (
             <div className="p-6 overflow-y-auto">
+              {/* Global Marketplace Stats */}
+              <div className="mb-8 p-6 bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg border border-blue-500/30">
+                <h3 className="text-lg font-semibold text-white mb-4">🌍 Global Marketplace Impact</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-400">$2.4M+</div>
+                    <div className="text-xs text-gray-400">Total Paid Globally</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-400">180+</div>
+                    <div className="text-xs text-gray-400">Countries Active</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-400">50K+</div>
+                    <div className="text-xs text-gray-400">Global Developers</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-400">24/7</div>
+                    <div className="text-xs text-gray-400">Global Coverage</div>
+                  </div>
+                </div>
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
                   <div className="flex items-center space-x-3 mb-2">
@@ -753,11 +825,11 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
               </div>
 
               <div className="text-center py-12">
-                <Coffee className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">Start Earning Today</h3>
-                <p className="text-gray-400 mb-6">Complete your profile and start helping other developers to earn money</p>
+                <Globe className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">Join the Global Developer Economy</h3>
+                <p className="text-gray-400 mb-6">Complete your profile and start earning from developers worldwide. Work across timezones, cultures, and technologies.</p>
                 <button className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
-                  Complete Profile
+                  Join Global Marketplace
                 </button>
               </div>
             </div>
@@ -770,7 +842,7 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
         <div className="fixed inset-0 bg-black/80 z-60 flex items-center justify-center p-4">
           <div className="bg-gray-800 rounded-lg max-w-2xl w-full p-6 border border-gray-700">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Hire {selectedDeveloper.name}</h3>
+              <h3 className="text-xl font-semibold text-white">Hire {selectedDeveloper.name} - Global Collaboration</h3>
               <button
                 onClick={() => setShowHireModal(false)}
                 className="text-gray-400 hover:text-white transition-colors"
@@ -838,9 +910,10 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Communication</label>
                   <select className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-green-500 focus:outline-none">
-                    <option>Chat + Video calls</option>
+                    <option>Global Chat + Video calls</option>
                     <option>Chat only</option>
                     <option>Video calls only</option>
+                    <option>Async collaboration</option>
                   </select>
                 </div>
               </div>
@@ -848,11 +921,15 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
               <div className="bg-gray-700 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-gray-300">Hourly Rate</span>
-                  <span className="text-white font-semibold">${selectedDeveloper.hourlyRate}/hr</span>
+                  <span className="text-white font-semibold">${selectedDeveloper.hourlyRate}/hr (Global Rate)</span>
                 </div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-300">Platform Fee (10%)</span>
+                  <span className="text-gray-300">Global Platform Fee (10%)</span>
                   <span className="text-white">$5.00/hr</span>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-gray-300">Cross-border Protection</span>
+                  <span className="text-green-400">✓ Included</span>
                 </div>
                 <div className="border-t border-gray-600 pt-2">
                   <div className="flex items-center justify-between">
@@ -871,7 +948,7 @@ const DeveloperMarketplace: React.FC<MarketplaceProps> = ({ isVisible, onToggle 
                 </button>
                 <button className="flex-1 flex items-center justify-center space-x-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
                   <CreditCard className="w-4 h-4" />
-                  <span>Hire & Pay</span>
+                  <span>Hire Globally & Pay</span>
                 </button>
               </div>
             </div>
