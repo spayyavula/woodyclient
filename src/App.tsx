@@ -197,50 +197,19 @@ mod tests {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Check if we're in demo mode (no real Supabase connection)
-    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
-                      import.meta.env.VITE_SUPABASE_URL === 'https://localhost:54321' ||
-                      import.meta.env.VITE_SUPABASE_URL.includes('your-production-project');
-    
-    if (isDemoMode) {
-      // In demo mode, create a mock user immediately
-      setUser({ 
-        id: 'demo-user', 
-        email: 'demo@rustcloudide.com',
-        created_at: new Date().toISOString(),
-        last_sign_in_at: new Date().toISOString()
-      });
-      setLoading(false);
-    } else {
-      // Get initial session with error handling for real Supabase
-      supabase.auth.getSession().then(({ data: { session }, error }) => {
-        if (error) {
-          console.warn('Auth session error:', error);
-          setUser(null);
-        } else {
-          setUser(session?.user ?? null);
-        }
-        setLoading(false);
-      }).catch((err) => {
-        console.error('Failed to get session:', err);
-        setUser(null);
-        setLoading(false);
-      });
-    }
+    // Always start with no user to show landing page
+    // Authentication will be handled by the landing page
+    setUser(null);
+    setLoading(false);
 
-    // Listen for auth changes with error handling
-    try {
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (!isDemoMode) setUser(session?.user ?? null);
-      });
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
-      return () => subscription.unsubscribe();
-    } catch (error) {
-      console.warn('Auth listener error:', error);
-      return () => {}; // No-op cleanup
-    }
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleLogin = async (email: string, password: string) => {

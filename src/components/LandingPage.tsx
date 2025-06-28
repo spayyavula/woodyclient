@@ -44,6 +44,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      return;
+    }
+    
     if (isLoginMode) {
       await onLogin(email, password);
     } else {
@@ -144,7 +149,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
               <div className="space-y-6">
                 <div className="inline-flex items-center space-x-2 bg-orange-500/10 border border-orange-500/20 rounded-full px-4 py-2">
                   <Rocket className="w-4 h-4 text-orange-400" />
-                  <span className="text-orange-300 text-sm font-medium">Now with AI-powered development</span>
+                  <span className="text-orange-300 text-sm font-medium">✨ Demo Mode - Try it now!</span>
                 </div>
                 
                 <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight">
@@ -156,6 +161,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                 <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
                   The most powerful cloud-based IDE for cross-platform mobile development. 
                   Write once in Rust, deploy everywhere with native performance.
+                  <br />
+                  <span className="text-orange-300 font-medium">Try the demo with any email and password!</span>
                 </p>
               </div>
 
@@ -192,7 +199,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                     {isLoginMode ? 'Welcome Back' : 'Join the Revolution'}
                   </h2>
                   <p className="text-gray-400">
-                    {isLoginMode ? 'Sign in to your account' : 'Create your free account'}
+                    {isLoginMode ? 'Enter any email and password to try the demo' : 'Enter any email and password to try the demo'}
                   </p>
                 </div>
 
@@ -219,6 +226,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                           placeholder="Enter your email"
                         />
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">Demo mode: Use any email (e.g., demo@example.com)</p>
                     </div>
 
                     <div>
@@ -243,6 +251,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">Demo mode: Use any password (minimum 6 characters)</p>
                     </div>
                   </div>
 
