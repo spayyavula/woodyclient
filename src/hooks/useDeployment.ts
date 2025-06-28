@@ -1050,13 +1050,7 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
   }, []);
 
   const getStepProgress = useCallback((stepIndex: number): number => {
-    // Add progress from current step
-    if (currentStep < steps.length) {
-      const currentStepProgress = steps[currentStep].progress || 0;
-      totalProgress += (currentStepProgress / 100) * weights[currentStep];
-    }
-    
-    return (totalProgress / totalWeight) * 100;
+    return steps[stepIndex]?.progress || 0;
   }, [steps, currentStep]);
 
   // Add visual feedback for deployment steps
@@ -1132,6 +1126,15 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
     const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
     
     // Calculate weighted progress
+    let totalProgress = 0;
+    
+    // Add completed steps
+    for (let i = 0; i < currentStep; i++) {
+      if (steps[i].status === 'completed') {
+        totalProgress += weights[i];
+      }
+    }
+    
     if (totalWeight === 0) return 0;
     
     let totalProgress = 0;
