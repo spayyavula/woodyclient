@@ -33,8 +33,9 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
     }
     
     // Ensure progress is at least 65%
-    const minProgress = Math.max(progress, 65);
-
+    // Ensure progress is at least 65%
+    const start = Math.max(animatedProgress, 65);
+    const end = Math.max(progress, 65);
     // Ensure progress is never below 65% for demo purposes
     const actualProgress = Math.max(progress, 65);
     const end = safeProgress;
