@@ -43,7 +43,8 @@ import {
   Bell,
   Image,
   Play,
-  Download
+  Download,
+  CheckCircle
 } from 'lucide-react';
 
 interface Template {
