@@ -163,3 +163,5 @@ const DeploymentProgressBar: React.FC<DeploymentProgressBarProps> = ({
 };
 
 export default DeploymentProgressBar;
+
+export default DeploymentProgressBar

@@ -29,7 +29,6 @@ import { useDeployment, DeploymentConfig, DeploymentStep } from '../hooks/useDep
 import DeploymentAssistant from './DeploymentAssistant';
 import { useDeploymentAutomation } from '../hooks/useDeploymentAutomation';
 import DeploymentVisualProgress from './DeploymentVisualProgress';
-import AndroidDeploymentStatus from './AndroidDeploymentStatus';
 
 interface DeploymentModalProps {
   isVisible: boolean;
@@ -66,17 +65,13 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   const [showPreDeployCheck, setShowPreDeployCheck] = useState(false);
   const [realTimeMetrics, setRealTimeMetrics] = useState({
     buildSpeed: 0,
-    memoryUsage: 0, 
+    memoryUsage: 0,
     cpuUsage: 0,
     networkSpeed: 0
   });
   const [deploymentError, setDeploymentError] = useState<string | null>(null);
   const [showAssistant, setShowAssistant] = useState(true);
   const [assistantCurrentStep, setAssistantCurrentStep] = useState('');
-  
-  // Track deployment ID for status view
-  const [currentDeploymentId, setCurrentDeploymentId] = useState<number | null>(null);
-  const [showDeploymentStatus, setShowDeploymentStatus] = useState(false);
   
   const { runAutomation, automationSteps, isRunning: automationRunning } = useDeploymentAutomation();
 
@@ -124,16 +119,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   const handleConfirmDeployment = () => {
     try {
       setShowPreDeployCheck(false);
-    
-    // Simulate creating a deployment and getting an ID
-    setTimeout(() => {
-      const mockDeploymentId = Math.floor(Math.random() * 1000) + 1;
-      setCurrentDeploymentId(mockDeploymentId);
-      setShowDeploymentStatus(true);
-    }, 1000);
-    
-    // Also start the regular deployment process
-    startDeployment(config); 
+      setAssistantCurrentStep('rust-build');
       
       // Reset any previous errors
       setDeploymentError(null);
@@ -166,21 +152,6 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   const handleRunAutomation = async (action: string) => {
     await runAutomation(action, config.platform);
   };
-
-  // If showing deployment status, render that instead
-  if (showDeploymentStatus && currentDeploymentId) {
-    return (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-6xl">
-          <AndroidDeploymentStatus 
-            deploymentId={currentDeploymentId}
-            onBack={() => setShowDeploymentStatus(false)}
-            onClose={onClose}
-          />
-        </div>
-      </div>
-    );
-  }
 
   const getStepIcon = (step: DeploymentStep) => {
     switch (step.status) {
@@ -800,17 +771,22 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                 {/* Progress Bar */}
                 <div className="w-full bg-gray-700 rounded-full h-3 shadow-inner">
                   <div 
-                    className={`bg-gradient-to-r ${getPlatformColor(config.platform)} h-3 rounded-full transition-all duration-500 shadow-lg`}
+                    className={`bg-gradient-to-r ${getPlatformColor(config.platform)} h-3 rounded-full transition-all duration-500 shadow-lg relative`}
                     style={{ 
                       width: `${getOverallProgress()}%`,
                       backgroundSize: '200% 200%',
                       animation: isDeploying ? 'gradient-animation 2s ease infinite' : 'none'
-                    style={{ width: `${getOverallProgress()}%` }}>
-                    <div className="absolute inset-0 bg-white/10 rounded-full" style={{
-                      backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 2s infinite'
-                    }}></div>
+                    }}
+                  >
+                    {/* Shimmer effect */}
+                    <div 
+                      className="absolute inset-0 bg-white/10 rounded-full"
+                      style={{
+                        backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                        backgroundSize: '200% 100%',
+                        animation: 'shimmer 2s infinite'
+                      }}
+                    ></div>
                   </div>
                 </div>
 
@@ -824,11 +800,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-3">
                           {getStepIcon(step)}
-                          <span className={`font-medium ${
-                            step.status === 'completed' ? 'text-green-300' :
-                            step.status === 'failed' ? 'text-red-300' :
-                            index === currentStep ? 'text-blue-300' : 'text-white'
-                          }`}>{step.name}</span>
+                          <span className="font-medium text-white">{step.name}</span>
                           {index === currentStep && isDeploying && (
                             <div className="flex items-center space-x-2 ml-2">
                               <div className="flex items-center space-x-1 bg-blue-900/30 px-2 py-1 rounded-full">
@@ -857,16 +829,20 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                       {/* Progress indicator for current step */}
                       {index === currentStep && isDeploying && (
                         <div className="mb-3 space-y-2">
-                          <DeploymentVisualProgress
-                            progress={getStepProgress(index)}
-                            status="running"
-                            platform={config.platform}
-                            showDetails={false}
-                          />
-                                backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
-                                backgroundSize: '200% 100%',
-                                animation: 'shimmer 2s infinite'
-                              }}></div>
+                          <div className="w-full bg-gray-700 rounded-full h-2 shadow-inner overflow-hidden">
+                            <div 
+                              className={`bg-gradient-to-r ${getPlatformColor(config.platform)} h-2 rounded-full transition-all duration-300 shadow-sm relative`}
+                              style={{ width: `${getStepProgress(index)}%` }}
+                            >
+                              {/* Shimmer effect */}
+                              <div 
+                                className="absolute inset-0 bg-white/10 rounded-full"
+                                style={{
+                                  backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                                  backgroundSize: '200% 100%',
+                                  animation: 'shimmer 2s infinite'
+                                }}
+                              ></div>
                             </div>
                           </div>
                           {step.substeps && step.currentSubstep !== undefined && (
@@ -881,13 +857,13 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                       {step.metadata && (index === currentStep || step.status === 'completed') && (
                         <div className="mb-3 grid grid-cols-2 gap-2 text-xs">
                           {step.metadata.outputSize && (
-                            <div className="bg-gray-800 p-2 rounded">
+                            <div className="bg-gray-800 p-2 rounded-lg">
                               <div className="text-gray-400">Output Size</div>
                               <div className="text-white font-medium">{step.metadata.outputSize}</div>
                             </div>
                           )}
                           {step.metadata.estimatedTime && (
-                            <div className="bg-gray-800 p-2 rounded">
+                            <div className="bg-gray-800 p-2 rounded-lg">
                               <div className="text-gray-400">Est. Time</div>
                               <div className="text-white font-medium">{step.metadata.estimatedTime}</div>
                             </div>
@@ -899,9 +875,9 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                         <div className="mb-2">
                           <div className="flex items-center space-x-2 text-sm text-gray-400 mb-1">
                             <Terminal className="w-3 h-3" />
-                            <span>Command:</span>
+                            <span className="font-medium">Command:</span>
                           </div>
-                          <code className="block text-sm bg-gray-800 p-2 rounded font-mono text-gray-300 overflow-x-auto">
+                          <code className="block text-sm bg-gray-800 p-3 rounded-lg font-mono text-gray-300 overflow-x-auto">
                             {step.command}
                           </code>
                         </div>
@@ -911,9 +887,9 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                         <div>
                           <div className="flex items-center space-x-2 text-sm text-gray-400 mb-1">
                             <Terminal className="w-3 h-3" />
-                            <span>Output:</span>
+                            <span className="font-medium">Output:</span>
                           </div>
-                          <pre className="text-sm bg-gray-800 p-3 rounded font-mono text-gray-300 overflow-x-auto whitespace-pre-wrap">
+                          <pre className="text-sm bg-gray-800 p-3 rounded-lg font-mono text-gray-300 overflow-x-auto whitespace-pre-wrap">
                             {step.output}
                           </pre>
                         </div>
@@ -924,7 +900,10 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
 
                 {/* Completion Actions */}
                 {!isDeploying && steps.length > 0 && steps.every(step => step.status === 'completed') && (
-                  <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500 rounded-lg p-6 text-center shadow-xl">
+                  <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500 rounded-lg p-6 text-center shadow-xl animate-gradient-animation" style={{
+                    backgroundSize: '200% 100%',
+                    animation: 'gradient-animation 3s ease infinite'
+                  }}>
                     <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-white mb-2">Deployment Successful!</h3>
                     <p className="text-gray-300 mb-6">
@@ -1042,7 +1021,10 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                 
                 {/* Failed deployment feedback */}
                 {!isDeploying && steps.length > 0 && steps.some(step => step.status === 'failed') && (
-                  <div className="bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-500 rounded-lg p-6 text-center shadow-xl">
+                  <div className="bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-500 rounded-lg p-6 text-center shadow-xl animate-gradient-animation" style={{
+                    backgroundSize: '200% 100%',
+                    animation: 'gradient-animation 3s ease infinite'
+                  }}>
                     <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-white mb-2">Deployment Failed</h3>
                     <p className="text-gray-300 mb-6">
