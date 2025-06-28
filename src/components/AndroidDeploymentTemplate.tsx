@@ -7,7 +7,7 @@ import {
   Terminal, 
   Download, 
   Upload,
-  RefreshCw,
+  RefreshCcw,
   Shield,
   Settings,
   Zap,
@@ -346,7 +346,7 @@ const AndroidDeploymentTemplate: React.FC<AndroidDeploymentTemplateProps> = ({ o
                 onClick={() => setLogs([])}
                 className="flex items-center space-x-2 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCcw className="w-4 h-4" />
                 <span>Clear Logs</span>
               </button>
             </div>
