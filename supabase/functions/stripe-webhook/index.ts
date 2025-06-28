@@ -13,22 +13,41 @@ const stripe = new Stripe(stripeSecret, {
 
 const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
+function corsResponse(data: any, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': '*',
+    },
+  });
+}
+
 Deno.serve(async (req) => {
   try {
     // Handle OPTIONS request for CORS preflight
     if (req.method === 'OPTIONS') {
-      return new Response(null, { status: 204 });
+      return new Response(null, {
+        status: 204,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': '*',
+        },
+      });
     }
 
     if (req.method !== 'POST') {
-      return new Response('Method not allowed', { status: 405 });
+      return corsResponse({ error: 'Method not allowed' }, 405);
     }
 
     // get the signature from the header
     const signature = req.headers.get('stripe-signature');
 
     if (!signature) {
-      return new Response('No signature found', { status: 400 });
+      return corsResponse({ error: 'No signature found' }, 400);
     }
 
     // get the raw body
@@ -41,15 +60,15 @@ Deno.serve(async (req) => {
       event = await stripe.webhooks.constructEventAsync(body, signature, stripeWebhookSecret);
     } catch (error: any) {
       console.error(`Webhook signature verification failed: ${error.message}`);
-      return new Response(`Webhook signature verification failed: ${error.message}`, { status: 400 });
+      return corsResponse({ error: `Webhook signature verification failed: ${error.message}` }, 400);
     }
 
     EdgeRuntime.waitUntil(handleEvent(event));
 
-    return Response.json({ received: true });
+    return corsResponse({ received: true });
   } catch (error: any) {
     console.error('Error processing webhook:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    return corsResponse({ error: error.message }, 500);
   }
 });
 
