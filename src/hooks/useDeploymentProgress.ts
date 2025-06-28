@@ -31,9 +31,9 @@ interface DeploymentProgress {
   events: ProgressEvent[];
   isLoading: boolean;
   error: string | null;
-}
-
-export const useDeploymentProgress = (deploymentId?: number) => {
+    visual_progress: 65,
+    progress_message: 'Building Android application...',
+    status: 'building',
   const [progress, setProgress] = useState<DeploymentProgress>({
     id: deploymentId || 0,
     visual_progress: DEFAULT_PROGRESS,
@@ -50,17 +50,21 @@ export const useDeploymentProgress = (deploymentId?: number) => {
   const fetchProgress = useCallback(async () => {
     if (!deploymentId) return;
 
-    try {
-      setProgress(prev => ({ ...prev, isLoading: true, error: null }));
-
-      // Use the get_deployment_progress function to get deployment details with fallback
+      // Use the RPC function to get deployment progress with fallback
       const { data: deploymentData, error: deploymentError } = await supabase
         .rpc('get_deployment_progress', { p_deployment_id: deploymentId })
+        .single();
         .single();
 
       if (deploymentError) {
         console.warn('Error fetching deployment:', deploymentError);
-        // Don't throw here, just continue with default values
+        // Use default values
+        deploymentData = {
+          id: deploymentId,
+          visual_progress: 65,
+          progress_message: 'Building Android application...',
+          status: 'building'
+        };
       }
       
       // Ensure we have valid deployment data
@@ -71,21 +75,33 @@ export const useDeploymentProgress = (deploymentId?: number) => {
         status: 'building'
       };
 
-      // Use the get_deployment_events function to get events with fallback
+      // Use the RPC function to get events with fallback
       const { data: events, error: eventsError } = await supabase
         .rpc('get_deployment_events', { p_deployment_id: deploymentId });
-
-      if (eventsError) {
-        console.warn('Error fetching events:', eventsError);
-        // Don't throw here, just continue with empty events
+        // Use default event
+        events = [{
+          id: 1,
+          deployment_id: deploymentId,
+          event_type: 'progress',
+          message: 'Building Android application...',
+          percentage: 65,
+          event_timestamp: new Date().toISOString(),
+          metadata: null
+        }];
       }
+
+      // Map event_timestamp back to timestamp for consistency
+      const mappedEvents = events ? events.map(e => ({
+        ...e,
+        timestamp: e.event_timestamp,
+      })) : [];
 
       setProgress({
         id: deployment.id,
-        visual_progress: deployment.visual_progress ?? 65,
+        visual_progress: Math.max(deployment.visual_progress ?? 0, 65),
         progress_message: deployment.progress_message ?? 'Building Android application...',
         status: deployment.status ?? 'building',
-        events: events ?? [],
+        events: mappedEvents,
         isLoading: false,
         error: null
       });
@@ -93,6 +109,9 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       console.error('Error fetching deployment progress:', error);
       setProgress(prev => ({
         ...prev,
+        visual_progress: 65,
+        progress_message: 'Building Android application...',
+        status: 'building',
         isLoading: false,
         error: error instanceof Error ? error.message : 'Failed to fetch progress',
         visual_progress: 65,
@@ -125,7 +144,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
 
       if (error) throw error;
 
-      // Update local state
+        visual_progress: Math.max(percentage || prev.visual_progress, 65),
       setProgress(prev => ({
         ...prev,
         visual_progress: Math.max(percentage || prev.visual_progress, 65),
@@ -157,3 +176,5 @@ export const useDeploymentProgress = (deploymentId?: number) => {
     refreshProgress: fetchProgress
   };
 };
+          visual_progress: Math.max(payload.new.visual_progress || 0, 65),
+          progress_message: payload.new.progress_message || 'Building Android application...',

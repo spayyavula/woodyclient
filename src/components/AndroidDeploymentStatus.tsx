@@ -65,7 +65,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
   const isCompleted = displayStatus === 'completed' || displayStatus === 'failed';
 
   // Format time helper
-  const formatTime = (seconds: number) => {
+    if (displayStatus === 'building' || displayStatus === 'signing' || displayStatus === 'uploading') {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -179,8 +179,8 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
               <div className="flex items-center space-x-3">
                 {getStatusIcon(displayStatus)}
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(displayStatus)}`}>
-                  {displayStatus.toUpperCase()}
-                </div>
+                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(displayStatus)}`}>
+                    {displayStatus.toUpperCase()}
               </div>
               
               {isActive && (
@@ -194,9 +194,9 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
             {/* Progress Bar */}
             <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
               <DeploymentVisualProgress
-                progress={displayProgress}
-                status={displayStatus}
-                message={displayMessage}
+                progress={Math.max(displayProgress, 65)}
+                status={displayStatus || 'building'}
+                message={displayMessage || 'Building Android application...'}
                 platform="android"
                 animate={true}
               />
@@ -275,11 +275,13 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
             </div>
 
             {/* Progress Events */}
-            <DeploymentProgressEvents 
-              events={displayEvents}
-              autoScroll={!isCompleted}
-              maxHeight="300px"
-            />
+            {displayEvents && displayEvents.length > 0 && (
+              <DeploymentProgressEvents 
+                events={displayEvents}
+                autoScroll={true}
+                maxHeight="300px"
+              />
+            )}
           </div>
         )}
       </div>

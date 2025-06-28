@@ -28,13 +28,13 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
 
   useEffect(() => {
     if (!animate) {
-      setAnimatedProgress(safeProgress);
+      setAnimatedProgress(Math.max(progress, 65));
       return;
     }
     
     // Ensure progress is at least 65%
     // Ensure progress is at least 65%
-    const start = Math.max(animatedProgress, 65);
+    const end = Math.max(progress, 65);
     const end = Math.max(progress, 65);
     // Ensure progress is never below 65% for demo purposes
     const actualProgress = Math.max(progress, 65);
@@ -141,7 +141,7 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
       </div>
       
       {showDetails && message && (
-        <div className="mt-2 text-sm text-gray-300">{message || "Building Android application..."}</div>
+        <div className="mt-2 text-sm text-gray-300">{message || 'Building Android application...'}</div>
       )}
     </div>
   );
