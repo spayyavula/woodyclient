@@ -72,54 +72,62 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const handleBuild = async () => {
     setIsBuilding(true);
     setBuildOutput([]);
+    setError(null);
     
-    // Simulate build process with real commands
-    const commands = [
-      'rustyclint scan --deep',
-      'cargo build --release',
-      'cargo test',
-      'rustyclint audit --compliance'
-    ];
-    
-    for (const command of commands) {
-      setBuildOutput(prev => [...prev, `$ ${command}`]);
+    try {
+      // Simulate build process with real commands
+      const commands = [
+        'rustyclint scan --deep',
+        'cargo build --release',
+        'cargo test',
+        'rustyclint audit --compliance'
+      ];
       
-      // Simulate command execution time
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-      
-      // Add realistic output
-      if (command.includes('rustyclint scan')) {
-        setBuildOutput(prev => [...prev, 
-          '🔍 Analyzing 47,392 lines of code...',
-          '⚡ Performance: 10.2M lines/second',
-          '✅ Analysis complete in 0.08s',
-          '⚠️  2 medium-risk issues found',
-          '🔧 3 optimizations suggested'
-        ]);
-      } else if (command.includes('cargo build')) {
-        setBuildOutput(prev => [...prev,
-          '   Compiling rustyclint v0.1.0',
-          '    Finished release [optimized] target(s) in 3.42s'
-        ]);
-      } else if (command.includes('cargo test')) {
-        setBuildOutput(prev => [...prev,
-          'running 8 tests',
-          'test result: ok. 8 passed; 0 failed; 0 ignored'
-        ]);
-      } else if (command.includes('rustyclint audit')) {
-        setBuildOutput(prev => [...prev,
-          '🛡️  Security Score: 98/100 (Excellent)',
-          '✅ SOC 2 Type II compliant',
-          '✅ GDPR data protection verified'
-        ]);
+      for (const command of commands) {
+        setBuildOutput(prev => [...prev, `$ ${command}`]);
+        
+        // Simulate command execution time
+        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+        
+        // Add realistic output
+        if (command.includes('rustyclint scan')) {
+          setBuildOutput(prev => [...prev, 
+            '🔍 Analyzing 47,392 lines of code...',
+            '⚡ Performance: 10.2M lines/second',
+            '✅ Analysis complete in 0.08s',
+            '⚠️  2 medium-risk issues found',
+            '🔧 3 optimizations suggested'
+          ]);
+        } else if (command.includes('cargo build')) {
+          setBuildOutput(prev => [...prev,
+            '   Compiling rustyclint v0.1.0',
+            '    Finished release [optimized] target(s) in 3.42s'
+          ]);
+        } else if (command.includes('cargo test')) {
+          setBuildOutput(prev => [...prev,
+            'running 8 tests',
+            'test result: ok. 8 passed; 0 failed; 0 ignored'
+          ]);
+        } else if (command.includes('rustyclint audit')) {
+          setBuildOutput(prev => [...prev,
+            '🛡️  Security Score: 98/100 (Excellent)',
+            '✅ SOC 2 Type II compliant',
+            '✅ GDPR data protection verified'
+          ]);
+        }
       }
+      
+      setBuildOutput(prev => [...prev, '🎉 Build completed successfully!']);
+      
+      // Trigger the original onRun callback
+      onRun();
+    } catch (err) {
+      console.error('Build error:', err);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setBuildOutput(prev => [...prev, `❌ Build failed: ${err instanceof Error ? err.message : 'Unknown error'}`]);
+    } finally {
+      setIsBuilding(false);
     }
-    
-    setBuildOutput(prev => [...prev, '🎉 Build completed successfully!']);
-    setIsBuilding(false);
-    
-    // Trigger the original onRun callback
-    onRun();
   };
 
   const handleDeploy = () => {
@@ -346,10 +354,19 @@ const Toolbar: React.FC<ToolbarProps> = ({
       {/* Build Output Overlay */}
       {isBuilding && buildOutput.length > 0 && (
         <div className="fixed bottom-4 right-4 w-96 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl z-40">
-          <div className="flex items-center justify-between p-3 border-b border-gray-700">
+          <div className={`flex items-center justify-between p-3 border-b border-gray-700 ${error ? 'bg-red-900/20' : ''}`}>
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
-              <span className="text-white font-medium">Building...</span>
+              {error ? (
+                <>
+                  <XCircle className="w-4 h-4 text-red-400" />
+                  <span className="text-red-300 font-medium">Build Failed</span>
+                </>
+              ) : (
+                <>
+                  <div className="w-3 h-3 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-white font-medium">Building...</span>
+                </>
+              )}
             </div>
             <button 
               onClick={() => setBuildOutput([])}
@@ -361,14 +378,20 @@ const Toolbar: React.FC<ToolbarProps> = ({
           <div className="p-3 max-h-64 overflow-y-auto">
             <div className="font-mono text-sm space-y-1">
               {buildOutput.map((line, index) => (
-                <div 
-                  key={index} 
-                  className={line.startsWith('$') ? 'text-green-400' : 'text-gray-300'}
-                >
-                  {line}
-                </div>
+                <div key={index} className={
+                  line.startsWith('$') ? 'text-green-400' : 
+                  line.includes('❌') ? 'text-red-400' :
+                  line.includes('⚠️') ? 'text-yellow-400' :
+                  line.includes('✅') ? 'text-green-400' :
+                  'text-gray-300'
+                }>{line}</div>
               ))}
             </div>
+            {error && (
+              <div className="mt-3 p-2 bg-red-900/20 border border-red-500 rounded text-red-300 text-xs">
+                {error}
+              </div>
+            )}
           </div>
         </div>
       )}

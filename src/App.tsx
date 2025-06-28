@@ -21,6 +21,7 @@ import MobilePreview from './components/MobilePreview';
 import DemoMode from './components/DemoMode';
 import StripeTestSuite from './components/StripeTestSuite';
 import IntegrationsPanel from './components/IntegrationsPanel';
+import ConfigurationChecker from './components/ConfigurationChecker';
 
 interface Tab {
   id: string;

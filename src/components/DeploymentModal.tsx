@@ -68,6 +68,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
     cpuUsage: 0,
     networkSpeed: 0
   });
+  const [deploymentError, setDeploymentError] = useState<Error | null>(null);
   const [showAssistant, setShowAssistant] = useState(true);
   const [assistantCurrentStep, setAssistantCurrentStep] = useState('');
   const [deploymentError, setDeploymentError] = useState<string | null>(null);
@@ -92,18 +93,29 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
 
   const handleStartDeployment = () => {
     setIsConfiguring(true);
+    setDeploymentError(null);
     
     // Show configuration animation
-    setTimeout(() => {
+    try {
+      setTimeout(() => {
+        setIsConfiguring(false);
+        setShowPreDeployCheck(true);
+      }, 2000);
+    } catch (error) {
+      setDeploymentError(error instanceof Error ? error : new Error('An unknown error occurred'));
       setIsConfiguring(false);
-      setShowPreDeployCheck(true);
-    }, 2000);
+    }
   };
 
   const handleConfirmDeployment = () => {
-    setShowPreDeployCheck(false);
-    setAssistantCurrentStep('rust-build');
-    startDeployment(config);
+    try {
+      setShowPreDeployCheck(false);
+      setAssistantCurrentStep('rust-build');
+      startDeployment(config);
+    } catch (error) {
+      setDeploymentError(error instanceof Error ? error : new Error('An unknown error occurred'));
+      console.error('Deployment error:', error);
+    }
   };
 
   // Update assistant step based on current deployment step
