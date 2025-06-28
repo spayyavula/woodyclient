@@ -355,7 +355,10 @@ fn example_function() {
         {activeTab === 'users' && (
           <div className="p-4 space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-gray-200">Team Members ({users.length})</h4>
+              <div>
+                <h4 className="text-sm font-medium text-gray-200">Team Members ({users.length})</h4>
+                <p className="text-xs text-gray-500 mb-2">Global team across multiple timezones</p>
+              </div>
               <button className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-white transition-colors">
                 <UserPlus className="w-4 h-4" />
               </button>
@@ -378,7 +381,7 @@ fn example_function() {
                     </div>
                     <div className="flex items-center space-x-2 text-xs text-gray-400">
                       <Globe className="w-3 h-3" />
-                      <span>{user.country}</span>
+                      <span>{user.country} 🌍</span>
                       <span>•</span>
                       <span>{user.timezone}</span>
                     </div>
@@ -395,7 +398,7 @@ fn example_function() {
             <div className="pt-4 border-t border-gray-700">
               <button className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm transition-colors">
                 <UserPlus className="w-4 h-4" />
-                <span>Invite Collaborators</span>
+                <span>Invite Global Collaborators</span>
               </button>
             </div>
           </div>
@@ -405,10 +408,10 @@ fn example_function() {
           <div className="p-4 space-y-4">
             <div className="text-center">
               <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Video className="w-8 h-8 text-gray-400" />
+                <Globe className="w-8 h-8 text-gray-400" />
               </div>
-              <h4 className="text-sm font-medium text-white mb-1">Voice & Video Chat</h4>
-              <p className="text-xs text-gray-400">Connect with your team in real-time</p>
+              <h4 className="text-sm font-medium text-white mb-1">Global Voice & Video</h4>
+              <p className="text-xs text-gray-400">Connect with developers worldwide in real-time</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -463,7 +466,7 @@ fn example_function() {
 
             {isVoiceActive && (
               <div className="bg-gray-700 rounded-lg p-3">
-                <div className="text-xs text-gray-300 mb-2">Active participants:</div>
+                <div className="text-xs text-gray-300 mb-2">Global participants online:</div>
                 <div className="space-y-2">
                   {users.filter(u => u.status === 'online').slice(0, 3).map((user) => (
                     <div key={user.id} className="flex items-center space-x-2">
@@ -472,6 +475,7 @@ fn example_function() {
                       </div>
                       <span className="text-xs text-gray-300">{user.name}</span>
                       <div className="flex-1" />
+                      <span className="text-xs text-gray-500">{user.country}</span>
                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                     </div>
                   ))}
@@ -481,7 +485,7 @@ fn example_function() {
 
             <div className="text-center">
               <button className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
-                Advanced Settings
+                Global Communication Settings
               </button>
             </div>
           </div>
