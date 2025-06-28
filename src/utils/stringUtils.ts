@@ -62,3 +62,27 @@ export function safeInterpolate(template: string, values: string[]): string {
   });
   return result;
 }
+
+/**
+ * Safely formats Dart/Flutter error messages without dollar sign interpolation
+ */
+export function formatDartError(errorMessage: string): string {
+  // Replace ${variable} patterns with safe concatenation
+  return errorMessage.replace(/\$\{([^}]+)\}/g, (match, variable) => {
+    return `' + ${variable} + '`;
+  });
+}
+
+/**
+ * Converts Dart string interpolation to safe concatenation
+ */
+export function convertDartStringInterpolation(dartCode: string): string {
+  // Convert 'Error: ${e.message}' to 'Error: ' + e.message
+  return dartCode.replace(/'([^']*)\$\{([^}]+)\}([^']*)'/g, (match, before, variable, after) => {
+    const parts = [];
+    if (before) parts.push(`'${before}'`);
+    parts.push(variable);
+    if (after) parts.push(`'${after}'`);
+    return parts.join(' + ');
+  });
+}

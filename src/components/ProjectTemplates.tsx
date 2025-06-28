@@ -1676,11 +1676,11 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     } on PlatformException catch (e) {
       setState(() {
-        _result = 'Error: ${e.message}';
+        _result = 'Success: ' + result;
       });
     }
   }
-
+        _result = 'Error: ' + e.message;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1695,7 +1695,7 @@ class _MyHomePageState extends State<MyHomePage> {
               'Tap the button to run Rust computation:',
             ),
             Text(
-              _result,
+              _counter.toString(),
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],

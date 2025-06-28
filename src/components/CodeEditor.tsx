@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import LiveCursors from './LiveCursors';
+import { convertDartStringInterpolation } from '../utils/stringUtils';
 
 interface CodeEditorProps {
   content: string;
@@ -58,7 +59,14 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
+    let content = e.target.value;
+    
+    // If this is a Dart file, automatically fix string interpolation issues
+    if (language === 'dart' || fileName.endsWith('.dart')) {
+      content = convertDartStringInterpolation(content);
+    }
+    
+    onChange(content);
     handleCursorMove(e);
   };
 

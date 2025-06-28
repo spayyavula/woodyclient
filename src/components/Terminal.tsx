@@ -80,6 +80,27 @@ For a more detailed help message, press "h". To quit, press "q".
 
 Application started successfully!`;
         break;
+      case 'flutter doctor':
+        output = `Doctor summary (to see all details, run flutter doctor -v):
+[✓] Flutter (Channel stable, 3.16.0, on macOS 14.0 23A344 darwin-arm64, locale en-US)
+[✓] Android toolchain - develop for Android devices (Android SDK version 34.0.0)
+[✓] Xcode - develop for iOS and macOS (Xcode 15.0)
+[✓] Chrome - develop for the web
+[✓] Android Studio (version 2023.1)
+[✓] VS Code (version 1.84.2)
+[✓] Connected device (3 available)
+[✓] Network resources
+
+• No issues found!`;
+        break;
+      case 'flutter clean':
+        output = `Deleting build...
+Deleting .dart_tool...
+Deleting .packages...
+Deleting pubspec.lock...
+Deleting .flutter-plugins...
+Deleting .flutter-plugins-dependencies...`;
+        break;
       case 'npx react-native start':
         output = `
                      ######                ######
