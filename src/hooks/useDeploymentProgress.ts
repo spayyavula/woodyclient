@@ -103,9 +103,9 @@ export const useDeploymentProgress = (deploymentId?: number) => {
 
       setProgress({
         id: deployment.id,
-        visual_progress: deployment.visual_progress ?? DEFAULT_PROGRESS,
-        progress_message: deployment.progress_message ?? DEFAULT_MESSAGE,
-        status: deployment.status ?? DEFAULT_STATUS,
+        visual_progress: Math.max(deployment.visual_progress ?? 65, 65),
+        progress_message: deployment.progress_message ?? 'Building Android application...',
+        status: deployment.status ?? 'building',
         events: events ?? [],
         isLoading: false,
         error: null
@@ -150,7 +150,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       // Update local state
       setProgress(prev => ({
         ...prev,
-        visual_progress: Math.max(percentage || 0, prev.visual_progress, DEFAULT_PROGRESS),
+        visual_progress: Math.max(percentage || prev.visual_progress, 65),
         progress_message: message,
         events: [...prev.events, data]
       }));

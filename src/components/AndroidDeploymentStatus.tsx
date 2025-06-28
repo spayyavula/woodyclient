@@ -39,65 +39,6 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
     refreshProgress
   } = useDeploymentProgress(deploymentId);
   
-  // Use simulated data if no real data is available
-  const hasData = events && events.length > 0;
-
-  const [timeElapsed, setTimeElapsed] = useState(0);
-  const [isActive, setIsActive] = useState(false);
-
-  // Start timer when deployment is active
-  useEffect(() => {
-    if (displayStatus === 'building' || displayStatus === 'signing' || displayStatus === 'uploading') {
-      if (!isActive) {
-        setIsActive(true);
-        // Reset timer when starting a new active state
-        setTimeElapsed(0);
-      }
-    } else {
-      setIsActive(false);
-    }
-  }, [displayStatus]);
-
-  // Handle timer
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    if (isActive) {
-      interval = setInterval(() => {
-        setTimeElapsed(prevTime => prevTime + 1);
-      }, 1000);
-    }
-
-    return () => clearInterval(interval);
-  }, [isActive, timeElapsed]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'text-green-400 bg-green-900/20';
-      case 'failed': return 'text-red-400 bg-red-900/20';
-      case 'building':
-      case 'signing':
-      case 'uploading': return 'text-blue-400 bg-blue-900/20';
-      case 'pending': return 'text-yellow-400 bg-yellow-900/20';
-      default: return 'text-gray-400 bg-gray-900/20';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="w-5 h-5 text-green-400" />;
-      case 'failed': return <XCircle className="w-5 h-5 text-red-400" />;
-      case 'building':
-      case 'signing':
-      case 'uploading': return <RefreshCw className="w-5 h-5 text-blue-400 animate-spin" />;
-      case 'pending': return <Clock className="w-5 h-5 text-yellow-400" />;
-      default: return <Info className="w-5 h-5 text-gray-400" />;
     }
   };
 
