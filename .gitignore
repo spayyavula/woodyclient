@@ -94,3 +94,10 @@ venv.bak/
 *.temp
 .tmp/
 .temp/
+
+# Android development
+android/keystore/
+android/keystore.properties
+.env.android
+android-test/
+$HOME/android/
