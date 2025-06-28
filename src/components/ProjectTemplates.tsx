@@ -623,9 +623,9 @@ async fn main() {
             
             // High-frequency updates (1000 times per second)
             time::sleep(Duration::from_millis(1)).await;
-            i += 1;
+            counter += 1;
             
-            if i > 10000 {
+            if counter > 10000 {
                 break;
             }
         }
