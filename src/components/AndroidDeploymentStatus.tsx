@@ -65,10 +65,12 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
   const isCompleted = displayStatus === 'completed' || displayStatus === 'failed';
 
   // Format time helper
+  const formatTime = (seconds: number) => {
     if (displayStatus === 'building' || displayStatus === 'signing' || displayStatus === 'uploading') {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
   };
 
   // Start timer when deployment is active
@@ -179,8 +181,8 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
               <div className="flex items-center space-x-3">
                 {getStatusIcon(displayStatus)}
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(displayStatus)}`}>
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(displayStatus)}`}>
-                    {displayStatus.toUpperCase()}
+                  {displayStatus.toUpperCase()}
+                </div>
               </div>
               
               {isActive && (
