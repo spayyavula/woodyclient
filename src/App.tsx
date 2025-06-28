@@ -22,6 +22,7 @@ import DemoMode from './components/DemoMode';
 import StripeTestSuite from './components/StripeTestSuite';
 import IntegrationsPanel from './components/IntegrationsPanel';
 import ConfigurationChecker from './components/ConfigurationChecker';
+import DeploymentStatusPanel from './components/DeploymentStatusPanel';
 
 interface Tab {
   id: string;
@@ -59,6 +60,7 @@ function App() {
   const [showConfigCheck, setShowConfigCheck] = useState(false);
   const [showStripeTests, setShowStripeTests] = useState(false);
   const [showIntegrations, setShowIntegrations] = useState(false);
+  const [showDeploymentStatus, setShowDeploymentStatus] = useState(false);
   const [showScriptRunner, setShowScriptRunner] = useState(false);
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);
   const [isCollaborationVisible, setIsCollaborationVisible] = useState(false);
@@ -485,6 +487,7 @@ console.log('Hello from ${fileName}!');`;
         onShowMobilePreview={() => setShowMobilePreview(true)}
         onShowStripeTests={() => setShowStripeTests(true)}
         onShowConfigCheck={() => setShowConfigCheck(true)}
+        onShowDeploymentStatus={() => setShowDeploymentStatus(true)}
         onShowIntegrations={() => setShowIntegrations(true)}
         onShowScriptRunner={() => setShowScriptRunner(true)}
       />
@@ -605,6 +608,15 @@ console.log('Hello from ${fileName}!');`;
         <ConfigurationChecker
           isVisible={showConfigCheck}
           onClose={() => setShowConfigCheck(false)}
+        />
+      )}
+
+      {showDeploymentStatus && (
+        <DeploymentStatusPanel
+          isVisible={showDeploymentStatus}
+          onClose={() => setShowDeploymentStatus(false)}
+          deployUrl="https://deft-cannoli-27300c.netlify.app"
+          deployId="deploy-id-123"
         />
       )}
 

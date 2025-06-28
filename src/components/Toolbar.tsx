@@ -41,6 +41,7 @@ interface ToolbarProps {
   onSave: () => void;
   onRun: () => void;
   onShowConfigCheck: () => void;
+  onShowDeploymentStatus: () => void;
   onShowTemplates: () => void;
   onShowMobilePreview: () => void;
   onShowStripeTests: () => void;
@@ -59,6 +60,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onRun,
   onShowConfigCheck,
   onShowTemplates,
+  onShowDeploymentStatus,
   onShowMobilePreview,
   onShowScriptRunner,
   onShowStripeTests,
@@ -255,6 +257,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
           >
             <CheckSquare className="w-4 h-4 mr-2" />
             <span>Check Config</span>
+          </button>
+          <button 
+            onClick={onShowDeploymentStatus}
+            className="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-medium transition-colors"
+            title="Deployment Status"
+          >
+            <Rocket className="w-4 h-4 mr-2" />
+            <span>Deployment Status</span>
           </button>
           <button 
             onClick={onShowScriptRunner}
