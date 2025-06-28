@@ -24,7 +24,8 @@ import {
   Hammer,
   Wrench,
   Zap, 
-  CheckSquare,
+  CheckSquare, 
+  Rocket,
   XCircle
 } from 'lucide-react';
 import SubscriptionStatus from './SubscriptionStatus';
