@@ -26,7 +26,9 @@ import {
   Heart,
   Award,
   TrendingUp,
-  Coffee
+  Coffee,
+  Monitor,
+  AlertTriangle
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -60,26 +62,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
   const features = [
     {
       icon: <Code className="w-8 h-8" />,
-      title: "Multi-Language Support",
-      description: "Write in Rust, Dart, Kotlin, Swift, and more with intelligent syntax highlighting and auto-completion.",
+      title: "Ultra-Fast Analysis Engine",
+      description: "Blazing-fast code analysis powered by Rust's zero-cost abstractions. Process millions of lines in seconds with memory-safe performance.",
       color: "from-orange-500 to-red-500"
     },
     {
-      icon: <Smartphone className="w-8 h-8" />,
-      title: "Cross-Platform Development",
-      description: "Build for Android, iOS, Flutter, React Native, and desktop from a single codebase.",
+      icon: <Shield className="w-8 h-8" />,
+      title: "Enterprise-Grade Security",
+      description: "Zero-trust architecture with end-to-end encryption, secure sandboxing, and SOC 2 Type II compliance for all platforms.",
       color: "from-blue-500 to-cyan-500"
     },
     {
-      icon: <Zap className="w-8 h-8" />,
-      title: "Real-Time Collaboration",
-      description: "Work together with your team in real-time with live cursors, chat, and voice calls.",
+      icon: <Cpu className="w-8 h-8" />,
+      title: "Multi-Platform Performance",
+      description: "Native performance on Windows, macOS, Linux, and web. WebAssembly compilation for browser-native speed.",
       color: "from-purple-500 to-pink-500"
     },
     {
-      icon: <Database className="w-8 h-8" />,
-      title: "AI-Powered Development",
-      description: "Leverage machine learning and AI tools for code generation, debugging, and optimization.",
+      icon: <Zap className="w-8 h-8" />,
+      title: "Real-Time Security Scanning",
+      description: "Continuous vulnerability detection with instant alerts. OWASP Top 10 coverage and custom security rules.",
       color: "from-green-500 to-emerald-500"
     }
   ];
@@ -87,32 +89,32 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
   const testimonials = [
     {
       name: "Sarah Chen",
-      role: "Senior Mobile Developer",
+      role: "Security Engineer",
       company: "TechCorp",
       avatar: "👩‍💻",
-      content: "Rust Cloud IDE has revolutionized our mobile development workflow. The cross-platform capabilities are incredible!"
+      content: "rustyclint caught 47 critical vulnerabilities in our codebase that other tools missed. The performance is unmatched!"
     },
     {
       name: "Marcus Johnson",
       role: "CTO",
       company: "StartupXYZ",
       avatar: "👨‍💼",
-      content: "The real-time collaboration features have made our remote team 3x more productive. Absolutely game-changing."
+      content: "We reduced our CI/CD pipeline time by 80% with rustyclint's parallel analysis. Security compliance became effortless."
     },
     {
       name: "Elena Rodriguez",
-      role: "Full-Stack Engineer",
+      role: "DevSecOps Lead",
       company: "InnovateLabs",
       avatar: "👩‍🚀",
-      content: "From prototype to production in record time. The AI assistance is like having a senior developer on your team."
+      content: "The zero-false-positive rate and sub-second analysis times make rustyclint essential for our security-first development."
     }
   ];
 
   const stats = [
-    { value: "50K+", label: "Developers" },
-    { value: "1M+", label: "Projects Built" },
+    { value: "10M+", label: "Lines Analyzed/sec" },
+    { value: "99.9%", label: "Vulnerability Detection" },
     { value: "99.9%", label: "Uptime" },
-    { value: "24/7", label: "Support" }
+    { value: "<100ms", label: "Analysis Time" }
   ];
 
   return (
@@ -156,12 +158,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                 <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight">
                   Build the
                   <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Future </span>
-                  of Code Quality
+                  of Secure Code
                 </h1>
                 
                 <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                  The most powerful cloud-based linting and code analysis platform. 
-                  Write better code with intelligent analysis and automated fixes.
+                  Ultra-fast, enterprise-grade code analysis with military-level security. 
+                  Detect vulnerabilities, enforce standards, and ship secure code at lightning speed.
                   <br />
                   <span className="text-orange-300 font-medium">Try the demo with any email and password!</span>
                 </p>
@@ -322,10 +324,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
               Everything You Need to Build
-              <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Better Code</span>
+              <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Secure, Fast Code</span>
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              From development to deployment, our platform provides all the tools and services you need to write clean, maintainable code.
+              From development to deployment, our platform provides military-grade security analysis with unmatched performance across all platforms.
             </p>
           </div>
 
@@ -362,20 +364,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                   <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-400 text-sm ml-4">rust-mobile-app</span>
+                  <span className="text-gray-400 text-sm ml-4">security-analysis</span>
                 </div>
                 
                 <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm">
-                  <div className="text-orange-400">// Cross-platform mobile development</div>
-                  <div className="text-blue-400">use <span className="text-white">mobile_framework</span>::<span className="text-green-400">*</span>;</div>
+                  <div className="text-orange-400">// High-performance security analysis</div>
+                  <div className="text-blue-400">use <span className="text-white">rustyclint</span>::<span className="text-green-400">*</span>;</div>
                   <div className="mt-2">
                     <span className="text-purple-400">fn</span> <span className="text-yellow-400">main</span>() {'{'}
                   </div>
                   <div className="ml-4">
-                    <span className="text-blue-400">let</span> <span className="text-white">linter</span> = <span className="text-green-400">RustyClint</span>::<span className="text-yellow-400">new</span>();
+                    <span className="text-blue-400">let</span> <span className="text-white">analyzer</span> = <span className="text-green-400">SecurityAnalyzer</span>::<span className="text-yellow-400">new</span>();
                   </div>
                   <div className="ml-4">
-                    <span className="text-white">linter</span>.<span className="text-yellow-400">analyze_and_fix</span>();
+                    <span className="text-white">analyzer</span>.<span className="text-yellow-400">scan_vulnerabilities</span>();
                   </div>
                   <div>{'}'}</div>
                 </div>
@@ -383,9 +385,206 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                 <div className="mt-4 flex items-center space-x-4">
                   <div className="flex items-center space-x-2 text-green-400">
                     <CheckCircle className="w-4 h-4" />
-                    <span className="text-sm">Analysis complete</span>
+                    <span className="text-sm">47 vulnerabilities detected & fixed</span>
                   </div>
-                  <div className="text-gray-400 text-sm">2.3s</div>
+                  <div className="text-gray-400 text-sm">0.08s</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Performance & Security Stats */}
+      <section className="px-6 py-20 bg-gray-800/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+              Unmatched
+              <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Performance & Security</span>
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Built with Rust for maximum performance and memory safety. Trusted by Fortune 500 companies worldwide.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <div className="bg-gray-700/50 backdrop-blur-xl border border-gray-600/50 rounded-xl p-6 text-center">
+              <div className="text-4xl font-bold text-orange-400 mb-2">10M+</div>
+              <div className="text-gray-300 mb-2">Lines/Second</div>
+              <div className="text-xs text-gray-500">Parallel analysis engine</div>
+            </div>
+            <div className="bg-gray-700/50 backdrop-blur-xl border border-gray-600/50 rounded-xl p-6 text-center">
+              <div className="text-4xl font-bold text-green-400 mb-2">99.97%</div>
+              <div className="text-gray-300 mb-2">Accuracy Rate</div>
+              <div className="text-xs text-gray-500">Zero false positives</div>
+            </div>
+            <div className="bg-gray-700/50 backdrop-blur-xl border border-gray-600/50 rounded-xl p-6 text-center">
+              <div className="text-4xl font-bold text-blue-400 mb-2">&lt;50ms</div>
+              <div className="text-gray-300 mb-2">Response Time</div>
+              <div className="text-xs text-gray-500">Real-time feedback</div>
+            </div>
+            <div className="bg-gray-700/50 backdrop-blur-xl border border-gray-600/50 rounded-xl p-6 text-center">
+              <div className="text-4xl font-bold text-purple-400 mb-2">256-bit</div>
+              <div className="text-gray-300 mb-2">Encryption</div>
+              <div className="text-xs text-gray-500">End-to-end security</div>
+            </div>
+          </div>
+
+          {/* Platform Support */}
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-gray-700/30 rounded-xl p-6 border border-gray-600/30">
+              <div className="flex items-center space-x-3 mb-4">
+                <Monitor className="w-8 h-8 text-blue-400" />
+                <h3 className="text-xl font-semibold text-white">Desktop Native</h3>
+              </div>
+              <ul className="space-y-2 text-gray-300">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Windows, macOS, Linux</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Native performance</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Offline capability</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-gray-700/30 rounded-xl p-6 border border-gray-600/30">
+              <div className="flex items-center space-x-3 mb-4">
+                <Globe className="w-8 h-8 text-green-400" />
+                <h3 className="text-xl font-semibold text-white">Web Platform</h3>
+              </div>
+              <ul className="space-y-2 text-gray-300">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>WebAssembly powered</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Browser-native speed</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Zero installation</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-gray-700/30 rounded-xl p-6 border border-gray-600/30">
+              <div className="flex items-center space-x-3 mb-4">
+                <Cloud className="w-8 h-8 text-purple-400" />
+                <h3 className="text-xl font-semibold text-white">Cloud Scale</h3>
+              </div>
+              <ul className="space-y-2 text-gray-300">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Auto-scaling infrastructure</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Global edge deployment</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>99.99% uptime SLA</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Security Features */}
+      <section className="px-6 py-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+              Enterprise
+              <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Security</span>
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Military-grade security with zero-trust architecture. Compliant with SOC 2, GDPR, and industry standards.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <div className="flex items-start space-x-4">
+                <div className="p-3 bg-red-600/20 rounded-lg">
+                  <Shield className="w-6 h-6 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Zero-Trust Architecture</h3>
+                  <p className="text-gray-300">Every request verified, encrypted, and logged. No implicit trust, maximum security.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="p-3 bg-blue-600/20 rounded-lg">
+                  <Lock className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-2">End-to-End Encryption</h3>
+                  <p className="text-gray-300">AES-256 encryption for data at rest and in transit. Your code never leaves your control.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="p-3 bg-green-600/20 rounded-lg">
+                  <Database className="w-6 h-6 text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Secure Sandboxing</h3>
+                  <p className="text-gray-300">Isolated execution environments with memory-safe Rust runtime. Zero code injection risk.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="p-3 bg-purple-600/20 rounded-lg">
+                  <Award className="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Compliance Ready</h3>
+                  <p className="text-gray-300">SOC 2 Type II, GDPR, HIPAA, and PCI DSS compliant. Audit trails included.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800/50 rounded-2xl p-6 border border-gray-700">
+              <h3 className="text-xl font-semibold text-white mb-4">Security Scan Results</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-red-900/20 rounded-lg border border-red-500/30">
+                  <div className="flex items-center space-x-3">
+                    <AlertTriangle className="w-5 h-5 text-red-400" />
+                    <span className="text-white">Critical Vulnerabilities</span>
+                  </div>
+                  <span className="text-red-400 font-bold">0</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-yellow-900/20 rounded-lg border border-yellow-500/30">
+                  <div className="flex items-center space-x-3">
+                    <AlertTriangle className="w-5 h-5 text-yellow-400" />
+                    <span className="text-white">High Risk Issues</span>
+                  </div>
+                  <span className="text-yellow-400 font-bold">2</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-green-900/20 rounded-lg border border-green-500/30">
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    <span className="text-white">Security Score</span>
+                  </div>
+                  <span className="text-green-400 font-bold">98/100</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                  <div className="flex items-center space-x-3">
+                    <Zap className="w-5 h-5 text-blue-400" />
+                    <span className="text-white">Scan Time</span>
+                  </div>
+                  <span className="text-blue-400 font-bold">0.08s</span>
                 </div>
               </div>
             </div>
@@ -421,7 +620,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                     <div className="text-gray-400 text-sm">{testimonial.role} at {testimonial.company}</div>
                   </div>
                 </div>
-                <p className="text-gray-300 italic">"{testimonial.content.replace(/mobile/gi, 'code quality').replace(/Mobile/gi, 'Code Quality')}"</p>
+                <p className="text-gray-300 italic">"{testimonial.content}"</p>
               </div>
             ))}
           </div>
@@ -432,10 +631,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
       <section className="px-6 py-20 bg-gradient-to-r from-orange-600/10 to-red-600/10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-            <span className="text-xl font-bold text-white">rustyclint</span>
+            Ready to Secure Your Code?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            © 2024 rustyclint. All rights reserved.
+            Join thousands of developers who trust rustyclint for enterprise-grade security and performance.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
@@ -462,10 +661,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                 <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
                   <Code className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold text-white">Rust Cloud IDE</span>
+                <span className="text-xl font-bold text-white">rustyclint</span>
               </div>
               <p className="text-gray-400">
-                The future of mobile development is here. Build once, deploy everywhere.
+                The future of secure code analysis. Fast, secure, and reliable.
               </p>
               <div className="flex items-center space-x-4">
                 <Github className="w-5 h-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
@@ -477,10 +676,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
             <div>
               <h3 className="font-semibold text-white mb-4">Product</h3>
               <div className="space-y-2">
-                <a href="#" className="block text-gray-400 hover:text-white transition-colors">Features</a>
+                <a href="#" className="block text-gray-400 hover:text-white transition-colors">Security Features</a>
+                <a href="#" className="block text-gray-400 hover:text-white transition-colors">Performance</a>
                 <a href="#" className="block text-gray-400 hover:text-white transition-colors">Pricing</a>
-                <a href="#" className="block text-gray-400 hover:text-white transition-colors">Documentation</a>
-                <a href="#" className="block text-gray-400 hover:text-white transition-colors">API Reference</a>
+                <a href="#" className="block text-gray-400 hover:text-white transition-colors">Compliance</a>
               </div>
             </div>
             
@@ -507,7 +706,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
           
           <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 Rust Cloud IDE. All rights reserved.
+              © 2024 rustyclint. All rights reserved.
             </p>
             <div className="flex items-center space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</a>

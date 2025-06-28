@@ -31,147 +31,112 @@ const Terminal: React.FC<TerminalProps> = ({ isVisible, onToggle }) => {
   cargo build    - Build the project
   cargo run      - Run the project
   cargo test     - Run tests
-  cargo android  - Build for Android
-  cargo ios      - Build for iOS
-  flutter build  - Build Flutter app
-  flutter run    - Run Flutter app
-  adb devices    - List connected Android devices
-  xcrun simctl   - iOS simulator commands
+ rustyclint scan - Run security analysis
+ rustyclint fix  - Auto-fix vulnerabilities
+ rustyclint bench - Performance benchmark
+ rustyclint audit - Security audit
   cargo clean    - Clean build artifacts
   ls            - List files
   clear         - Clear terminal
   help          - Show this help`;
         break;
       case 'cargo build':
-        output = `   Compiling mobile-rust-app v0.1.0
+        output = `   Compiling rustyclint v0.1.0
     Finished dev [unoptimized + debuginfo] target(s) in 2.34s`;
         break;
       case 'cargo run':
-        output = `   Compiling mobile-rust-app v0.1.0
+        output = `   Compiling rustyclint v0.1.0
     Finished dev [unoptimized + debuginfo] target(s) in 1.23s
-     Running \`target/debug/mobile-rust-app\`
+     Running \`target/debug/rustyclint\`
 Hello, rustyclint!
 rustyclint Initialized
-Platform: Desktop`;
+Security Engine: Active
+Performance Mode: Optimized`;
         break;
-      case 'cargo android':
-        output = `   Compiling mobile-rust-app v0.1.0
-    Finished release [optimized] target(s) in 4.56s
-Building Android APK...
-APK built successfully: target/android/mobile-rust-app.apk`;
-        break;
-      case 'cargo ios':
-        output = `   Compiling mobile-rust-app v0.1.0
-    Finished release [optimized] target(s) in 3.21s
-Building iOS framework...
-iOS framework built successfully`;
-        break;
-      case 'flutter build':
-        output = `Building Flutter app...
-Running "flutter packages get" in mobile-rust-app...
-Launching lib/main.dart on iPhone 15 Pro in debug mode...
-Built build/ios/iphoneos/Runner.app`;
-        break;
-      case 'flutter run':
-        output = `Launching lib/main.dart on iPhone 15 Pro in debug mode...
-🔥  To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R".
-An Observatory debugger and profiler on iPhone 15 Pro is available at: http://127.0.0.1:54321/
-For a more detailed help message, press "h". To quit, press "q".
+      case 'rustyclint scan':
+        output = `🔍 Security Analysis Starting...
+📊 Analyzing 47,392 lines of code
+🛡️  Checking OWASP Top 10 vulnerabilities
+⚡ Performance: 10.2M lines/second
 
-Application started successfully!`;
+Results:
+✅ 0 Critical vulnerabilities
+⚠️  2 Medium-risk issues found
+🔧 3 Performance optimizations suggested
+
+Analysis completed in 0.08 seconds`;
         break;
-      case 'flutter doctor':
-        output = `Doctor summary (to see all details, run flutter doctor -v):
-[✓] Flutter (Channel stable, 3.16.0, on macOS 14.0 23A344 darwin-arm64, locale en-US)
-[✓] Android toolchain - develop for Android devices (Android SDK version 34.0.0)
-[✓] Xcode - develop for iOS and macOS (Xcode 15.0)
-[✓] Chrome - develop for the web
-[✓] Android Studio (version 2023.1)
-[✓] VS Code (version 1.84.2)
-[✓] Connected device (3 available)
-[✓] Network resources
+      case 'rustyclint fix':
+        output = `🔧 Auto-fixing vulnerabilities...
 
-• No issues found!`;
+Fixed Issues:
+✅ SQL injection vulnerability in auth.rs:42
+✅ XSS prevention in template.rs:156
+✅ Buffer overflow protection in parser.rs:89
+
+Performance Improvements:
+⚡ Optimized memory allocation (-23% usage)
+⚡ Parallel processing enabled (+340% speed)
+
+All fixes applied successfully!`;
         break;
-      case 'flutter clean':
-        output = `Deleting build...
-Deleting .dart_tool...
-Deleting .packages...
-Deleting pubspec.lock...
-Deleting .flutter-plugins...
-Deleting .flutter-plugins-dependencies...`;
+      case 'rustyclint bench':
+        output = `🚀 Performance Benchmark
+
+Analysis Speed:
+├─ Lines per second: 10,247,832
+├─ Memory usage: 45.2 MB
+├─ CPU utilization: 12%
+└─ Response time: <50ms
+
+Security Checks:
+├─ Vulnerability detection: 99.97% accuracy
+├─ False positive rate: 0.03%
+├─ Coverage: OWASP Top 10 + Custom rules
+└─ Compliance: SOC 2, GDPR, HIPAA ready
+
+Platform Performance:
+├─ Native (Windows/macOS/Linux): 100%
+├─ WebAssembly (Browser): 95%
+└─ Cloud (Auto-scaling): 99.99% uptime`;
         break;
-      case 'npx react-native start':
-        output = `
-                     ######                ######
-                   ###     ####        ####     ###
-                  ##          ###    ###          ##
-                  ##             ####             ##
-                  ##             ####             ##
-                  ##           ##    ##           ##
-                  ##         ###      ###         ##
-                   ##  ########################  ##
-                    ##  #####################  ##
-                     ####  #################  ####
-                       ########         ########
-                          #####       #####
-                             ###     ###
-                                ## ##
-                                 ###
-                                  #
+      case 'rustyclint audit':
+        output = `🛡️  Security Audit Report
 
-                      Welcome to React Native!
-                        Learn once, write anywhere
+Encryption Status:
+✅ AES-256 encryption active
+✅ TLS 1.3 for data in transit
+✅ Zero-trust architecture verified
 
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                                                                              │
-│  Running Metro Bundler on port 8081.                                        │
-│                                                                              │
-│  Keep Metro running while developing on any JS projects. Feel free to       │
-│  close this tab and run your own Metro instance if you prefer.              │
-│                                                                              │
-│  https://github.com/facebook/react-native                                   │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
+Compliance Check:
+✅ SOC 2 Type II compliant
+✅ GDPR data protection verified
+✅ HIPAA security controls active
+✅ PCI DSS requirements met
 
-Looking for JS files in
-   /home/project/platforms/react-native
+Vulnerability Scan:
+✅ 0 Critical issues
+✅ 0 High-risk vulnerabilities
+⚠️  2 Medium-risk items (non-blocking)
 
-Metro waiting on 'ws://localhost:8081/ws'...`;
-        break;
-      case 'npx react-native run-android':
-        output = `info Running jetifier to migrate libraries to AndroidX. You can disable it using "--no-jetifier" flag.
-Jetifier found 967 file(s) to forward-jetify. Using 4 workers...
-info Starting JS server...
-info Building and installing the app on the device (cd android && ./gradlew app:installDebug)...
-
-> Task :app:installDebug
-Installing APK 'app-debug.apk' on 'Pixel_3a_API_30_x86(AVD) - 11' for app:debug
-Installed on 1 device.
-
-BUILD SUCCESSFUL in 45s
-27 actionable tasks: 27 executed
-info Connecting to the development server...
-info Starting the app on 'emulator-5554'...
-Starting: Intent { cmp=com.mobilerustapp/.MainActivity }`;
-        break;
-      case 'adb devices':
-        output = `List of devices attached
-emulator-5554	device
-R58M123ABCD	device`;
+Security Score: 98/100 (Excellent)`;
         break;
       case 'cargo test':
-        output = `   Compiling mobile-rust-app v0.1.0
+        output = `   Compiling rustyclint v0.1.0
     Finished test [unoptimized + debuginfo] target(s) in 1.45s
      Running unittests src/lib.rs
 
-running 4 tests
-test tests::test_mobile_init ... ok
-test tests::test_touch_validation ... ok
-test tests::test_platform_detection ... ok
-test tests::test_ui_rendering ... ok
+running 8 tests
+test tests::test_security_scanner ... ok
+test tests::test_vulnerability_detection ... ok
+test tests::test_performance_analysis ... ok
+test tests::test_encryption_validation ... ok
+test tests::test_compliance_check ... ok
+test tests::test_memory_safety ... ok
+test tests::test_parallel_processing ... ok
+test tests::test_zero_trust_auth ... ok
 
-test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s`;
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s`;
         break;
       case 'cargo clean':
         output = 'Cleaning target directory...';
@@ -263,7 +228,7 @@ Successfully installed torch-2.1.0+cu118 torchvision-0.16.0+cu118 tensorflow-2.1
         output = 'CUDA available: True';
         break;
       case 'ls':
-        output = 'Cargo.toml  Cargo.lock  README.md  src/  platforms/  tests/  assets/  target/  flutter_rust_bridge.yaml  main.py  requirements.txt  computer_vision.py  nlp_transformer.py  data_science.py  setup.py';
+        output = 'Cargo.toml  Cargo.lock  README.md  src/  security/  tests/  benchmarks/  target/  rustyclint.toml  main.py  requirements.txt  security_scanner.py  performance_analyzer.py  compliance_checker.py  setup.py';
         break;
       case 'clear':
         setHistory([TERMINAL_CONSTANTS.WELCOME]);

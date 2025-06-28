@@ -14,49 +14,49 @@ const DemoMode: React.FC<DemoModeProps> = ({ isActive, onToggle }) => {
   const demoSteps = [
     {
       title: "Welcome to rustyclint",
-      description: "Let's take a tour of the powerful features available in this development environment.",
+      description: "Let's explore the high-performance security analysis and code quality features.",
       action: "intro",
       duration: 3000,
     },
     {
-      title: "File Explorer",
-      description: "Browse through your project structure. Click on any file to open it in the editor.",
+      title: "Security Scanner",
+      description: "Advanced vulnerability detection with real-time analysis and zero false positives.",
       action: "highlight-explorer",
       duration: 4000,
     },
     {
-      title: "Code Editor",
-      description: "Full-featured code editor with syntax highlighting for Rust, Dart, Kotlin, and more.",
+      title: "Performance Engine",
+      description: "Ultra-fast analysis engine processing millions of lines per second with memory safety.",
       action: "highlight-editor",
       duration: 4000,
     },
     {
-      title: "Multi-Platform Support",
-      description: "Build for Android, iOS, Flutter, React Native, and desktop from a single codebase.",
+      title: "Enterprise Security",
+      description: "Military-grade encryption, zero-trust architecture, and compliance-ready features.",
       action: "highlight-platforms",
       duration: 4000,
     },
     {
-      title: "Integrated Terminal",
-      description: "Run cargo commands, build your project, and deploy to mobile platforms.",
+      title: "Security Terminal",
+      description: "Run security scans, performance benchmarks, and compliance audits from the command line.",
       action: "show-terminal",
       duration: 4000,
     },
     {
-      title: "Real-time Compilation",
-      description: "See your code compile in real-time with instant feedback and error reporting.",
+      title: "Real-time Analysis",
+      description: "Instant vulnerability detection with sub-50ms response times and continuous monitoring.",
       action: "demo-compilation",
       duration: 5000,
     },
     {
-      title: "Project Templates",
-      description: "Start with pre-built templates for games, IoT, blockchain, and more.",
+      title: "Security Templates",
+      description: "Pre-configured security policies for web apps, APIs, microservices, and more.",
       action: "show-templates",
       duration: 4000,
     },
     {
-      title: "Ready to Code!",
-      description: "You're all set! Choose a template or start coding from scratch.",
+      title: "Ready to Secure!",
+      description: "You're all set! Start analyzing your code for vulnerabilities and performance issues.",
       action: "complete",
       duration: 3000,
     },
@@ -232,15 +232,15 @@ const DemoMode: React.FC<DemoModeProps> = ({ isActive, onToggle }) => {
           <div className="mt-6 p-4 bg-gray-700 rounded-lg">
             <div className="flex items-center space-x-2 mb-3">
               <Code className="w-5 h-5 text-orange-400" />
-              <span className="font-medium text-white">Available Templates</span>
+              <span className="font-medium text-white">Security Templates</span>
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="text-gray-300">🎮 Mobile Game Engine</div>
-              <div className="text-gray-300">🏠 IoT Dashboard</div>
-              <div className="text-gray-300">💰 Crypto Wallet</div>
-              <div className="text-gray-300">🌐 Web Scraper</div>
-              <div className="text-gray-300">💬 Chat Application</div>
-              <div className="text-gray-300">📱 React Native App</div>
+              <div className="text-gray-300">🛡️ Web Application Security</div>
+              <div className="text-gray-300">🔐 API Security Policy</div>
+              <div className="text-gray-300">⚡ Microservices Security</div>
+              <div className="text-gray-300">🌐 Cloud Security Config</div>
+              <div className="text-gray-300">📊 Database Security</div>
+              <div className="text-gray-300">🔒 Blockchain Security</div>
             </div>
           </div>
         )}
@@ -249,11 +249,14 @@ const DemoMode: React.FC<DemoModeProps> = ({ isActive, onToggle }) => {
           <div className="mt-6 p-4 bg-gray-900 rounded-lg font-mono text-sm">
             <div className="flex items-center space-x-2 mb-2">
               <Terminal className="w-4 h-4 text-green-400" />
-              <span className="text-green-400">$ cargo build --release</span>
+              <span className="text-green-400">$ rustyclint scan --deep</span>
             </div>
             <div className="text-gray-300 space-y-1">
-              <div>   Compiling mobile-rust-app v0.1.0</div>
-              <div className="text-green-400">    Finished release [optimized] target(s) in 2.34s</div>
+              <div>🔍 Analyzing 47,392 lines of code...</div>
+              <div>⚡ Performance: 10.2M lines/second</div>
+              <div className="text-green-400">✅ Analysis complete in 0.08s</div>
+              <div className="text-yellow-400">⚠️  2 medium-risk issues found</div>
+              <div className="text-blue-400">🔧 3 optimizations suggested</div>
             </div>
           </div>
         )}
@@ -262,7 +265,7 @@ const DemoMode: React.FC<DemoModeProps> = ({ isActive, onToggle }) => {
           <div className="mt-6 text-center">
             <div className="text-4xl mb-2">🎉</div>
             <p className="text-gray-300">
-              Ready to start building amazing mobile applications with Rust!
+              Ready to secure your code with enterprise-grade analysis and performance optimization!
             </p>
           </div>
         )}
