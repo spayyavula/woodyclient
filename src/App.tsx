@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
+import { isSupabaseConfigured } from './lib/supabase';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
@@ -200,8 +201,13 @@ mod tests {
     // Check for existing session
     const checkSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
+        if (isSupabaseConfigured) {
+          const { data: { session } } = await supabase.auth.getSession();
+          setUser(session?.user ?? null);
+        } else {
+          // In demo mode, always start with no user to show landing page
+          setUser(null);
+        }
       } catch (error) {
         console.error('Error checking session:', error);
         setUser(null);
@@ -226,6 +232,21 @@ mod tests {
     setAuthLoading(true);
     setAuthError(null);
 
+    // Handle demo mode
+    if (!isSupabaseConfigured) {
+      // In demo mode, simulate successful login
+      setTimeout(() => {
+        setUser({ 
+          id: 'demo-user', 
+          email: email,
+          created_at: new Date().toISOString(),
+          last_sign_in_at: new Date().toISOString()
+        });
+        setAuthLoading(false);
+      }, 1000);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -249,6 +270,21 @@ mod tests {
     if (password.length < 6) {
       setAuthError('Password must be at least 6 characters long');
       setAuthLoading(false);
+      return;
+    }
+
+    // Handle demo mode
+    if (!isSupabaseConfigured) {
+      // In demo mode, simulate successful signup
+      setTimeout(() => {
+        setUser({ 
+          id: 'demo-user', 
+          email: email,
+          created_at: new Date().toISOString(),
+          last_sign_in_at: new Date().toISOString()
+        });
+        setAuthLoading(false);
+      }, 1000);
       return;
     }
 

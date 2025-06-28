@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   Code, 
   Smartphone, 
@@ -252,6 +253,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                         </button>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">Minimum 6 characters required</p>
+                      {!isSupabaseConfigured && (
+                        <p className="text-xs text-orange-400 mt-1">Demo mode: Use any email and password</p>
+                      )}
                     </div>
                   </div>
 
