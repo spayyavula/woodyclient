@@ -4,12 +4,12 @@ import {
   Play, 
   Pause, 
   CheckCircle, 
-  XCircle, 
+  XCircle,
   Clock, 
   Terminal,
   Download,
   Settings,
-  RefreshCw,
+  RefreshCcw,
   AlertTriangle
 } from 'lucide-react';
 import { useDeploymentAutomation } from '../hooks/useDeploymentAutomation';
@@ -61,9 +61,9 @@ const AutomationPanel: React.FC<AutomationPanelProps> = ({ platform, isVisible, 
       case 'completed':
         return <CheckCircle className="w-4 h-4 text-green-400" />;
       case 'failed':
-        return <XCircle className="w-4 h-4 text-red-400" />;
+        return <XCircle className="w-4 h-4 text-red-400" />; 
       case 'running':
-        return <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />;
+        return <RefreshCcw className="w-4 h-4 text-blue-400 animate-spin" />;
       default:
         return <Clock className="w-4 h-4 text-gray-400" />;
     }
@@ -142,7 +142,7 @@ const AutomationPanel: React.FC<AutomationPanelProps> = ({ platform, isVisible, 
                   >
                     {isRunning ? (
                       <>
-                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <RefreshCcw className="w-4 h-4 animate-spin" />
                         <span>Running...</span>
                       </>
                     ) : (

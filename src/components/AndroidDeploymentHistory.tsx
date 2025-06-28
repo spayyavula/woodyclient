@@ -4,7 +4,7 @@ import {
   CheckCircle, 
   XCircle, 
   Clock, 
-  RefreshCw, 
+  RefreshCcw, 
   Download, 
   ExternalLink,
   Calendar,
@@ -62,11 +62,11 @@ const AndroidDeploymentHistory: React.FC<AndroidDeploymentHistoryProps> = ({ onC
       case 'completed':
         return <CheckCircle className="w-4 h-4 text-green-400" />;
       case 'failed':
-        return <XCircle className="w-4 h-4 text-red-400" />;
+        return <XCircle className="w-4 h-4 text-red-400" />; 
       case 'building':
       case 'signing':
       case 'uploading':
-        return <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />;
+        return <RefreshCcw className="w-4 h-4 text-blue-400 animate-spin" />;
       case 'pending':
         return <Clock className="w-4 h-4 text-yellow-400" />;
       default:
@@ -143,13 +143,13 @@ const AndroidDeploymentHistory: React.FC<AndroidDeploymentHistoryProps> = ({ onC
               className="p-2 text-gray-400 hover:text-white disabled:opacity-50 transition-colors rounded-lg hover:bg-gray-800"
               title="Refresh"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
           
           {isLoading ? (
             <div className="flex items-center justify-center h-40">
-              <RefreshCw className="w-6 h-6 text-blue-400 animate-spin" />
+              <RefreshCcw className="w-6 h-6 text-blue-400 animate-spin" />
             </div>
           ) : deployments.length === 0 ? (
             <div className="text-center py-8 text-gray-400">

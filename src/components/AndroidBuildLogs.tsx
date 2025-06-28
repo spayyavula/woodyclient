@@ -6,7 +6,7 @@ import {
   XCircle, 
   Copy, 
   Search,
-  Filter,
+  Filter, 
   ArrowDown,
   ArrowUp,
   CheckCircle,
@@ -71,7 +71,7 @@ const AndroidBuildLogs: React.FC<AndroidBuildLogsProps> = ({
   const fetchLogs = async () => {
     setIsLoading(true);
     
-    try {
+    try { 
       // Simulate API call to fetch logs
       await new Promise(resolve => setTimeout(resolve, 1000));
       
@@ -305,7 +305,7 @@ const AndroidBuildLogs: React.FC<AndroidBuildLogsProps> = ({
       >
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
-            <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
+            <RefreshCcw className="w-8 h-8 text-blue-400 animate-spin" />
           </div>
         ) : filteredLogs.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-400">
@@ -342,7 +342,7 @@ const AndroidBuildLogs: React.FC<AndroidBuildLogsProps> = ({
             onClick={downloadLogs}
             className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4" /> 
             <span>Download</span>
           </button>
           
@@ -359,7 +359,7 @@ const AndroidBuildLogs: React.FC<AndroidBuildLogsProps> = ({
             disabled={isLoading}
             className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:opacity-50 text-white rounded-lg transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCcw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </button>
         </div>

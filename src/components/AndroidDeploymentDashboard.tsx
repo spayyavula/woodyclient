@@ -5,11 +5,10 @@ import {
   CheckCircle, 
   XCircle, 
   Clock, 
-  Clock, 
   Terminal, 
   Download, 
   Upload,
-  RefreshCw,
+  RefreshCcw,
   Shield,
   Settings,
   Zap,
@@ -118,9 +117,9 @@ const AndroidDeploymentDashboard: React.FC<AndroidDeploymentDashboardProps> = ({
       case 'failed':
         return <XCircle className="w-4 h-4 text-red-400" />;
       case 'building':
-      case 'signing':
+      case 'signing': 
       case 'uploading':
-        return <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />;
+        return <RefreshCcw className="w-4 h-4 text-blue-400 animate-spin" />;
       case 'pending':
         return <Clock className="w-4 h-4 text-yellow-400" />;
       default:
@@ -241,10 +240,10 @@ const AndroidDeploymentDashboard: React.FC<AndroidDeploymentDashboardProps> = ({
                 onClick={fetchDeployments}
                 className="flex items-center justify-center space-x-2 py-3 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
               >
-                <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCcw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
                 <span>Refresh</span>
               </button>
-            </div>
+            </div> 
             
             {/* Recent Deployments */}
             <div>
@@ -252,7 +251,7 @@ const AndroidDeploymentDashboard: React.FC<AndroidDeploymentDashboardProps> = ({
               
               {isLoading ? (
                 <div className="flex items-center justify-center h-40">
-                  <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
+                  <RefreshCcw className="w-8 h-8 text-blue-400 animate-spin" />
                 </div>
               ) : deployments.length === 0 ? (
                 <div className="text-center py-12 bg-gray-700 rounded-lg">

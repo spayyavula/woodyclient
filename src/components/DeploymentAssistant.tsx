@@ -3,7 +3,7 @@ import {
   HelpCircle, 
   CheckCircle, 
   AlertTriangle, 
-  Info, 
+  Info,
   ExternalLink, 
   Copy, 
   Eye, 
@@ -15,8 +15,7 @@ import {
   Shield,
   Zap,
   Terminal,
-  FileText,
-  Smartphone,
+  FileText, 
   Monitor
 } from 'lucide-react';
 

@@ -9,12 +9,12 @@ import {
   ExternalLink,
   Settings,
   Shield,
-  Database,
+  Database, 
   Key,
   Smartphone,
   Globe,
   Zap,
-  RefreshCw
+  RefreshCcw
 } from 'lucide-react';
 
 interface ConfigItem {
@@ -380,12 +380,12 @@ const ConfigurationChecker: React.FC<ConfigurationCheckerProps> = ({ isVisible, 
               >
                 {isChecking ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCcw className="w-4 h-4 animate-spin" />
                     <span>Checking...</span>
                   </>
                 ) : (
                   <>
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCcw className="w-4 h-4" />
                     <span>Run All Checks</span>
                   </>
                 )}
