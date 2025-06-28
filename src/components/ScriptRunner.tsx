@@ -3,8 +3,8 @@ import {
   Terminal, 
   Play, 
   X, 
-  Download, 
-  RefreshCw,
+  Download,
+  RefreshCcw,
   Smartphone,
   Shield,
   CheckCircle,
@@ -536,7 +536,7 @@ const ScriptRunner: React.FC<ScriptRunnerProps> = ({ onClose }) => {
                 disabled={output.length === 0}
                 className="flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-700 disabled:opacity-50 text-white rounded-lg transition-colors"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCcw className="w-4 h-4" />
                 <span>Clear Output</span>
               </button>
               

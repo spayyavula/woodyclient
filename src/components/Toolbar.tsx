@@ -22,7 +22,7 @@ import {
   TestTube,
   Link,
   Hammer,
-  Wrench,
+  Wrench, 
   Zap, 
   CheckSquare, 
   Rocket,
@@ -210,7 +210,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
                 <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 <span>Building...</span>
               </>
-            ) : (
+            ) : ( 
               <>
                 <Hammer className="w-4 h-4 mr-2" />
                 <span>Build & Analyze</span>
@@ -413,7 +413,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
               ))}
             </div>
             {error && (
-              <div className="mt-3 p-2 bg-red-900/20 border border-red-500 rounded text-red-300 text-xs">
+                  ✕ 
                 {error}
               </div>
             )}
