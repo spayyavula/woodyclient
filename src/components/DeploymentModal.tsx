@@ -13,7 +13,11 @@ import {
   Terminal,
   ExternalLink,
   Download,
-  Upload
+  Upload,
+  Loader2,
+  Zap,
+  Shield,
+  Package
 } from 'lucide-react';
 import { useDeployment, DeploymentConfig, DeploymentStep } from '../hooks/useDeployment';
 
@@ -46,8 +50,21 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isConfiguring, setIsConfiguring] = useState(false);
+  const [showPreDeployCheck, setShowPreDeployCheck] = useState(false);
 
   const handleStartDeployment = () => {
+    setIsConfiguring(true);
+    
+    // Show configuration animation
+    setTimeout(() => {
+      setIsConfiguring(false);
+      setShowPreDeployCheck(true);
+    }, 2000);
+  };
+
+  const handleConfirmDeployment = () => {
+    setShowPreDeployCheck(false);
     startDeployment(config);
   };
 
@@ -402,18 +419,53 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
 
             {/* Action Buttons */}
             <div className="space-y-3">
-              {!isDeploying ? (
+              {!isDeploying && !isConfiguring && !showPreDeployCheck ? (
                 <button
                   onClick={handleStartDeployment}
-                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg"
                 >
                   <Play className="w-4 h-4" />
                   <span>Start Deployment</span>
                 </button>
+              ) : isConfiguring ? (
+                <div className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-blue-600 text-white rounded-lg font-medium">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Preparing Deployment...</span>
+                </div>
+              ) : showPreDeployCheck ? (
+                <div className="space-y-3">
+                  <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <AlertCircle className="w-5 h-5 text-orange-400" />
+                      <span className="font-medium text-orange-300">Ready to Deploy</span>
+                    </div>
+                    <p className="text-sm text-orange-200 mb-3">
+                      {config.platform === 'android' 
+                        ? `Building ${config.androidTarget?.toUpperCase()} for Google Play Store. This will create a production-ready build.`
+                        : `Building for ${config.platform.toUpperCase()} production. This process may take several minutes.`
+                      }
+                    </p>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handleConfirmDeployment}
+                        className="flex-1 flex items-center justify-center space-x-2 py-2 px-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
+                      >
+                        <Zap className="w-4 h-4" />
+                        <span>Deploy Now</span>
+                      </button>
+                      <button
+                        onClick={() => setShowPreDeployCheck(false)}
+                        className="flex-1 py-2 px-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <button
                   onClick={stopDeployment}
-                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg"
                 >
                   <Square className="w-4 h-4" />
                   <span>Stop Deployment</span>
@@ -424,6 +476,24 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                 <ExternalLink className="w-4 h-4" />
                 <span>View Documentation</span>
               </button>
+              
+              {/* Visual Status Indicators */}
+              {(isConfiguring || isDeploying) && (
+                <div className="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span className="text-blue-300 text-sm font-medium">
+                      {isConfiguring ? 'Configuring Build Environment' : 'Deployment In Progress'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-blue-200">
+                    {isConfiguring 
+                      ? 'Setting up build tools and dependencies...'
+                      : `Building ${config.platform.toUpperCase()} application...`
+                    }
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -457,6 +527,8 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                         <li>• Ensure all architectures are built for maximum compatibility</li>
                         <li>• Use SHA-256 signing for enhanced security</li>
                         <li>• Test on internal track before production release</li>
+                        <li>• Build process typically takes 3-5 minutes for Android</li>
+                        <li>• Upload to Play Console happens automatically after build</li>
                       </ul>
                     </div>
                   )}
@@ -522,11 +594,27 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                         <div className="flex items-center space-x-3">
                           {getStepIcon(step)}
                           <span className="font-medium text-white">{step.name}</span>
+                          {index === currentStep && isDeploying && (
+                            <div className="flex items-center space-x-1">
+                              <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping"></div>
+                              <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.2s' }}></div>
+                              <div className="w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.4s' }}></div>
+                            </div>
+                          )}
                         </div>
                         {step.duration && (
                           <span className="text-sm text-gray-400">{(step.duration / 1000).toFixed(1)}s</span>
                         )}
                       </div>
+                      
+                      {/* Progress indicator for current step */}
+                      {index === currentStep && isDeploying && (
+                        <div className="mb-3">
+                          <div className="w-full bg-gray-700 rounded-full h-1">
+                            <div className="bg-blue-500 h-1 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                          </div>
+                        </div>
+                      )}
                       
                       {step.command && (
                         <div className="mb-2">
@@ -560,7 +648,29 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                   <div className="bg-green-900/20 border border-green-500 rounded-lg p-6 text-center">
                     <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-white mb-2">Deployment Successful!</h3>
-                    <p className="text-gray-300 mb-6">Your app has been successfully deployed to {config.platform.toUpperCase()}</p>
+                    <p className="text-gray-300 mb-6">
+                      Your {config.platform === 'android' ? config.androidTarget?.toUpperCase() : 'app'} has been successfully deployed to {config.platform.toUpperCase()}
+                      {config.platform === 'android' && ' Play Console'}
+                    </p>
+                    
+                    {/* Platform-specific success info */}
+                    {config.platform === 'android' && (
+                      <div className="bg-green-800/30 rounded-lg p-4 mb-6">
+                        <div className="flex items-center justify-center space-x-2 mb-2">
+                          <Package className="w-5 h-5 text-green-400" />
+                          <span className="font-medium text-green-300">Android Build Complete</span>
+                        </div>
+                        <div className="text-sm text-green-200 space-y-1">
+                          <div>✓ {config.androidTarget?.toUpperCase()} signed with release keystore</div>
+                          <div>✓ Uploaded to Google Play Console</div>
+                          <div>✓ Available on internal testing track</div>
+                          <div className="text-yellow-200 mt-2">
+                            ⏳ Review process: 1-3 days for production release
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-center space-x-4">
                       {config.platform === 'web' ? (
                         <>
@@ -588,14 +698,38 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                         <>
                           <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                             <Download className="w-4 h-4" />
-                            <span>Download Build</span>
+                            <span>Download {config.platform === 'android' ? config.androidTarget?.toUpperCase() : 'Build'}</span>
                           </button>
                           <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
                             <Upload className="w-4 h-4" />
-                            <span>View in Store</span>
+                            <span>View in {config.platform === 'android' ? 'Play Console' : 'App Store'}</span>
                           </button>
                         </>
                       )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Failed deployment feedback */}
+                {!isDeploying && steps.some(step => step.status === 'failed') && (
+                  <div className="bg-red-900/20 border border-red-500 rounded-lg p-6 text-center">
+                    <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-white mb-2">Deployment Failed</h3>
+                    <p className="text-gray-300 mb-6">
+                      The deployment process encountered an error. Check the logs above for details.
+                    </p>
+                    <div className="flex justify-center space-x-4">
+                      <button 
+                        onClick={() => handleStartDeployment()}
+                        className="flex items-center space-x-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        <span>Retry Deployment</span>
+                      </button>
+                      <button className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                        <ExternalLink className="w-4 h-4" />
+                        <span>Get Help</span>
+                      </button>
                     </div>
                   </div>
                 )}

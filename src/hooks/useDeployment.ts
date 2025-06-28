@@ -112,7 +112,9 @@ Export path: /Users/dev/build/App.ipa`
       if (command.includes('assembleRelease')) {
         return {
           success: true,
-          output: `> Task :app:preBuild UP-TO-DATE
+          output: `🤖 Building Android APK...
+
+> Task :app:preBuild UP-TO-DATE
 > Task :app:preReleaseBuild UP-TO-DATE
 > Task :app:compileReleaseAidl NO-SOURCE
 > Task :app:compileReleaseRenderscript NO-SOURCE
@@ -130,20 +132,26 @@ Export path: /Users/dev/build/App.ipa`
 > Task :app:packageRelease
 > Task :app:assembleRelease
 
-BUILD SUCCESSFUL in 2m 34s
-42 actionable tasks: 42 executed`
+✅ BUILD SUCCESSFUL in 2m 34s
+📦 APK generated: android/app/build/outputs/apk/release/app-release.apk
+📊 Size: 38.7 MB
+🎯 42 actionable tasks: 42 executed`
         };
       }
       
       if (command.includes('bundleRelease')) {
         return {
           success: true,
-          output: `> Task :app:bundleReleaseClassesToCompileJar
+          output: `🤖 Building Android App Bundle...
+
+> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:bundleReleaseClassesToRuntimeJar
 > Task :app:bundleRelease
 
-BUILD SUCCESSFUL in 1m 45s
-Generated AAB: android/app/build/outputs/bundle/release/app-release.aab`
+✅ BUILD SUCCESSFUL in 1m 45s
+📦 AAB generated: android/app/build/outputs/bundle/release/app-release.aab
+📊 Size: 35.2 MB (optimized for Play Store)
+🎯 Ready for Google Play Console upload`
         };
       }
     }
@@ -151,51 +159,67 @@ Generated AAB: android/app/build/outputs/bundle/release/app-release.aab`
     if (command.includes('jarsigner')) {
       return {
         success: true,
-        output: `   adding: META-INF/MANIFEST.MF
+        output: `🔐 Signing Android ${config.androidTarget?.toUpperCase()}...
+
+   adding: META-INF/MANIFEST.MF
    adding: META-INF/CERT.SF
    adding: META-INF/CERT.RSA
   signing: AndroidManifest.xml
   signing: classes.dex
   signing: resources.arsc
-jar signed.
+✅ jar signed successfully.
+🔒 SHA-256 signature applied
+🛡️  Release keystore verified
 
-Warning: 
-The signer certificate will expire within six months.`
+⚠️  Certificate expires in 6 months - consider renewal`
       };
     }
     
     if (command.includes('zipalign')) {
       return {
         success: true,
-        output: `Verifying alignment of app-release.apk (4)...
+        output: `📐 Optimizing APK alignment...
+
+Verifying alignment of app-release.apk (4)...
       50 META-INF/MANIFEST.MF (OK - compressed)
      178 META-INF/CERT.SF (OK - compressed)
     1234 META-INF/CERT.RSA (OK - compressed)
     2468 AndroidManifest.xml (OK - compressed)
     3692 classes.dex (OK)
-Verification successful`
+✅ Verification successful
+⚡ APK optimized for faster installation
+📦 Final size: 38.7 MB`
       };
     }
     
     if (command.includes('fastlane supply')) {
       return {
         success: true,
-        output: `[14:45:12]: Preparing to upload APK to Google Play Console
-[14:45:15]: Uploading APK to Google Play Console
-[14:45:18]: Successfully uploaded APK to Google Play Console
+        output: `🚀 Uploading to Google Play Console...
+
+[14:45:12]: 📋 Preparing to upload ${config.androidTarget?.toUpperCase()} to Google Play Console
+[14:45:13]: 🔍 Validating app bundle integrity
+[14:45:14]: ✅ App bundle validation passed
+[14:45:15]: ⬆️  Uploading ${config.androidTarget?.toUpperCase()} to Google Play Console
+[14:45:17]: 📊 Upload progress: 100%
+[14:45:18]: ✅ Successfully uploaded ${config.androidTarget?.toUpperCase()} to Google Play Console
 [14:45:20]: Setting up release for track: internal
-[14:45:22]: Release successfully created on Google Play Console
+[14:45:22]: ✅ Release successfully created on Google Play Console
+[14:45:23]: 🎯 Available for internal testing
+[14:45:24]: 📱 Ready for production rollout
 
 ┌──────────────────────────────────────────────────────────────────┐
-│                    fastlane summary                              │
+│                    🤖 Android Deployment Summary                 │
 ├──────────────────────────────────────────────────────────────────┤
 │ Step │ Action                    │ Time (in s) │
 ├──────────────────────────────────────────────────────────────────┤
 │ 1    │ default_platform          │ 0           │
-│ 2    │ supply                    │ 8           │
+│ 2    │ supply (upload)           │ 8           │
 └──────────────────────────────────────────────────────────────────┘
 
-fastlane.tools finished successfully 🎉`
+🎉 fastlane.tools finished successfully!
+📱 Your app is now available on Google Play Console
+⏳ Review process: 1-3 days for production release`
       };
     }
     
