@@ -17,6 +17,7 @@ import {
   Terminal,
   FileText,
   Clock,
+  Clock,
   Smartphone,
   Monitor
 } from 'lucide-react';

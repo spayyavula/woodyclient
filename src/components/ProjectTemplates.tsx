@@ -30,6 +30,7 @@ import {
   AlertTriangle,
   GitBranch,
   Workflow,
+  Clock,
   X
 } from 'lucide-react';
 
