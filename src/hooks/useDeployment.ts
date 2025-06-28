@@ -1050,8 +1050,42 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
   }, []);
 
   const getStepProgress = useCallback((stepIndex: number): number => {
-    return steps[stepIndex]?.progress || 0;
-  }, [steps]);
+    // Add progress from current step
+    if (currentStep < steps.length) {
+      const currentStepProgress = steps[currentStep].progress || 0;
+      totalProgress += (currentStepProgress / 100) * weights[currentStep];
+    }
+    
+    return (totalProgress / totalWeight) * 100;
+  }, [steps, currentStep]);
+
+  // Add visual feedback for deployment steps
+  useEffect(() => {
+    if (isDeploying && currentStep < steps.length) {
+      // Add visual progress updates for the current step
+      const step = steps[currentStep];
+      
+      if (step.status === 'running' && step.progress !== undefined && step.progress < 100) {
+        // Create a more realistic progress animation
+        const interval = setInterval(() => {
+          // Increment progress in a non-linear way to seem more realistic
+          setSteps(prev => prev.map((s, idx) => 
+            idx === currentStep 
+              ? { 
+                  ...s, 
+                  progress: Math.min(
+                    (s.progress || 0) + (Math.random() * 2) + (100 - (s.progress || 0)) / 20, 
+                    95
+                  ) 
+                }
+              : s
+          ));
+        }, 500);
+        
+        return () => clearInterval(interval);
+      }
+    }
+  }, [isDeploying, currentStep, steps]);
 
   // Add visual feedback for deployment steps
   // Add visual feedback for deployment steps
@@ -1102,6 +1136,11 @@ ${deploymentConfig.desktopTarget === 'windows' || deploymentConfig.desktopTarget
     
     let totalProgress = 0;
     
+    // Add completed steps
+    for (let i = 0; i < currentStep; i++) {
+      if (steps[i].status === 'completed') {
+        totalProgress += weights[i];
+      }
     // Add completed steps
     for (let i = 0; i < currentStep; i++) {
       if (steps[i].status === 'completed') {

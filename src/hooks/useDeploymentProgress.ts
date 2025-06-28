@@ -117,6 +117,9 @@ export const useDeploymentProgress = (deploymentId?: number) => {
   useEffect(() => {
     if (!deploymentId) return;
 
+    // Initial fetch
+    fetchProgress();
+
     // Subscribe to deployment updates
     const deploymentSubscription = supabase
       .channel(`deployment-${deploymentId}`)
@@ -150,9 +153,6 @@ export const useDeploymentProgress = (deploymentId?: number) => {
         }));
       })
       .subscribe();
-
-    // Initial fetch
-    fetchProgress();
 
     return () => {
       deploymentSubscription.unsubscribe();

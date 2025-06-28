@@ -48,7 +48,7 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
     };
 
     requestAnimationFrame(animateProgress);
-  }, [progress, animate]);
+  }, [progress, animate, animatedProgress]);
 
   const getStatusIcon = () => {
     switch (status) {
@@ -61,6 +61,7 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
       case 'building':
       case 'signing':
       case 'uploading':
+      case 'running':
         return <RefreshCw className="w-5 h-5 text-blue-400 animate-spin" />;
       default:
         return <AlertTriangle className="w-5 h-5 text-gray-400" />;
@@ -78,6 +79,7 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
       case 'building':
       case 'signing':
       case 'uploading':
+      case 'running':
         return 'from-blue-500 to-indigo-500';
       default:
         return 'from-gray-500 to-slate-500';

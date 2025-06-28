@@ -28,6 +28,8 @@ import {
 import { useDeployment, DeploymentConfig, DeploymentStep } from '../hooks/useDeployment';
 import DeploymentAssistant from './DeploymentAssistant';
 import { useDeploymentAutomation } from '../hooks/useDeploymentAutomation';
+import DeploymentVisualProgress from './DeploymentVisualProgress';
+import AndroidDeploymentStatus from './AndroidDeploymentStatus';
 
 interface DeploymentModalProps {
   isVisible: boolean;
@@ -64,13 +66,17 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   const [showPreDeployCheck, setShowPreDeployCheck] = useState(false);
   const [realTimeMetrics, setRealTimeMetrics] = useState({
     buildSpeed: 0,
-    memoryUsage: 0,
+    memoryUsage: 0, 
     cpuUsage: 0,
     networkSpeed: 0
   });
   const [deploymentError, setDeploymentError] = useState<string | null>(null);
   const [showAssistant, setShowAssistant] = useState(true);
   const [assistantCurrentStep, setAssistantCurrentStep] = useState('');
+  
+  // Track deployment ID for status view
+  const [currentDeploymentId, setCurrentDeploymentId] = useState<number | null>(null);
+  const [showDeploymentStatus, setShowDeploymentStatus] = useState(false);
   
   const { runAutomation, automationSteps, isRunning: automationRunning } = useDeploymentAutomation();
 
@@ -118,7 +124,16 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   const handleConfirmDeployment = () => {
     try {
       setShowPreDeployCheck(false);
-      setAssistantCurrentStep('rust-build');
+    
+    // Simulate creating a deployment and getting an ID
+    setTimeout(() => {
+      const mockDeploymentId = Math.floor(Math.random() * 1000) + 1;
+      setCurrentDeploymentId(mockDeploymentId);
+      setShowDeploymentStatus(true);
+    }, 1000);
+    
+    // Also start the regular deployment process
+    startDeployment(config); 
       
       // Reset any previous errors
       setDeploymentError(null);
@@ -151,6 +166,21 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
   const handleRunAutomation = async (action: string) => {
     await runAutomation(action, config.platform);
   };
+
+  // If showing deployment status, render that instead
+  if (showDeploymentStatus && currentDeploymentId) {
+    return (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-6xl">
+          <AndroidDeploymentStatus 
+            deploymentId={currentDeploymentId}
+            onBack={() => setShowDeploymentStatus(false)}
+            onClose={onClose}
+          />
+        </div>
+      </div>
+    );
+  }
 
   const getStepIcon = (step: DeploymentStep) => {
     switch (step.status) {
@@ -775,8 +805,13 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                       width: `${getOverallProgress()}%`,
                       backgroundSize: '200% 200%',
                       animation: isDeploying ? 'gradient-animation 2s ease infinite' : 'none'
-                    }}
-                  />
+                    style={{ width: `${getOverallProgress()}%` }}>
+                    <div className="absolute inset-0 bg-white/10 rounded-full" style={{
+                      backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 2s infinite'
+                    }}></div>
+                  </div>
                 </div>
 
                 {/* Steps */}
@@ -789,7 +824,11 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-3">
                           {getStepIcon(step)}
-                          <span className="font-medium text-white">{step.name}</span>
+                          <span className={`font-medium ${
+                            step.status === 'completed' ? 'text-green-300' :
+                            step.status === 'failed' ? 'text-red-300' :
+                            index === currentStep ? 'text-blue-300' : 'text-white'
+                          }`}>{step.name}</span>
                           {index === currentStep && isDeploying && (
                             <div className="flex items-center space-x-2 ml-2">
                               <div className="flex items-center space-x-1 bg-blue-900/30 px-2 py-1 rounded-full">
@@ -818,12 +857,12 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                       {/* Progress indicator for current step */}
                       {index === currentStep && isDeploying && (
                         <div className="mb-3 space-y-2">
-                          <div className="w-full bg-gray-700 rounded-full h-2 shadow-inner overflow-hidden">
-                            <div 
-                              className={`bg-gradient-to-r ${getPlatformColor(config.platform)} h-2 rounded-full transition-all duration-300 shadow-sm relative`}
-                              style={{ width: `${getStepProgress(index)}%` }}
-                            >
-                              <div className="absolute inset-0 bg-white/10 rounded-full" style={{
+                          <DeploymentVisualProgress
+                            progress={getStepProgress(index)}
+                            status="running"
+                            platform={config.platform}
+                            showDetails={false}
+                          />
                                 backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
                                 backgroundSize: '200% 100%',
                                 animation: 'shimmer 2s infinite'
