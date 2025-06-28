@@ -53,57 +53,36 @@ export const useDeploymentProgress = (deploymentId?: number) => {
     try {
       setProgress(prev => ({ ...prev, isLoading: true, error: null }));
 
-      // Use a simpler query approach to avoid 406 errors
-      const { data: deploymentData, error: deploymentError } = await supabase.rpc(
-        'get_deployment_progress',
-        { deployment_id: deploymentId }
-      );
+      // Use the get_deployment_progress function to get deployment details with fallback
+      const { data: deploymentData, error: deploymentError } = await supabase
+        .rpc('get_deployment_progress', { p_deployment_id: deploymentId })
+        .single();
 
       if (deploymentError) {
         console.warn('Error fetching deployment:', deploymentError);
-        // Use default values
-        setProgress(prev => ({
-          ...prev,
-          isLoading: false,
-          visual_progress: Math.max(prev.visual_progress, 65), // Never go below 65%
-          progress_message: 'Building Android application...',
-          status: 'building'
-        }));
-        return;
+        // Don't throw here, just continue with default values
       }
       
-      // Get the first row from the result
-      const deployment = deploymentData && deploymentData.length > 0 ? deploymentData[0] : {
+      // Ensure we have valid deployment data
+      const deployment: DeploymentDetails = deploymentData || {
         id: deploymentId,
-        visual_progress: DEFAULT_PROGRESS,
-        progress_message: DEFAULT_MESSAGE,
-        status: DEFAULT_STATUS
+        visual_progress: 65,
+        progress_message: 'Building Android application...',
+        status: 'building'
       };
 
-      // Fetch progress events
-      const { data: events, error: eventsError } = await supabase.rpc(
-        'get_deployment_events',
-        { deployment_id: deploymentId }
-      );
+      // Use the get_deployment_events function to get events with fallback
+      const { data: events, error: eventsError } = await supabase
+        .rpc('get_deployment_events', { p_deployment_id: deploymentId });
 
       if (eventsError) {
         console.warn('Error fetching events:', eventsError);
-        // Use default events
-        setProgress(prev => ({
-          ...prev,
-          id: deployment.id,
-          visual_progress: Math.max(deployment.visual_progress ?? 65, 65), // Never go below 65%
-          progress_message: deployment.progress_message ?? 'Building Android application...',
-          status: deployment.status ?? 'building',
-          isLoading: false,
-          error: null
-        }));
-        return;
+        // Don't throw here, just continue with empty events
       }
 
       setProgress({
         id: deployment.id,
-        visual_progress: Math.max(deployment.visual_progress ?? 65, 65),
+        visual_progress: deployment.visual_progress ?? 65,
         progress_message: deployment.progress_message ?? 'Building Android application...',
         status: deployment.status ?? 'building',
         events: events ?? [],
@@ -114,12 +93,11 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       console.error('Error fetching deployment progress:', error);
       setProgress(prev => ({
         ...prev,
-        visual_progress: DEFAULT_PROGRESS,
-        progress_message: DEFAULT_MESSAGE,
-        status: DEFAULT_STATUS,
         isLoading: false,
         error: error instanceof Error ? error.message : 'Failed to fetch progress',
-        visual_progress: Math.max(prev.visual_progress, 65) // Never go below 65%
+        visual_progress: 65,
+        progress_message: 'Building Android application...',
+        status: 'building'
       }));
     }
   }, [deploymentId]);
