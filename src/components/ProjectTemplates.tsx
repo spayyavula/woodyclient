@@ -1211,7 +1211,7 @@ async fn main() {
     let mut price = 150.0;
     for i in 0..1000 {
         // Simulate price movement
-        price += (rand::random::<f64>() - 0.5) * 2.0;
+        price += (Math.random() - 0.5) * 2.0;
         
         let market_data = MarketData {
             symbol: "AAPL".to_string(),
@@ -1235,18 +1235,6 @@ async fn main() {
     let final_summary = engine.get_performance_summary();
     println!("🏁 Final Performance: PnL: \${:.2}, Total Trades: {}", 
             final_summary.total_pnl, final_summary.trade_count);
-}
-
-// Simple random number generation for demo
-mod rand {
-    use std::sync::atomic::{AtomicU64, Ordering};
-    
-    static SEED: AtomicU64 = AtomicU64::new(1);
-    
-    pub fn random<T>() -> f64 {
-        let seed = SEED.fetch_add(1, Ordering::Relaxed);
-        ((seed.wrapping_mul(1103515245).wrapping_add(12345)) % (1 << 31)) as f64 / (1 << 31) as f64
-    }
 }`,
           language: 'rust',
         },
@@ -1562,7 +1550,7 @@ async fn main() {
     // Simulate trading activity
     for i in 0..100 {
         // Update market data
-        let price = 150.0 + (i as f64 * 0.1) + (rand::random::<f64>() - 0.5) * 10.0;
+        let price = 150.0 + (i as f64 * 0.1) + (Math.random() - 0.5) * 10.0;
         risk_manager.update_market_data("AAPL".to_string(), price);
         
         // Update position
@@ -1595,18 +1583,6 @@ async fn main() {
         }
         
         tokio::time::sleep(Duration::from_millis(100)).await;
-    }
-}
-
-// Simple random number generation for demo
-mod rand {
-    use std::sync::atomic::{AtomicU64, Ordering};
-    
-    static SEED: AtomicU64 = AtomicU64::new(1);
-    
-    pub fn random<T>() -> f64 {
-        let seed = SEED.fetch_add(1, Ordering::Relaxed);
-        ((seed.wrapping_mul(1103515245).wrapping_add(12345)) % (1 << 31)) as f64 / (1 << 31) as f64
     }
 }`,
           language: 'rust',
