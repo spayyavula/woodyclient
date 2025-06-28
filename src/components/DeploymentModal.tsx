@@ -25,7 +25,6 @@ import {
   Wifi,
   RefreshCw
 } from 'lucide-react';
-import { X } from 'lucide-react';
 import { useDeployment, DeploymentConfig, DeploymentStep } from '../hooks/useDeployment';
 import DeploymentAssistant from './DeploymentAssistant';
 import { useDeploymentAutomation } from '../hooks/useDeploymentAutomation';
