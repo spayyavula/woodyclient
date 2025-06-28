@@ -10,10 +10,13 @@ export interface DeploymentStep {
 }
 
 export interface DeploymentConfig {
-  platform: 'ios' | 'android' | 'flutter' | 'desktop';
+  platform: 'ios' | 'android' | 'flutter' | 'desktop' | 'web';
   buildType: 'debug' | 'release';
   target?: string;
   outputPath?: string;
+  webTarget?: 'spa' | 'pwa' | 'ssr';
+  desktopTarget?: 'windows' | 'macos' | 'linux' | 'all';
+  androidTarget?: 'apk' | 'aab';
 }
 
 interface UseDeploymentReturn {
@@ -32,7 +35,10 @@ export const useDeployment = (): UseDeploymentReturn => {
   const [steps, setSteps] = useState<DeploymentStep[]>([]);
   const [deploymentConfig, setDeploymentConfig] = useState<DeploymentConfig>({
     platform: 'ios',
-    buildType: 'release'
+    buildType: 'release',
+    webTarget: 'spa',
+    desktopTarget: 'all',
+    androidTarget: 'aab'
   });
 
   const executeCommand = useCallback(async (command: string): Promise<{ success: boolean; output: string }> => {
@@ -101,6 +107,193 @@ Export path: /Users/dev/build/App.ipa`
       };
     }
     
+    // Android commands
+    if (command.includes('./gradlew')) {
+      if (command.includes('assembleRelease')) {
+        return {
+          success: true,
+          output: `> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:compileReleaseAidl NO-SOURCE
+> Task :app:compileReleaseRenderscript NO-SOURCE
+> Task :app:generateReleaseBuildConfig
+> Task :app:generateReleaseResValues
+> Task :app:generateReleaseResources
+> Task :app:packageReleaseResources
+> Task :app:parseReleaseLocalResources
+> Task :app:processReleaseManifest
+> Task :app:compileReleaseKotlin
+> Task :app:javaPreCompileRelease
+> Task :app:compileReleaseJavaWithJavac
+> Task :app:compileReleaseSources
+> Task :app:lintVitalRelease
+> Task :app:packageRelease
+> Task :app:assembleRelease
+
+BUILD SUCCESSFUL in 2m 34s
+42 actionable tasks: 42 executed`
+        };
+      }
+      
+      if (command.includes('bundleRelease')) {
+        return {
+          success: true,
+          output: `> Task :app:bundleReleaseClassesToCompileJar
+> Task :app:bundleReleaseClassesToRuntimeJar
+> Task :app:bundleRelease
+
+BUILD SUCCESSFUL in 1m 45s
+Generated AAB: android/app/build/outputs/bundle/release/app-release.aab`
+        };
+      }
+    }
+    
+    if (command.includes('jarsigner')) {
+      return {
+        success: true,
+        output: `   adding: META-INF/MANIFEST.MF
+   adding: META-INF/CERT.SF
+   adding: META-INF/CERT.RSA
+  signing: AndroidManifest.xml
+  signing: classes.dex
+  signing: resources.arsc
+jar signed.
+
+Warning: 
+The signer certificate will expire within six months.`
+      };
+    }
+    
+    if (command.includes('zipalign')) {
+      return {
+        success: true,
+        output: `Verifying alignment of app-release.apk (4)...
+      50 META-INF/MANIFEST.MF (OK - compressed)
+     178 META-INF/CERT.SF (OK - compressed)
+    1234 META-INF/CERT.RSA (OK - compressed)
+    2468 AndroidManifest.xml (OK - compressed)
+    3692 classes.dex (OK)
+Verification successful`
+      };
+    }
+    
+    if (command.includes('fastlane supply')) {
+      return {
+        success: true,
+        output: `[14:45:12]: Preparing to upload APK to Google Play Console
+[14:45:15]: Uploading APK to Google Play Console
+[14:45:18]: Successfully uploaded APK to Google Play Console
+[14:45:20]: Setting up release for track: internal
+[14:45:22]: Release successfully created on Google Play Console
+
+┌──────────────────────────────────────────────────────────────────┐
+│                    fastlane summary                              │
+├──────────────────────────────────────────────────────────────────┤
+│ Step │ Action                    │ Time (in s) │
+├──────────────────────────────────────────────────────────────────┤
+│ 1    │ default_platform          │ 0           │
+│ 2    │ supply                    │ 8           │
+└──────────────────────────────────────────────────────────────────┘
+
+fastlane.tools finished successfully 🎉`
+      };
+    }
+    
+    // Web commands
+    if (command.includes('wasm-pack')) {
+      return {
+        success: true,
+        output: `[INFO]: 🎯  Checking for the Wasm target...
+[INFO]: 🌀  Compiling to Wasm...
+   Compiling rustyclint v0.1.0
+    Finished release [optimized] target(s) in 45.67s
+[INFO]: ⬇️  Installing wasm-bindgen...
+[INFO]: Optimizing wasm binaries with \`wasm-opt\`...
+[INFO]: Optional fields missing from Cargo.toml: 'description', 'repository', and 'license'. These are not necessary, but recommended
+[INFO]: ✨   Done in 47.23s
+[INFO]: 📦   Your wasm pkg is ready to publish at pkg.`
+      };
+    }
+    
+    if (command.includes('npm run build')) {
+      return {
+        success: true,
+        output: `> rustyclint-web@1.0.0 build
+> vite build
+
+vite v5.0.0 building for production...
+✓ 1247 modules transformed.
+✓ building SSR bundle for production...
+dist/index.html                   2.34 kB │ gzip:  1.12 kB
+dist/assets/index-B26YQF_l.js   142.67 kB │ gzip: 45.23 kB
+dist/assets/index-Crgjde5t.css   23.45 kB │ gzip:  6.78 kB
+✓ built in 12.34s`
+      };
+    }
+    
+    if (command.includes('netlify deploy')) {
+      return {
+        success: true,
+        output: `Deploy path: dist
+Configuration path: netlify.toml
+Deploying to main site URL...
+✔ Finished hashing 127 files and 3 functions
+✔ CDN requesting 89 files and 2 functions
+✔ Finished uploading 89 files and 2 functions
+✔ Deploy is live!
+
+Logs:              https://app.netlify.com/sites/rustyclint/deploys/abc123def456
+Unique Deploy URL: https://abc123def456--rustyclint.netlify.app
+Website URL:       https://rustyclint.netlify.app`
+      };
+    }
+    
+    if (command.includes('vercel deploy')) {
+      return {
+        success: true,
+        output: `Vercel CLI 32.5.0
+🔍  Inspect: https://vercel.com/rustyclint/rustyclint-web/abc123def456 [2s]
+✅  Production: https://rustyclint-web.vercel.app [copied to clipboard] [47s]
+📝  Deployed to production. Run \`vercel --prod\` to overwrite later (https://vercel.link/2F).`
+      };
+    }
+    
+    // Desktop commands
+    if (command.includes('cargo tauri')) {
+      return {
+        success: true,
+        output: `    Updating crates.io index
+   Compiling rustyclint v0.1.0
+    Finished release [optimized] target(s) in 2m 15s
+    Bundling rustyclint_0.1.0_x64_en-US.msi (/path/to/target/release/bundle/msi/rustyclint_0.1.0_x64_en-US.msi)
+    Bundling rustyclint_0.1.0_x64.app (/path/to/target/release/bundle/macos/rustyclint.app)
+    Bundling rustyclint_0.1.0_amd64.deb (/path/to/target/release/bundle/deb/rustyclint_0.1.0_amd64.deb)
+    Bundling rustyclint_0.1.0_amd64.AppImage (/path/to/target/release/bundle/appimage/rustyclint_0.1.0_amd64.AppImage)
+        Finished 4 bundles at:
+        /path/to/target/release/bundle/msi/rustyclint_0.1.0_x64_en-US.msi
+        /path/to/target/release/bundle/macos/rustyclint.app
+        /path/to/target/release/bundle/deb/rustyclint_0.1.0_amd64.deb
+        /path/to/target/release/bundle/appimage/rustyclint_0.1.0_amd64.AppImage`
+      };
+    }
+    
+    if (command.includes('electron-builder')) {
+      return {
+        success: true,
+        output: `  • electron-builder  version=24.6.4 os=darwin
+  • loaded configuration  file=package.json ("build" field)
+  • writing effective config  file=dist/builder-effective-config.yaml
+  • packaging       platform=darwin arch=x64 electron=27.0.0 appOutDir=dist/mac
+  • building        target=macOS zip arch=x64 file=dist/rustyclint-1.0.0-mac.zip
+  • building        target=DMG arch=x64 file=dist/rustyclint-1.0.0.dmg
+  • packaging       platform=win32 arch=x64 electron=27.0.0 appOutDir=dist/win-unpacked
+  • building        target=nsis arch=x64 file=dist/rustyclint Setup 1.0.0.exe
+  • packaging       platform=linux arch=x64 electron=27.0.0 appOutDir=dist/linux-unpacked
+  • building        target=AppImage arch=x64 file=dist/rustyclint-1.0.0.AppImage
+  • building        target=deb arch=x64 file=dist/rustyclint_1.0.0_amd64.deb`
+      };
+    }
+    
     return {
       success: true,
       output: `Command executed: ${command}\nOutput: Success`
@@ -161,31 +354,50 @@ Export path: /Users/dev/build/App.ipa`
             id: 'rust-build',
             name: 'Build Rust Code for Android',
             status: 'pending',
-            command: `cargo build --target aarch64-linux-android --${config.buildType}`
+            command: `cargo build --target aarch64-linux-android --${config.buildType} && cargo build --target armv7-linux-androideabi --${config.buildType} && cargo build --target i686-linux-android --${config.buildType} && cargo build --target x86_64-linux-android --${config.buildType}`
+          },
+          {
+            id: 'copy-libs',
+            name: 'Copy Native Libraries',
+            status: 'pending',
+            command: `mkdir -p android/app/src/main/jniLibs/{arm64-v8a,armeabi-v7a,x86,x86_64} && cp target/aarch64-linux-android/${config.buildType}/librustyclint.so android/app/src/main/jniLibs/arm64-v8a/`
           },
           {
             id: 'gradle-build',
-            name: 'Build Android APK',
+            name: `Build Android ${config.androidTarget?.toUpperCase() || 'AAB'}`,
             status: 'pending',
-            command: `cd android && ./gradlew assemble${config.buildType === 'release' ? 'Release' : 'Debug'}`
+            command: config.androidTarget === 'apk' 
+              ? `cd android && ./gradlew assemble${config.buildType === 'release' ? 'Release' : 'Debug'}`
+              : `cd android && ./gradlew bundle${config.buildType === 'release' ? 'Release' : 'Debug'}`
           },
           {
-            id: 'sign-apk',
-            name: 'Sign APK',
+            id: 'sign-app',
+            name: `Sign ${config.androidTarget?.toUpperCase() || 'AAB'}`,
             status: 'pending',
-            command: `jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore android/app/release.keystore android/app/build/outputs/apk/release/app-release-unsigned.apk alias_name`
+            command: config.androidTarget === 'apk'
+              ? `jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore android/app/release.keystore android/app/build/outputs/apk/release/app-release-unsigned.apk release-key`
+              : `jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore android/app/release.keystore android/app/build/outputs/bundle/release/app-release.aab release-key`
           },
+          ...(config.androidTarget === 'apk' ? [
           {
             id: 'align-apk',
             name: 'Align APK',
             status: 'pending',
             command: `zipalign -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/build/outputs/apk/release/app-release.apk`
-          },
+          }] : []),
           {
             id: 'upload-playstore',
             name: 'Upload to Google Play',
             status: 'pending',
-            command: `fastlane supply --apk android/app/build/outputs/apk/release/app-release.apk`
+            command: config.androidTarget === 'apk'
+              ? `fastlane supply --apk android/app/build/outputs/apk/release/app-release.apk`
+              : `fastlane supply --aab android/app/build/outputs/bundle/release/app-release.aab`
+          },
+          {
+            id: 'submit-review',
+            name: 'Submit for Review',
+            status: 'pending',
+            command: `fastlane supply --track internal --rollout 1.0`
           }
         ];
       
@@ -198,6 +410,12 @@ Export path: /Users/dev/build/App.ipa`
             command: `flutter_rust_bridge_codegen --rust-input src/api.rs --dart-output lib/bridge_generated.dart`
           },
           {
+            id: 'flutter-deps',
+            name: 'Install Flutter Dependencies',
+            status: 'pending',
+            command: `flutter pub get`
+          },
+          {
             id: 'flutter-build-ios',
             name: 'Build Flutter iOS',
             status: 'pending',
@@ -207,7 +425,9 @@ Export path: /Users/dev/build/App.ipa`
             id: 'flutter-build-android',
             name: 'Build Flutter Android',
             status: 'pending',
-            command: `flutter build apk --${config.buildType}`
+            command: config.androidTarget === 'apk' 
+              ? `flutter build apk --${config.buildType}`
+              : `flutter build appbundle --${config.buildType}`
           },
           {
             id: 'deploy-ios',
@@ -220,6 +440,98 @@ Export path: /Users/dev/build/App.ipa`
             name: 'Deploy to Google Play',
             status: 'pending',
             command: `cd android && fastlane deploy`
+          }
+        ];
+      
+      case 'web':
+        return [
+          {
+            id: 'rust-wasm',
+            name: 'Build Rust to WebAssembly',
+            status: 'pending',
+            command: `wasm-pack build --target web --${config.buildType === 'release' ? 'release' : 'dev'}`
+          },
+          {
+            id: 'install-deps',
+            name: 'Install Web Dependencies',
+            status: 'pending',
+            command: `npm install`
+          },
+          {
+            id: 'build-web',
+            name: `Build ${config.webTarget?.toUpperCase() || 'SPA'} Application`,
+            status: 'pending',
+            command: config.webTarget === 'pwa' 
+              ? `npm run build:pwa`
+              : config.webTarget === 'ssr'
+              ? `npm run build:ssr`
+              : `npm run build`
+          },
+          {
+            id: 'optimize-wasm',
+            name: 'Optimize WebAssembly',
+            status: 'pending',
+            command: `wasm-opt -Oz --enable-mutable-globals pkg/rustyclint_bg.wasm -o pkg/rustyclint_bg.wasm`
+          },
+          {
+            id: 'deploy-web',
+            name: 'Deploy to Production',
+            status: 'pending',
+            command: config.outputPath?.includes('vercel') 
+              ? `vercel deploy --prod`
+              : config.outputPath?.includes('netlify')
+              ? `netlify deploy --prod --dir=dist`
+              : `npm run deploy`
+          },
+          {
+            id: 'setup-cdn',
+            name: 'Configure CDN & Caching',
+            status: 'pending',
+            command: `echo "Setting up CDN headers and caching policies..."`
+          }
+        ];
+      
+      case 'desktop':
+        return [
+          {
+            id: 'rust-build',
+            name: 'Build Rust Application',
+            status: 'pending',
+            command: `cargo build --${config.buildType}`
+          },
+          {
+            id: 'build-ui',
+            name: 'Build Desktop UI',
+            status: 'pending',
+            command: `npm run build:desktop`
+          },
+          {
+            id: 'bundle-tauri',
+            name: 'Bundle with Tauri',
+            status: 'pending',
+            command: config.desktopTarget === 'all'
+              ? `cargo tauri build --target universal-apple-darwin,x86_64-pc-windows-msvc,x86_64-unknown-linux-gnu`
+              : `cargo tauri build --target ${config.desktopTarget === 'windows' ? 'x86_64-pc-windows-msvc' : config.desktopTarget === 'macos' ? 'universal-apple-darwin' : 'x86_64-unknown-linux-gnu'}`
+          },
+          {
+            id: 'sign-binaries',
+            name: 'Code Sign Binaries',
+            status: 'pending',
+            command: config.desktopTarget === 'macos' || config.desktopTarget === 'all'
+              ? `codesign --force --deep --sign "Developer ID Application: Your Name" target/release/bundle/macos/rustyclint.app`
+              : `echo "Signing binaries for ${config.desktopTarget}..."`
+          },
+          {
+            id: 'create-installers',
+            name: 'Create Installers',
+            status: 'pending',
+            command: `electron-builder --publish=never`
+          },
+          {
+            id: 'upload-releases',
+            name: 'Upload to Release Channels',
+            status: 'pending',
+            command: `gh release create v1.0.0 target/release/bundle/**/* --title "rustyclint v1.0.0" --notes "Production release"`
           }
         ];
       

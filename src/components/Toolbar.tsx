@@ -152,12 +152,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
             <option value="android">Android</option>
             <option value="ios">iOS</option>
             <option value="flutter">Flutter</option>
+            <option value="web">Web</option>
             <option value="desktop">Desktop</option>
           </select>
           <div className="flex items-center space-x-1">
             {selectedPlatform === 'android' && <Smartphone className="w-4 h-4 text-green-400" />}
             {selectedPlatform === 'ios' && <Smartphone className="w-4 h-4 text-blue-400" />}
             {selectedPlatform === 'flutter' && <Tablet className="w-4 h-4 text-cyan-400" />}
+            {selectedPlatform === 'web' && <Monitor className="w-4 h-4 text-green-400" />}
             {selectedPlatform === 'desktop' && <Monitor className="w-4 h-4 text-purple-400" />}
           </div>
         </div>

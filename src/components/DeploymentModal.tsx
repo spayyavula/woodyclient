@@ -20,7 +20,7 @@ import { useDeployment, DeploymentConfig, DeploymentStep } from '../hooks/useDep
 interface DeploymentModalProps {
   isVisible: boolean;
   onClose: () => void;
-  initialPlatform?: 'ios' | 'android' | 'flutter' | 'desktop';
+  initialPlatform?: 'ios' | 'android' | 'flutter' | 'desktop' | 'web';
 }
 
 const DeploymentModal: React.FC<DeploymentModalProps> = ({ 
@@ -39,7 +39,10 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
 
   const [config, setConfig] = useState<DeploymentConfig>({
     platform: initialPlatform,
-    buildType: 'release'
+    buildType: 'release',
+    webTarget: 'spa',
+    desktopTarget: 'all',
+    androidTarget: 'aab'
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -71,6 +74,8 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
         return <Tablet className="w-5 h-5 text-cyan-400" />;
       case 'desktop':
         return <Monitor className="w-5 h-5 text-purple-400" />;
+      case 'web':
+        return <Monitor className="w-5 h-5 text-green-400" />;
       default:
         return <Smartphone className="w-5 h-5 text-gray-400" />;
     }
@@ -103,17 +108,21 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
           title: 'Android Deployment Guide',
           requirements: [
             'Android Studio installed',
+            'Android SDK 34+ configured',
+            'NDK for native code compilation',
             'Google Play Developer Account',
             'Signing keystore configured',
-            'Google Play Console access'
+            'Google Play Console access',
+            'Fastlane configured (optional)'
           ],
           steps: [
-            'Build Rust code for Android targets',
-            'Build APK/AAB with Gradle',
-            'Sign with release keystore',
-            'Align and optimize APK',
+            'Build Rust code for all Android architectures (ARM64, ARM, x86, x86_64)',
+            'Copy native libraries to Android project',
+            'Build APK or AAB with Gradle',
+            'Sign with release keystore using SHA-256',
+            'Align APK (if using APK format)',
             'Upload to Google Play Console',
-            'Submit for Play Store review'
+            'Submit for Play Store review and rollout'
           ]
         };
       case 'flutter':
@@ -122,25 +131,54 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
           requirements: [
             'Flutter SDK installed',
             'flutter_rust_bridge configured',
-            'Platform-specific requirements (iOS/Android)'
+            'Platform-specific requirements (iOS/Android)',
+            'Dart dependencies updated'
           ],
           steps: [
             'Generate Rust-Flutter bridge code',
+            'Install Flutter dependencies',
             'Build for iOS platform',
             'Build for Android platform',
-            'Deploy to respective app stores'
+            'Deploy to iOS App Store',
+            'Deploy to Google Play Store'
+          ]
+        };
+      case 'web':
+        return {
+          title: 'Web Deployment Guide',
+          requirements: [
+            'wasm-pack installed',
+            'Node.js and npm/yarn',
+            'Web bundler (Vite/Webpack)',
+            'Deployment target (Vercel/Netlify/AWS)',
+            'CDN configuration'
+          ],
+          steps: [
+            'Compile Rust to WebAssembly',
+            'Install web dependencies',
+            'Build web application (SPA/PWA/SSR)',
+            'Optimize WebAssembly binaries',
+            'Deploy to production hosting',
+            'Configure CDN and caching policies'
           ]
         };
       default:
         return {
-          title: 'Desktop Deployment Guide',
+          title: 'Desktop Deployment Guide', 
           requirements: [
             'Rust toolchain installed',
-            'Target platform tools'
+            'Tauri CLI or Electron',
+            'Platform-specific build tools',
+            'Code signing certificates',
+            'Distribution channels configured'
           ],
           steps: [
             'Build Rust application',
-            'Package for distribution'
+            'Build desktop UI framework',
+            'Bundle with Tauri/Electron',
+            'Code sign binaries for security',
+            'Create platform-specific installers',
+            'Upload to release channels (GitHub/Steam/etc.)'
           ]
         };
     }
@@ -180,8 +218,24 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
             {/* Platform Selection */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-300 mb-2">Platform</label>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                {['ios', 'android', 'flutter'].map(platform => (
+                  <button
+                    key={platform}
+                    onClick={() => setConfig(prev => ({ ...prev, platform: platform as any }))}
+                    className={`flex items-center space-x-2 p-3 rounded-lg border transition-colors ${
+                      config.platform === platform
+                        ? 'border-blue-500 bg-blue-600/20 text-blue-300'
+                        : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
+                    }`}
+                  >
+                    {getPlatformIcon(platform)}
+                    <span className="text-sm font-medium">{platform.toUpperCase()}</span>
+                  </button>
+                ))}
+              </div>
               <div className="grid grid-cols-2 gap-2">
-                {['ios', 'android', 'flutter', 'desktop'].map(platform => (
+                {['web', 'desktop'].map(platform => (
                   <button
                     key={platform}
                     onClick={() => setConfig(prev => ({ ...prev, platform: platform as any }))}
@@ -197,6 +251,85 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                 ))}
               </div>
             </div>
+
+            {/* Platform-specific Options */}
+            {config.platform === 'android' && (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Android Target</label>
+                <div className="flex space-x-2">
+                  {[
+                    { key: 'aab', label: 'AAB (Recommended)', desc: 'App Bundle for Play Store' },
+                    { key: 'apk', label: 'APK', desc: 'Direct installation' }
+                  ].map(target => (
+                    <button
+                      key={target.key}
+                      onClick={() => setConfig(prev => ({ ...prev, androidTarget: target.key as any }))}
+                      className={`flex-1 p-3 rounded-lg border text-left transition-colors ${
+                        config.androidTarget === target.key
+                          ? 'border-green-500 bg-green-600/20 text-green-300'
+                          : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
+                      }`}
+                    >
+                      <div className="font-medium text-sm">{target.label}</div>
+                      <div className="text-xs opacity-75">{target.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {config.platform === 'web' && (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Web Target</label>
+                <div className="space-y-2">
+                  {[
+                    { key: 'spa', label: 'SPA', desc: 'Single Page Application' },
+                    { key: 'pwa', label: 'PWA', desc: 'Progressive Web App' },
+                    { key: 'ssr', label: 'SSR', desc: 'Server-Side Rendered' }
+                  ].map(target => (
+                    <button
+                      key={target.key}
+                      onClick={() => setConfig(prev => ({ ...prev, webTarget: target.key as any }))}
+                      className={`w-full p-3 rounded-lg border text-left transition-colors ${
+                        config.webTarget === target.key
+                          ? 'border-green-500 bg-green-600/20 text-green-300'
+                          : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
+                      }`}
+                    >
+                      <div className="font-medium text-sm">{target.label}</div>
+                      <div className="text-xs opacity-75">{target.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {config.platform === 'desktop' && (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Desktop Target</label>
+                <div className="space-y-2">
+                  {[
+                    { key: 'all', label: 'All Platforms', desc: 'Windows, macOS, Linux' },
+                    { key: 'windows', label: 'Windows', desc: 'Windows 10/11' },
+                    { key: 'macos', label: 'macOS', desc: 'macOS 10.15+' },
+                    { key: 'linux', label: 'Linux', desc: 'Ubuntu, Debian, etc.' }
+                  ].map(target => (
+                    <button
+                      key={target.key}
+                      onClick={() => setConfig(prev => ({ ...prev, desktopTarget: target.key as any }))}
+                      className={`w-full p-3 rounded-lg border text-left transition-colors ${
+                        config.desktopTarget === target.key
+                          ? 'border-purple-500 bg-purple-600/20 text-purple-300'
+                          : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
+                      }`}
+                    >
+                      <div className="font-medium text-sm">{target.label}</div>
+                      <div className="text-xs opacity-75">{target.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Build Type */}
             <div className="mb-6">
@@ -314,6 +447,43 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                       </div>
                     ))}
                   </div>
+                  
+                  {/* Platform-specific info */}
+                  {config.platform === 'android' && (
+                    <div className="mt-6 p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                      <h5 className="font-medium text-green-300 mb-2">🤖 Android Deployment Tips</h5>
+                      <ul className="text-sm text-green-200 space-y-1">
+                        <li>• AAB format is recommended for Play Store (smaller downloads)</li>
+                        <li>• Ensure all architectures are built for maximum compatibility</li>
+                        <li>• Use SHA-256 signing for enhanced security</li>
+                        <li>• Test on internal track before production release</li>
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {config.platform === 'web' && (
+                    <div className="mt-6 p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                      <h5 className="font-medium text-green-300 mb-2">🌐 Web Deployment Tips</h5>
+                      <ul className="text-sm text-green-200 space-y-1">
+                        <li>• WebAssembly provides near-native performance</li>
+                        <li>• PWA enables offline functionality and app-like experience</li>
+                        <li>• CDN configuration is crucial for global performance</li>
+                        <li>• Consider SSR for better SEO and initial load times</li>
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {config.platform === 'desktop' && (
+                    <div className="mt-6 p-4 bg-purple-900/20 border border-purple-500/30 rounded-lg">
+                      <h5 className="font-medium text-purple-300 mb-2">💻 Desktop Deployment Tips</h5>
+                      <ul className="text-sm text-purple-200 space-y-1">
+                        <li>• Tauri provides smaller bundle sizes than Electron</li>
+                        <li>• Code signing is required for macOS and recommended for Windows</li>
+                        <li>• Auto-updater can be configured for seamless updates</li>
+                        <li>• Consider distribution via GitHub Releases, Steam, or app stores</li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -392,14 +562,40 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                     <h3 className="text-xl font-semibold text-white mb-2">Deployment Successful!</h3>
                     <p className="text-gray-300 mb-6">Your app has been successfully deployed to {config.platform.toUpperCase()}</p>
                     <div className="flex justify-center space-x-4">
-                      <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                        <Download className="w-4 h-4" />
-                        <span>Download Build</span>
-                      </button>
-                      <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
-                        <Upload className="w-4 h-4" />
-                        <span>View in Store</span>
-                      </button>
+                      {config.platform === 'web' ? (
+                        <>
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            <ExternalLink className="w-4 h-4" />
+                            <span>View Live Site</span>
+                          </button>
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                            <Download className="w-4 h-4" />
+                            <span>Download Assets</span>
+                          </button>
+                        </>
+                      ) : config.platform === 'desktop' ? (
+                        <>
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            <Download className="w-4 h-4" />
+                            <span>Download Installers</span>
+                          </button>
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                            <ExternalLink className="w-4 h-4" />
+                            <span>View Releases</span>
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            <Download className="w-4 h-4" />
+                            <span>Download Build</span>
+                          </button>
+                          <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                            <Upload className="w-4 h-4" />
+                            <span>View in Store</span>
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
