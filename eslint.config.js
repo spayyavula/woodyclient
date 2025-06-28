@@ -23,6 +23,10 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // Prevent unescaped dollar signs in template literals
+      'no-template-curly-in-string': 'error',
+      // Warn about potential string interpolation issues
+      'prefer-template': 'warn',
     },
   }
 );
