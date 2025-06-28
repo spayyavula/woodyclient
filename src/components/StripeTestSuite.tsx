@@ -10,10 +10,12 @@ import {
   RefreshCw,
   Download,
   Eye,
-  Zap
+  Zap,
+  Shield,
+  Database,
+  Settings
 } from 'lucide-react';
-import { usePayments } from '../hooks/usePayments';
-import { stripeProducts } from '../stripe-config';
+import { useStripeTests } from '../hooks/useStripeTests';
 
 interface TestCase {
   id: string;
@@ -33,218 +35,109 @@ interface StripeTestSuiteProps {
 }
 
 const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose }) => {
-  const { createCheckoutSession, loading } = usePayments();
-  const [testResults, setTestResults] = useState<Record<string, TestCase>>({});
-  const [runningTests, setRunningTests] = useState<Set<string>>(new Set());
+  const { runTest, runAllTests, testResults, isRunning, clearResults } = useStripeTests();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const testCases: TestCase[] = [
-    // Subscription Tests
+    // Client-side Integration Tests
     {
-      id: 'sub-enterprise-success',
-      name: 'Enterprise Subscription - Success Flow',
-      description: 'Test successful Enterprise Plan subscription with valid card',
-      category: 'subscription',
+      id: 'db-connection',
+      name: 'Database Connection',
+      description: 'Test Supabase database connectivity using anonymous key',
+      category: 'integration',
       testData: {
-        product: stripeProducts.find(p => p.name === 'Enterprise Plan'),
-        cardNumber: '4242424242424242',
-        expectedStatus: 'active'
+        endpoint: 'stripe_customers',
+        method: 'SELECT'
       },
-      expectedResult: 'Subscription created successfully, user redirected to success page',
+      expectedResult: 'Database connection established successfully',
       status: 'pending'
     },
     {
-      id: 'sub-enterprise-decline',
-      name: 'Enterprise Subscription - Card Declined',
-      description: 'Test Enterprise Plan subscription with declined card',
-      category: 'subscription',
+      id: 'auth-flow',
+      name: 'Authentication Flow',
+      description: 'Test authentication simulation and user session handling',
+      category: 'integration',
       testData: {
-        product: stripeProducts.find(p => p.name === 'Enterprise Plan'),
-        cardNumber: '4000000000000002',
-        expectedStatus: 'incomplete'
+        userEmail: 'test@example.com',
+        sessionType: 'mock'
       },
-      expectedResult: 'Payment declined, user shown error message',
+      expectedResult: 'Authentication flow works correctly',
       status: 'pending'
     },
     {
-      id: 'sub-enterprise-3ds',
-      name: 'Enterprise Subscription - 3D Secure',
-      description: 'Test Enterprise Plan subscription requiring 3D Secure authentication',
-      category: 'subscription',
+      id: 'stripe-config',
+      name: 'Stripe Configuration',
+      description: 'Validate Stripe product configuration and pricing data',
+      category: 'configuration',
       testData: {
-        product: stripeProducts.find(p => p.name === 'Enterprise Plan'),
-        cardNumber: '4000000000003220',
-        expectedStatus: 'active'
+        products: 'all',
+        validation: 'complete'
       },
-      expectedResult: '3D Secure challenge completed, subscription active',
+      expectedResult: 'All Stripe products properly configured',
       status: 'pending'
     },
 
-    // One-time Payment Tests
     {
-      id: 'payment-premium-success',
-      name: 'Premium Plan - Success Flow',
-      description: 'Test successful Premium Plan one-time payment',
-      category: 'one-time',
+      id: 'checkout-endpoint',
+      name: 'Checkout Endpoint',
+      description: 'Test Stripe checkout endpoint availability and response',
+      category: 'endpoint',
       testData: {
-        product: stripeProducts.find(p => p.name === 'Premium Plan'),
-        cardNumber: '4242424242424242',
-        expectedStatus: 'paid'
+        endpoint: '/functions/v1/stripe-checkout',
+        method: 'POST'
       },
-      expectedResult: 'Payment processed successfully, order recorded',
+      expectedResult: 'Checkout endpoint accessible and responding',
       status: 'pending'
     },
     {
-      id: 'payment-coffee-success',
-      name: 'Buy Me Coffee - Success Flow',
-      description: 'Test successful coffee purchase',
-      category: 'one-time',
+      id: 'webhook-endpoint',
+      name: 'Webhook Endpoint',
+      description: 'Test Stripe webhook endpoint availability and signature validation',
+      category: 'endpoint',
       testData: {
-        product: stripeProducts.find(p => p.name === 'Buy me coffee'),
-        cardNumber: '4242424242424242',
-        expectedStatus: 'paid'
+        endpoint: '/functions/v1/stripe-webhook',
+        method: 'POST'
       },
-      expectedResult: 'Coffee purchase completed, thank you message shown',
+      expectedResult: 'Webhook endpoint accessible with proper validation',
       status: 'pending'
     },
     {
-      id: 'payment-sponsor-decline',
-      name: 'Sponsor Us - Insufficient Funds',
-      description: 'Test sponsorship payment with insufficient funds',
-      category: 'one-time',
+      id: 'data-validation',
+      name: 'Data Validation',
+      description: 'Test database constraints and data validation rules',
+      category: 'security',
       testData: {
-        product: stripeProducts.find(p => p.name === 'Sponsor Us'),
-        cardNumber: '4000000000009995',
-        expectedStatus: 'failed'
+        table: 'stripe_subscriptions',
+        constraint: 'status_enum'
       },
-      expectedResult: 'Payment failed due to insufficient funds',
+      expectedResult: 'Data validation rules enforced correctly',
       status: 'pending'
     },
 
-    // Edge Cases
     {
-      id: 'edge-duplicate-customer',
-      name: 'Duplicate Customer Creation',
-      description: 'Test handling of existing customer attempting new subscription',
-      category: 'edge-case',
+      id: 'env-config',
+      name: 'Environment Configuration',
+      description: 'Validate all required environment variables are properly set',
+      category: 'configuration',
       testData: {
-        scenario: 'existing_customer',
-        product: stripeProducts.find(p => p.name === 'Enterprise Plan')
+        variables: ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_STRIPE_PUBLISHABLE_KEY']
       },
-      expectedResult: 'Existing customer record used, no duplicate created',
+      expectedResult: 'All environment variables configured correctly',
       status: 'pending'
     },
     {
-      id: 'edge-expired-card',
-      name: 'Expired Card Handling',
-      description: 'Test payment with expired credit card',
-      category: 'edge-case',
+      id: 'client-integration',
+      name: 'Client Integration',
+      description: 'Test client-side hooks and components integration',
+      category: 'integration',
       testData: {
-        cardNumber: '4000000000000069',
-        product: stripeProducts.find(p => p.name === 'Premium Plan')
+        hooks: ['usePayments', 'useSubscription'],
+        components: 'all'
       },
-      expectedResult: 'Expired card error handled gracefully',
-      status: 'pending'
-    },
-    {
-      id: 'edge-processing-error',
-      name: 'Processing Error Recovery',
-      description: 'Test handling of generic processing errors',
-      category: 'edge-case',
-      testData: {
-        cardNumber: '4000000000000119',
-        product: stripeProducts.find(p => p.name === 'Support Us')
-      },
-      expectedResult: 'Processing error handled with retry option',
-      status: 'pending'
-    },
-
-    // Webhook Tests
-    {
-      id: 'webhook-subscription-created',
-      name: 'Subscription Created Webhook',
-      description: 'Test webhook handling for new subscription',
-      category: 'webhook',
-      testData: {
-        event: 'customer.subscription.created',
-        customerId: 'cus_test_123'
-      },
-      expectedResult: 'Subscription record created in database',
-      status: 'pending'
-    },
-    {
-      id: 'webhook-payment-succeeded',
-      name: 'Payment Succeeded Webhook',
-      description: 'Test webhook handling for successful payment',
-      category: 'webhook',
-      testData: {
-        event: 'payment_intent.succeeded',
-        paymentIntentId: 'pi_test_123'
-      },
-      expectedResult: 'Order record updated with payment success',
-      status: 'pending'
-    },
-    {
-      id: 'webhook-subscription-cancelled',
-      name: 'Subscription Cancelled Webhook',
-      description: 'Test webhook handling for cancelled subscription',
-      category: 'webhook',
-      testData: {
-        event: 'customer.subscription.deleted',
-        subscriptionId: 'sub_test_123'
-      },
-      expectedResult: 'Subscription status updated to cancelled',
+      expectedResult: 'Client-side integration working correctly',
       status: 'pending'
     }
   ];
-
-  const runTest = async (testCase: TestCase) => {
-    setRunningTests(prev => new Set([...prev, testCase.id]));
-    const startTime = Date.now();
-
-    try {
-      // Simulate test execution
-      await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
-
-      // For demo purposes, randomly pass/fail tests
-      const success = Math.random() > 0.2; // 80% success rate
-
-      const duration = Date.now() - startTime;
-      const result: TestCase = {
-        ...testCase,
-        status: success ? 'passed' : 'failed',
-        duration,
-        error: success ? undefined : 'Simulated test failure for demonstration'
-      };
-
-      setTestResults(prev => ({ ...prev, [testCase.id]: result }));
-    } catch (error: any) {
-      const duration = Date.now() - startTime;
-      setTestResults(prev => ({
-        ...prev,
-        [testCase.id]: {
-          ...testCase,
-          status: 'failed',
-          duration,
-          error: error.message
-        }
-      }));
-    } finally {
-      setRunningTests(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(testCase.id);
-        return newSet;
-      });
-    }
-  };
-
-  const runAllTests = async () => {
-    for (const testCase of testCases) {
-      if (selectedCategory === 'all' || testCase.category === selectedCategory) {
-        await runTest(testCase);
-      }
-    }
-  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -274,14 +167,14 @@ const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose })
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'subscription':
-        return <RefreshCw className="w-4 h-4 text-purple-400" />;
-      case 'one-time':
-        return <CreditCard className="w-4 h-4 text-blue-400" />;
-      case 'edge-case':
-        return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
-      case 'webhook':
+      case 'integration':
+        return <Zap className="w-4 h-4 text-blue-400" />;
+      case 'configuration':
+        return <Settings className="w-4 h-4 text-purple-400" />;
+      case 'endpoint':
         return <Zap className="w-4 h-4 text-green-400" />;
+      case 'security':
+        return <Shield className="w-4 h-4 text-red-400" />;
       default:
         return <TestTube className="w-4 h-4 text-gray-400" />;
     }
@@ -295,7 +188,7 @@ const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose })
     total: filteredTests.length,
     passed: Object.values(testResults).filter(r => r.status === 'passed').length,
     failed: Object.values(testResults).filter(r => r.status === 'failed').length,
-    running: runningTests.size
+    running: Object.values(testResults).filter(r => r.status === 'running').length
   };
 
   const exportResults = () => {
@@ -371,10 +264,10 @@ const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose })
                 <div className="space-y-2">
                   {[
                     { id: 'all', label: 'All Tests', count: testCases.length },
-                    { id: 'subscription', label: 'Subscriptions', count: testCases.filter(t => t.category === 'subscription').length },
-                    { id: 'one-time', label: 'One-time Payments', count: testCases.filter(t => t.category === 'one-time').length },
-                    { id: 'edge-case', label: 'Edge Cases', count: testCases.filter(t => t.category === 'edge-case').length },
-                    { id: 'webhook', label: 'Webhooks', count: testCases.filter(t => t.category === 'webhook').length }
+                    { id: 'integration', label: 'Integration', count: testCases.filter(t => t.category === 'integration').length },
+                    { id: 'configuration', label: 'Configuration', count: testCases.filter(t => t.category === 'configuration').length },
+                    { id: 'endpoint', label: 'Endpoints', count: testCases.filter(t => t.category === 'endpoint').length },
+                    { id: 'security', label: 'Security', count: testCases.filter(t => t.category === 'security').length }
                   ].map(category => (
                     <button
                       key={category.id}
@@ -396,38 +289,43 @@ const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose })
               <div className="space-y-3">
                 <button
                   onClick={runAllTests}
-                  disabled={runningTests.size > 0}
-                  className="w-full flex items-center justify-center space-x-2 p-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg transition-colors"
+                  disabled={isRunning}
+                  className="w-full flex items-center justify-center space-x-2 p-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:opacity-50 text-white rounded-lg transition-colors"
                 >
-                  <Play className="w-4 h-4" />
-                  <span>Run All Tests</span>
+                  {isRunning ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Running Tests...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4" />
+                      <span>Run All Tests</span>
+                    </>
+                  )}
                 </button>
                 
                 <button
-                  onClick={exportResults}
+                  onClick={clearResults}
                   className="w-full flex items-center justify-center space-x-2 p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
                 >
-                  <Download className="w-4 h-4" />
-                  <span>Export Results</span>
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Clear Results</span>
                 </button>
               </div>
 
-              {/* Test Cards */}
+              {/* Security Notice */}
               <div>
-                <h3 className="text-sm font-medium text-gray-300 mb-3">Test Cards</h3>
-                <div className="space-y-2 text-xs">
-                  <div className="bg-gray-800 p-2 rounded">
-                    <div className="text-green-400 font-mono">4242424242424242</div>
-                    <div className="text-gray-400">Success</div>
+                <h3 className="text-sm font-medium text-gray-300 mb-3">Security Notice</h3>
+                <div className="bg-green-900/20 border border-green-500 rounded p-3">
+                  <div className="flex items-center space-x-2 text-green-400 mb-2">
+                    <Shield className="w-4 h-4" />
+                    <span className="font-medium text-xs">Client-side Testing</span>
                   </div>
-                  <div className="bg-gray-800 p-2 rounded">
-                    <div className="text-red-400 font-mono">4000000000000002</div>
-                    <div className="text-gray-400">Declined</div>
-                  </div>
-                  <div className="bg-gray-800 p-2 rounded">
-                    <div className="text-yellow-400 font-mono">4000000000003220</div>
-                    <div className="text-gray-400">3D Secure</div>
-                  </div>
+                  <p className="text-xs text-green-300">
+                    These tests use only the anonymous Supabase key for maximum security. 
+                    No service role key required.
+                  </p>
                 </div>
               </div>
             </div>
@@ -438,8 +336,8 @@ const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose })
             <div className="space-y-4">
               {filteredTests.map(testCase => {
                 const result = testResults[testCase.id];
-                const isRunning = runningTests.has(testCase.id);
-                const status = isRunning ? 'running' : (result?.status || 'pending');
+                const status = result?.status || 'pending';
+                const isTestRunning = status === 'running';
 
                 return (
                   <div
@@ -489,18 +387,29 @@ const StripeTestSuite: React.FC<StripeTestSuiteProps> = ({ isVisible, onClose })
                       
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => runTest(testCase)}
-                          disabled={isRunning}
-                          className="flex items-center space-x-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded text-sm transition-colors"
+                          onClick={() => runTest(testCase.id)}
+                          disabled={isTestRunning || isRunning}
+                          className="flex items-center space-x-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-50 text-white rounded text-sm transition-colors"
                         >
-                          <Play className="w-3 h-3" />
-                          <span>Run</span>
+                          {isTestRunning ? (
+                            <>
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                              <span>Running</span>
+                            </>
+                          ) : (
+                            <>
+                              <Play className="w-3 h-3" />
+                              <span>Run</span>
+                            </>
+                          )}
                         </button>
                         
-                        <button className="flex items-center space-x-1 px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors">
-                          <Eye className="w-3 h-3" />
-                          <span>Details</span>
-                        </button>
+                        {result && (
+                          <button className="flex items-center space-x-1 px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors">
+                            <Eye className="w-3 h-3" />
+                            <span>Details</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
