@@ -114,20 +114,18 @@ const DeploymentVisualProgress: React.FC<DeploymentVisualProgressProps> = ({
       <div className="relative h-3 bg-gray-700 rounded-full overflow-hidden shadow-inner">
         {/* Progress bar with gradient and animation */}
         <div 
-          className={`absolute top-0 left-0 h-full bg-gradient-to-r ${status === 'pending' ? getPlatformColor() : getStatusColor()} transition-all duration-300 rounded-full flex items-center overflow-hidden`}
+          className={`absolute top-0 left-0 h-full bg-gradient-to-r ${status === 'pending' ? getPlatformColor() : getStatusColor()} transition-all duration-300 rounded-full flex items-center`}
           style={{ width: `${animatedProgress}%` }}
         >
           {/* Shimmer effect */}
-          {animate && (
-            <div 
-              className="absolute inset-0 bg-white/10 rounded-full overflow-hidden"
-              style={{
-                backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
-                backgroundSize: '200% 100%',
-                animation: 'shimmer 2s infinite'
-              }}
-            />
-          )}
+          <div 
+            className="absolute inset-0 bg-white/10 rounded-full"
+            style={{
+              backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+              backgroundSize: '200% 100%',
+              animation: animate ? 'shimmer 2s infinite' : 'none'
+            }}
+          />
         </div>
       </div>
       

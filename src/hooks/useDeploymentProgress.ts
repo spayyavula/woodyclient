@@ -42,15 +42,34 @@ export const useDeploymentProgress = (deploymentId?: number) => {
   const fetchProgress = useCallback(async () => {
     if (!deploymentId) return;
 
+    let retryCount = 0;
+    const maxRetries = 3;
+
     try {
       setProgress(prev => ({ ...prev, isLoading: true, error: null }));
 
-      // Fetch deployment details
-      const { data: deploymentData, error: deploymentError } = await supabase
-        .from('android_deployments')
-        .select('id, visual_progress, progress_message, status')
-        .eq('id', deploymentId)
-        .single();
+      // Retry logic for fetching deployment details
+      let deploymentData = null;
+      let deploymentError = null;
+      
+      while (retryCount < maxRetries && !deploymentData) {
+        const result = await supabase
+          .from('android_deployments')
+          .select('id, visual_progress, progress_message, status')
+          .eq('id', deploymentId)
+          .single();
+        
+        deploymentData = result.data;
+        deploymentError = result.error;
+        
+        if (deploymentError && retryCount < maxRetries - 1) {
+          // Wait before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+          retryCount++;
+        } else {
+          break;
+        }
+      }
 
       if (deploymentError) {
         console.warn('Error fetching deployment:', deploymentError);
@@ -68,7 +87,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       // Fetch progress events
       const { data: events, error: eventsError } = await supabase
         .from('deployment_progress_events')
-        .select('*')
+        .select('id, deployment_id, event_type, message, percentage, timestamp, metadata')
         .eq('deployment_id', deploymentId)
         .order('timestamp', { ascending: true });
 
@@ -141,43 +160,13 @@ export const useDeploymentProgress = (deploymentId?: number) => {
     // Initial fetch
     fetchProgress();
     
-    // Subscribe to deployment updates
-    const deploymentSubscription = supabase
-      .channel(`deployment-${deploymentId}`)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'android_deployments',
-        filter: `id=eq.${deploymentId}`
-      }, (payload) => {
-        setProgress(prev => ({
-          ...prev,
-          visual_progress: payload.new.visual_progress || 0,
-          progress_message: payload.new.progress_message || '',
-          status: payload.new.status
-        }));
-      })
-      .subscribe();
-
-    // Subscribe to progress events
-    const eventsSubscription = supabase
-      .channel(`progress-events-${deploymentId}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'deployment_progress_events',
-        filter: `deployment_id=eq.${deploymentId}`
-      }, (payload) => {
-        setProgress(prev => ({
-          ...prev,
-          events: [...prev.events, payload.new as ProgressEvent]
-        }));
-      })
-      .subscribe();
+    // Set up polling for progress updates
+    const pollingInterval = setInterval(() => {
+      fetchProgress();
+    }, 3000); // Poll every 3 seconds
 
     return () => {
-      deploymentSubscription.unsubscribe();
-      eventsSubscription.unsubscribe();
+      clearInterval(pollingInterval);
     };
   }, [deploymentId, fetchProgress]);
 
