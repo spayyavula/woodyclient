@@ -220,7 +220,7 @@ mod tests {
         setUser(null);
         setLoading(false);
       });
-    });
+    }
 
     // Listen for auth changes with error handling
     try {
