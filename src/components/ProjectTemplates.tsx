@@ -632,7 +632,7 @@ async fn main() {
         loop {
             time::sleep(Duration::from_secs(5)).await;
             let (sent, filled, rejected, pnl) = engine_clone.get_performance_stats();
-            println!("📊 Stats: {} sent, {} filled, {} rejected, PnL: ${:.2}",
+            println!("📊 Stats: {} sent, {} filled, {} rejected, PnL: \${:.2}",
                     sent, filled, rejected, pnl);
         }
     });
