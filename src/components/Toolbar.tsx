@@ -18,7 +18,8 @@ import {
   User,
   CreditCard,
   Eye,
-  TestTube
+  TestTube,
+  Link
 } from 'lucide-react';
 import SubscriptionStatus from './SubscriptionStatus';
 
@@ -48,7 +49,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onRun, 
   onShowTemplates,
   onShowMobilePreview,
-  onShowStripeTests
+  onShowStripeTests,
   onShowIntegrations
 }) => {
   const [selectedPlatform, setSelectedPlatform] = React.useState('android');
