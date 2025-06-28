@@ -39,6 +39,29 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
     refreshProgress
   } = useDeploymentProgress(deploymentId);
   
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="w-5 h-5 text-green-400" />;
+      case 'failed':
+        return <XCircle className="w-5 h-5 text-red-400" />;
+      case 'pending':
+        return <Clock className="w-5 h-5 text-yellow-400" />;
+      default:
+        return <RefreshCw className="w-5 h-5 text-blue-400 animate-spin" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-900/20 text-green-400 border border-green-500';
+      case 'failed':
+        return 'bg-red-900/20 text-red-400 border border-red-500';
+      case 'pending':
+        return 'bg-yellow-900/20 text-yellow-400 border border-yellow-500';
+      default:
+        return 'bg-blue-900/20 text-blue-400 border border-blue-500';
     }
   };
 
