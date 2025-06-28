@@ -154,6 +154,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
         progress_message: message,
         events: [...prev.events, data]
       }));
+    }
 
     // Set up polling instead of real-time subscriptions
     const pollingInterval = setInterval(() => {
@@ -162,6 +163,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
 
     return () => {
       if (pollingInterval) {
+      }
       clearInterval(pollingInterval);
     };
   }, [deploymentId, fetchProgress, pollingInterval]);
