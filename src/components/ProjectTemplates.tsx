@@ -632,7 +632,7 @@ async fn main() {
         loop {
             time::sleep(Duration::from_secs(5)).await;
             let (sent, filled, rejected, pnl) = engine_clone.get_performance_stats();
-            println!("📊 Stats: {} sent, {} filled, {} rejected, PnL: ${{:.2}}",
+            println!("📊 Stats: {} sent, {} filled, {} rejected, PnL: \\${{:.2}}",
                     sent, filled, rejected, pnl);
         }
     });
@@ -1225,7 +1225,7 @@ async fn main() {
         // Print performance every 100 iterations
         if i % 100 == 0 {
             let summary = engine.get_performance_summary();
-            println!("📊 Performance: PnL: ${{:.2}}, Trades: {}", 
+            println!("📊 Performance: PnL: \\${{:.2}}, Trades: {}", 
                     summary.total_pnl, summary.trade_count);
         }
         
@@ -1233,7 +1233,7 @@ async fn main() {
     }
     
     let final_summary = engine.get_performance_summary();
-    println!("🏁 Final Performance: PnL: ${{:.2}}, Total Trades: {}", 
+    println!("🏁 Final Performance: PnL: \\${{:.2}}, Total Trades: {}", 
             final_summary.total_pnl, final_summary.trade_count);
 }
 
@@ -1526,6 +1526,10 @@ Portfolio Value: ${:.2}
 Total P&L: ${:.2}
 1-Day VaR (95%): ${:.2}
 10-Day VaR (95%): ${:.2}
+Portfolio Value: \\${:.2}
+Total P&L: \\${:.2}
+1-Day VaR (95%): \\${:.2}
+10-Day VaR (95%): \\${:.2}
 Max Drawdown: {:.2}%
 Leverage: {:.2}x
 Largest Position: {:.1}%
