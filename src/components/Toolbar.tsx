@@ -22,7 +22,8 @@ import {
   TestTube,
   Link,
   Hammer,
-  Wrench
+  Wrench,
+  Zap
 } from 'lucide-react';
 import SubscriptionStatus from './SubscriptionStatus';
 import AutomationPanel from './AutomationPanel';
