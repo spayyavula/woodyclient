@@ -7,13 +7,17 @@ interface DeploymentStep {
   progress: number;
   status: 'pending' | 'running' | 'completed' | 'failed';
   message?: string;
+  output?: string;
 }
 
-interface DeploymentConfig {
+export interface DeploymentConfig {
   platform: string;
   buildType: string;
-  outputType: string;
-  track?: string;
+  webTarget?: string;
+  desktopTarget?: string;
+  androidTarget?: string;
+  outputPath?: string;
+  target?: string;
 }
 
 export const useDeployment = () => {
