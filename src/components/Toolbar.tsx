@@ -46,7 +46,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onSave, 
   onRun, 
   onShowTemplates,
-  onShowMobilePreview
+  onShowMobilePreview,
   onShowStripeTests
 }) => {
   const [selectedPlatform, setSelectedPlatform] = React.useState('android');
