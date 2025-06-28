@@ -115,7 +115,6 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
         setIsActive(true);
         // Reset timer when starting a new active state
         setTimeElapsed(0);
-      }
     } else {
       setIsActive(false);
     }
@@ -127,6 +126,8 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
 
     if (isActive) {
       interval = setInterval(() => {
+        setTimeElapsed(prevTime => prevTime + 1);
+      }, 1000);
     }
 
     return () => clearInterval(interval);
