@@ -15,8 +15,15 @@ export const isSupabaseConfigured = supabaseUrl &&
 const finalUrl = isSupabaseConfigured ? supabaseUrl : 'https://localhost:54321';
 const finalKey = isSupabaseConfigured ? supabaseAnonKey : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
-if (!isSupabaseConfigured) {
-  console.warn('Supabase not configured. Running in demo mode.');
-}
+// Create a single instance to avoid multiple client warnings
+let supabaseInstance: any = null;
 
-export const supabase = createClient(finalUrl, finalKey);
+export const supabase = (() => {
+  if (!supabaseInstance) {
+    if (!isSupabaseConfigured) {
+      console.warn('Supabase not configured. Running in demo mode.');
+    }
+    supabaseInstance = createClient(finalUrl, finalKey);
+  }
+  return supabaseInstance;
+})();

@@ -90,6 +90,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onSwitchToSignup }) =>
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

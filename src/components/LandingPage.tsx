@@ -263,6 +263,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
+                          autoComplete="current-password"
                           className="w-full pl-10 pr-12 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-colors"
                           placeholder="Enter your password"
                         />
