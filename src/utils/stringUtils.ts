@@ -6,7 +6,7 @@
 // Safe constants for terminal prompts and common strings
 export const TERMINAL_CONSTANTS = {
   PROMPT: '$ ',
-  WELCOME: '$ Welcome to Rust Cloud IDE Terminal',
+  WELCOME: '$ Welcome to rustyclint Terminal',
   HELP: '$ Type "help" for available commands',
 } as const;
 

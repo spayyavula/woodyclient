@@ -1,11 +1,11 @@
-# Rust Cloud IDE
+# rustyclint
 
-A powerful cloud-based IDE for Rust development with mobile app support, real-time collaboration, and AI-powered features.
+A powerful cloud-based linting and code analysis platform with real-time collaboration and AI-powered features.
 
 ## Features
 
-- 🦀 **Rust Development**: Full-featured Rust development environment
-- 📱 **Mobile Support**: Build for Android, iOS, Flutter, and React Native
+- 🦀 **Code Analysis**: Advanced linting and code quality analysis
+- 📱 **Multi-Language Support**: Support for Rust, Python, JavaScript, TypeScript, and more
 - 🤝 **Real-time Collaboration**: Work together with your team in real-time
 - 🤖 **AI/ML Integration**: Advanced AI and machine learning capabilities
 - 🛒 **Developer Marketplace**: Connect with expert developers worldwide
@@ -35,8 +35,8 @@ A powerful cloud-based IDE for Rust development with mobile app support, real-ti
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/rust-cloud-ide.git
-cd rust-cloud-ide
+git clone https://github.com/your-username/rustyclint.git
+cd rustyclint
 ```
 
 2. Install dependencies:
@@ -68,8 +68,8 @@ The application uses the following environment variables:
 - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
 
 #### Optional
-- `VITE_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key for payments
-- `VITE_APP_NAME`: Application name (default: "Rust Cloud IDE")
+- `VITE_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key for payments  
+- `VITE_APP_NAME`: Application name (default: "rustyclint")
 - `VITE_DEBUG_MODE`: Enable debug mode (default: true in development)
 
 See `.env.example` for a complete list of available environment variables.
@@ -182,9 +182,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- 📧 Email: support@rustcloudide.com
-- 💬 Discord: [Join our community](https://discord.gg/rustcloudide)
-- 📖 Documentation: [docs.rustcloudide.com](https://docs.rustcloudide.com)
+- 📧 Email: support@rustyclint.com
+- 💬 Discord: [Join our community](https://discord.gg/rustyclint)
+- 📖 Documentation: [docs.rustyclint.com](https://docs.rustyclint.com)
 
 ## Acknowledgments
 

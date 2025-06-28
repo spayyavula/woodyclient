@@ -50,8 +50,8 @@ const Terminal: React.FC<TerminalProps> = ({ isVisible, onToggle }) => {
         output = `   Compiling mobile-rust-app v0.1.0
     Finished dev [unoptimized + debuginfo] target(s) in 1.23s
      Running \`target/debug/mobile-rust-app\`
-Hello, Mobile Rust!
-Mobile Rust App Initialized
+Hello, rustyclint!
+rustyclint Initialized
 Platform: Desktop`;
         break;
       case 'cargo android':

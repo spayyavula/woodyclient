@@ -51,7 +51,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onSwitchToSignup }) =>
         <div className="text-center">
           <div className="text-6xl mb-4">🦀</div>
           <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
-          <p className="text-gray-400">Sign in to your Rust Cloud IDE account</p>
+          <p className="text-gray-400">Sign in to your rustyclint account</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">

@@ -124,7 +124,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
             <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
               <Code className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-white">Rust Cloud IDE</span>
+            <span className="text-2xl font-bold text-white">rustyclint</span>
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
@@ -156,12 +156,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                 <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight">
                   Build the
                   <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Future </span>
-                  of Mobile Apps
+                  of Code Quality
                 </h1>
                 
                 <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                  The most powerful cloud-based IDE for cross-platform mobile development. 
-                  Write once in Rust, deploy everywhere with native performance.
+                  The most powerful cloud-based linting and code analysis platform. 
+                  Write better code with intelligent analysis and automated fixes.
                   <br />
                   <span className="text-orange-300 font-medium">Try the demo with any email and password!</span>
                 </p>
@@ -322,10 +322,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
               Everything You Need to Build
-              <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Amazing Apps</span>
+              <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent"> Better Code</span>
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              From idea to production, our platform provides all the tools and services you need to create world-class mobile applications.
+              From development to deployment, our platform provides all the tools and services you need to write clean, maintainable code.
             </p>
           </div>
 
@@ -372,10 +372,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                     <span className="text-purple-400">fn</span> <span className="text-yellow-400">main</span>() {'{'}
                   </div>
                   <div className="ml-4">
-                    <span className="text-blue-400">let</span> <span className="text-white">app</span> = <span className="text-green-400">MobileApp</span>::<span className="text-yellow-400">new</span>();
+                    <span className="text-blue-400">let</span> <span className="text-white">linter</span> = <span className="text-green-400">RustyClint</span>::<span className="text-yellow-400">new</span>();
                   </div>
                   <div className="ml-4">
-                    <span className="text-white">app</span>.<span className="text-yellow-400">build_for_all_platforms</span>();
+                    <span className="text-white">linter</span>.<span className="text-yellow-400">analyze_and_fix</span>();
                   </div>
                   <div>{'}'}</div>
                 </div>
@@ -383,7 +383,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                 <div className="mt-4 flex items-center space-x-4">
                   <div className="flex items-center space-x-2 text-green-400">
                     <CheckCircle className="w-4 h-4" />
-                    <span className="text-sm">Build successful</span>
+                    <span className="text-sm">Analysis complete</span>
                   </div>
                   <div className="text-gray-400 text-sm">2.3s</div>
                 </div>
@@ -421,7 +421,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                     <div className="text-gray-400 text-sm">{testimonial.role} at {testimonial.company}</div>
                   </div>
                 </div>
-                <p className="text-gray-300 italic">"{testimonial.content}"</p>
+                <p className="text-gray-300 italic">"{testimonial.content.replace(/mobile/gi, 'code quality').replace(/Mobile/gi, 'Code Quality')}"</p>
               </div>
             ))}
           </div>
@@ -432,10 +432,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
       <section className="px-6 py-20 bg-gradient-to-r from-orange-600/10 to-red-600/10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-            Ready to Build the Future?
+            <span className="text-xl font-bold text-white">rustyclint</span>
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join thousands of developers who are already building amazing mobile apps with Rust Cloud IDE.
+            © 2024 rustyclint. All rights reserved.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
