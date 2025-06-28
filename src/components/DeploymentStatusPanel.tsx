@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Rocket, 
   X, 
-  RefreshCw, 
+  RefreshCcw, 
   CheckCircle, 
   XCircle, 
   Clock,
@@ -108,7 +108,7 @@ const DeploymentStatusPanel: React.FC<DeploymentStatusPanelProps> = ({
                 disabled={isRefreshing || deploymentStatus === 'in_progress'}
                 className="flex items-center space-x-2 px-3 py-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white rounded-lg text-sm transition-colors"
               >
-                <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <RefreshCcw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
                 <span>Refresh</span>
               </button>
             </div>
@@ -167,7 +167,7 @@ const DeploymentStatusPanel: React.FC<DeploymentStatusPanelProps> = ({
                   onClick={refreshStatus}
                   className="flex items-center space-x-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCcw className="w-4 h-4" />
                   <span>Refresh Status</span>
                 </button>
               </div>

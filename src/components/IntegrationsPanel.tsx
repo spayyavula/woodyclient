@@ -16,7 +16,7 @@ import {
   Webhook,
   Key,
   Link,
-  RefreshCw,
+  RefreshCcw,
   Play,
   Pause,
   X
@@ -229,7 +229,7 @@ const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ isVisible, onClos
                 <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <button className="flex items-center space-x-2 p-3 bg-green-600 hover:bg-green-700 rounded-lg text-white transition-colors">
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCcw className="w-4 h-4" />
                     <span>Sync All</span>
                   </button>
                   <button className="flex items-center space-x-2 p-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors">

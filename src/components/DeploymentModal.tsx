@@ -12,7 +12,7 @@ import {
   Settings,
   Terminal,
   ExternalLink,
-  Download,
+  Download, 
   Upload,
   Loader2,
   Zap,
@@ -22,8 +22,8 @@ import {
   Globe,
   Cpu,
   HardDrive,
-  Wifi,
-  RefreshCw
+  Wifi, 
+  RefreshCcw
 } from 'lucide-react';
 import { useDeployment, DeploymentConfig, DeploymentStep } from '../hooks/useDeployment';
 import DeploymentAssistant from './DeploymentAssistant';
@@ -668,7 +668,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                         onClick={handleConfirmDeployment}
                         className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 bg-gradient-to-r ${getPlatformColor(config.platform)} hover:shadow-lg text-white rounded-lg text-sm font-medium transition-all transform hover:scale-105`}
                       >
-                        <Zap className="w-4 h-4" />
+                        <Zap className="w-4 h-4" /> 
                         <span>Deploy Now</span>
                       </button>
                       <button
@@ -685,7 +685,7 @@ const DeploymentModal: React.FC<DeploymentModalProps> = ({
                   onClick={stopDeployment}
                   className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 hover:shadow-xl text-white rounded-lg font-medium transition-all transform hover:scale-105"
                 >
-                  <Square className="w-4 h-4" />
+                  <Square className="w-4 h-4" /> 
                   <span>Stop Deployment</span>
                 </button>
               )}
