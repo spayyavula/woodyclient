@@ -604,7 +604,7 @@ async fn main() {
     
     // Simulate market data feed
     let market_data_task = tokio::spawn(async move {
-        let mut counter = 0;
+            price += ((i % 100) as f64 / 100.0 - 0.5) * 2.0; // Deterministic for demo
         loop {
             let market_data = MarketData {
                 symbol: "AAPL".to_string(),
@@ -1211,7 +1211,7 @@ async fn main() {
     let mut price = 150.0;
     for i in 0..1000 {
         // Simulate price movement
-        price += (rand::random::<f64>() - 0.5) * 2.0;
+        price += (0.5 - 0.5) * 2.0; // Simplified for demo
         
         let market_data = MarketData {
             symbol: "AAPL".to_string(),
