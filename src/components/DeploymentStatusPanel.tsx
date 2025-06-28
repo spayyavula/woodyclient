@@ -218,3 +218,5 @@ const DeploymentStatusPanel: React.FC<DeploymentStatusPanelProps> = ({
     </div>
   );
 };
+
+export default DeploymentStatusPanel
