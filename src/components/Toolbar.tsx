@@ -1,35 +1,10 @@
 import React, { useState, lazy, Suspense } from 'react';
 import DeploymentModal from './DeploymentModal';
 import { 
-  Play, 
-  Square, 
-  Save, 
-  Folder, 
-  FileText, 
-  Search, 
-  Settings, 
-  Terminal,
-  GitBranch,
-  Bug,
-  Smartphone,
-  Monitor,
-  Code,
-  Database,
-  Tablet,
-  Users,
-  ShoppingCart,
-  User,
-  CreditCard,
-  Eye,
-  TestTube,
-  Link,
-  Hammer,
-  Wrench, 
-  Zap, 
-  CheckSquare, 
-  Rocket,
-  XCircle,
-  PlusCircle
+  Play, Square, Save, Folder, FileText, Search, Settings, Terminal,
+  GitBranch, Bug, Smartphone, Monitor, Code, Database, Tablet, 
+  Users, ShoppingCart, User, CreditCard, Eye, TestTube, Link,
+  Hammer, Wrench, Zap, CheckSquare, Rocket, XCircle, PlusCircle
 } from 'lucide-react';
 
 // Lazy load components that aren't needed immediately
