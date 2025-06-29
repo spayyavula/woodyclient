@@ -14,6 +14,7 @@ import {
   Bug,
   Smartphone,
   Monitor,
+  Code,
   Tablet,
   Users,
   ShoppingCart,
