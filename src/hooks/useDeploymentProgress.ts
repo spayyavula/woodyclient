@@ -58,13 +58,14 @@ export const useDeploymentProgress = (deploymentId?: number) => {
 
       if (deploymentError) {
         console.warn('Error fetching deployment:', deploymentError);
-        // Use default values
-        deploymentData = {
+        // Use default values - create a new variable instead of reassigning
+        const defaultData = {
           id: deploymentId,
           visual_progress: 65,
           progress_message: 'Building Android application...',
           status: 'building'
         };
+        deploymentData = defaultData;
       }
       
       // Ensure we have valid deployment data
@@ -81,8 +82,8 @@ export const useDeploymentProgress = (deploymentId?: number) => {
 
       if (eventsError) {
         console.warn('Error fetching events:', eventsError);
-        // Use default event
-        events = [{
+        // Use default event - create a new variable instead of reassigning
+        const defaultEvents = [{
           id: 1,
           deployment_id: deploymentId,
           event_type: 'progress',
@@ -91,6 +92,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
           event_timestamp: new Date().toISOString(),
           metadata: null
         }];
+        events = defaultEvents;
       }
 
       // Map event_timestamp back to timestamp for consistency
