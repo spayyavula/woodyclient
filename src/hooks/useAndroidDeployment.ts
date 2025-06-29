@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase, cachedQuery, createSupabaseQueryKey } from '../lib/supabase';
 import { CACHE_EXPIRATION } from '../utils/cacheUtils';
 import { useDeploymentStats } from './useOptimizedQuery';
