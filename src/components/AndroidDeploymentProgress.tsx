@@ -53,7 +53,7 @@ const AndroidDeploymentProgress: React.FC<AndroidDeploymentProgressProps> = ({
 
   // Handle timer
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: number;
     
     if (isActive) {
       interval = setInterval(() => {

@@ -84,7 +84,7 @@ const AndroidDeploymentStatus: React.FC<AndroidDeploymentStatusProps> = ({
 
   // Handle timer
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    let interval: number | null = null;
     if (isActive) {
       interval = setInterval(() => {
         setTimeElapsed(time => time + 1);
