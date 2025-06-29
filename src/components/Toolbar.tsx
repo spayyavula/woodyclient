@@ -44,6 +44,8 @@ interface ToolbarProps {
   onShowConfigCheck: () => void;
   onShowDeploymentStatus: () => void;
   onShowTemplates: () => void;
+  onShowTemplateMarketplace: () => void;
+  onShowFeatureRequestForm: () => void;
   onShowMobilePreview: () => void;
   onShowStripeTests: () => void;
   onShowDeploymentTemplates: () => void;
@@ -64,6 +66,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onShowTemplates,
   onShowDeploymentStatus,
   onShowDeploymentTemplates,
+  onShowTemplateMarketplace,
+  onShowFeatureRequestForm,
   onShowMobilePreview,
   onShowScriptRunner,
   onShowStripeTests,
@@ -165,6 +169,27 @@ const Toolbar: React.FC<ToolbarProps> = ({
               className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors"
             >
               <Save className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <div className="w-px h-6 bg-gray-600 mx-2" />
+          
+          <div className="flex items-center space-x-1">
+            <button 
+              onClick={onShowTemplateMarketplace}
+              className="flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-medium transition-colors"
+              title="Template Marketplace"
+            >
+              <Code className="w-4 h-4 mr-2" />
+              <span>Template Marketplace</span>
+            </button>
+            <button 
+              onClick={onShowFeatureRequestForm}
+              className="flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white text-sm font-medium transition-colors"
+              title="Request Feature"
+            >
+              <PlusCircle className="w-4 h-4 mr-2" />
+              <span>Request Feature</span>
             </button>
           </div>
           

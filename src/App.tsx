@@ -24,6 +24,8 @@ import IntegrationsPanel from './components/IntegrationsPanel';
 import ConfigurationChecker from './components/ConfigurationChecker';
 import DeploymentStatusPanel from './components/DeploymentStatusPanel';
 import DeploymentTemplateSelector from './components/DeploymentTemplateSelector';
+import TemplateMarketplace from './components/TemplateMarketplace';
+import FeatureRequestForm from './components/FeatureRequestForm';
 
 interface Tab {
   id: string;
@@ -64,6 +66,8 @@ function App() {
   const [showDeploymentStatus, setShowDeploymentStatus] = useState(false);
   const [showDeploymentTemplates, setShowDeploymentTemplates] = useState(false);
   const [showScriptRunner, setShowScriptRunner] = useState(false);
+  const [showTemplateMarketplace, setShowTemplateMarketplace] = useState(false);
+  const [showFeatureRequestForm, setShowFeatureRequestForm] = useState(false);
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);
   const [isCollaborationVisible, setIsCollaborationVisible] = useState(false);
   const [isMarketplaceVisible, setIsMarketplaceVisible] = useState(false);
@@ -493,6 +497,8 @@ console.log('Hello from ${fileName}!');`;
         onSave={handleSave}
         onRun={handleRun}
         onShowTemplates={() => setShowTemplates(true)}
+        onShowTemplateMarketplace={() => setShowTemplateMarketplace(true)}
+        onShowFeatureRequestForm={() => setShowFeatureRequestForm(true)}
         onShowMobilePreview={() => setShowMobilePreview(true)}
         onShowStripeTests={() => setShowStripeTests(true)}
         onShowConfigCheck={() => setShowConfigCheck(true)}
@@ -624,6 +630,23 @@ console.log('Hello from ${fileName}!');`;
       {showDeploymentTemplates && (
         <DeploymentTemplateSelector 
           onClose={() => setShowDeploymentTemplates(false)}
+        />
+      )}
+
+      {showTemplateMarketplace && (
+        <TemplateMarketplace 
+          onClose={() => setShowTemplateMarketplace(false)}
+          onSelectTemplate={(template) => {
+            console.log('Selected template:', template);
+            setShowTemplateMarketplace(false);
+          }}
+        />
+      )}
+
+      {showFeatureRequestForm && (
+        <FeatureRequestForm 
+          isVisible={showFeatureRequestForm}
+          onClose={() => setShowFeatureRequestForm(false)}
         />
       )}
 
