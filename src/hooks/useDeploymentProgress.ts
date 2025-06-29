@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, cachedQuery, createSupabaseQueryKey } from '../lib/supabase';
 import { CACHE_EXPIRATION } from '../utils/cacheUtils';
+import { useDeploymentWithEvents } from './useOptimizedQuery';
 
 // Default values for when no deployment exists
 const DEFAULT_PROGRESS = 65;
@@ -35,7 +36,7 @@ interface DeploymentProgress {
 }
 
 export const useDeploymentProgress = (deploymentId?: number) => {
-  const [progress, setProgress] = useState<DeploymentProgress>({
+  const initialProgress: DeploymentProgress = {
     id: deploymentId || 0,
     visual_progress: DEFAULT_PROGRESS,
     progress_message: DEFAULT_MESSAGE,
@@ -43,101 +44,52 @@ export const useDeploymentProgress = (deploymentId?: number) => {
     events: [],
     isLoading: false,
     error: null
-  });
+  };
+  
+  const [progress, setProgress] = useState<DeploymentProgress>(initialProgress);
   
   // Add polling interval state
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  
+  // Use the optimized query hook for deployment with events
+  const { 
+    data: deploymentData,
+    isLoading,
+    error,
+    refetch
+  } = useDeploymentWithEvents(deploymentId, 50);
 
-  const fetchProgress = useCallback(async () => {
-    if (!deploymentId) return;
-
-    try {
-      // Use the RPC function to get deployment progress with fallback
-      // Create a cache key for this specific deployment
-      const progressCacheKey = createSupabaseQueryKey('deployment_progress', deploymentId?.toString() || '');
-      
-      // Use cached query with a short expiration for real-time data
-      let { data: deploymentData, error: deploymentError } = await cachedQuery(
-        () => supabase.rpc('get_deployment_progress', { p_deployment_id: deploymentId }).single(),
-        progressCacheKey,
-        CACHE_EXPIRATION.SHORT // Short cache time for progress data
-      );
-
-      if (deploymentError) {
-        console.warn('Error fetching deployment:', deploymentError);
-        // Use default values - create a new variable instead of reassigning
-        const defaultData = {
-          id: deploymentId,
-          visual_progress: 65,
-          progress_message: 'Building Android application...',
-          status: 'building'
-        };
-        deploymentData = defaultData;
-        deploymentData = defaultData;
-      }
-      
-      // Ensure we have valid deployment data
-      const deployment: DeploymentDetails = deploymentData || {
-        id: deploymentId,
-        visual_progress: 65,
-        progress_message: 'Building Android application...',
-        status: 'building'
-      };
-
-      // Use the RPC function to get events with fallback
-      // Create a cache key for events
-      const eventsCacheKey = createSupabaseQueryKey('deployment_events', deploymentId?.toString() || '');
-      
-      // Use cached query with a short expiration for events
-      let { data: events, error: eventsError } = await cachedQuery(
-        () => supabase.rpc('get_deployment_events', { p_deployment_id: deploymentId }),
-        eventsCacheKey,
-        CACHE_EXPIRATION.SHORT // Short cache time for events
-      );
-
-      if (eventsError) {
-        console.warn('Error fetching events:', eventsError);
-        // Use default event - create a new variable instead of reassigning
-        const defaultEvents = [{
-          id: 1,
-          deployment_id: deploymentId,
-          event_type: 'progress',
-          message: 'Building Android application...',
-          percentage: 65,
-          event_timestamp: new Date().toISOString(),
-          metadata: null
-        }];
-        events = defaultEvents;
-        events = defaultEvents;
-      }
-
-      // Map event_timestamp back to timestamp for consistency
-      const mappedEvents = events ? events.map(e => ({
+  // Update progress state when deployment data changes
+  useEffect(() => {
+    if (!deploymentData) return;
+    
+    // Map events from the JSON array
+    const mappedEvents = deploymentData.events ? 
+      JSON.parse(deploymentData.events).map((e: any) => ({
         ...e,
-        timestamp: e.event_timestamp,
-      })) : [];
-
-      setProgress({
-        id: deployment.id,
-        visual_progress: Math.max(deployment.visual_progress ?? 0, 65),
-        progress_message: deployment.progress_message ?? 'Building Android application...',
-        status: deployment.status ?? 'building',
-        events: mappedEvents,
-        isLoading: false,
-        error: null
-      });
-    } catch (error) {
-      console.error('Error fetching deployment progress:', error);
-      setProgress(prev => ({
-        ...prev,
-        visual_progress: 65,
-        progress_message: 'Building Android application...',
-        status: 'building',
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch progress'
-      }));
-    }
-  }, [deploymentId]);
+        timestamp: e.timestamp,
+      })) : 
+      [];
+    
+    setProgress({
+      id: deploymentData.deployment_id,
+      visual_progress: Math.max(deploymentData.visual_progress ?? 0, 65),
+      progress_message: deploymentData.progress_message ?? 'Building Android application...',
+      status: deploymentData.status ?? 'building',
+      events: mappedEvents,
+      isLoading: false,
+      error: null
+    });
+  }, [deploymentData]);
+  
+  // Update loading and error states
+  useEffect(() => {
+    setProgress(prev => ({
+      ...prev,
+      isLoading,
+      error: error ? String(error) : null
+    }));
+  }, [isLoading, error]);
 
   const addProgressEvent = useCallback(async (
     event_type: ProgressEvent['event_type'],
@@ -174,11 +126,12 @@ export const useDeploymentProgress = (deploymentId?: number) => {
   }, [deploymentId]);
 
   useEffect(() => {
-    fetchProgress();
+    // Initial fetch
+    refetch();
 
     // Set up polling instead of real-time subscriptions
     const pollingInterval = setInterval(() => {
-      fetchProgress();
+      refetch();
     }, 3000);
 
     return () => {
@@ -186,7 +139,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
         clearInterval(pollingInterval);
       }
     };
-  }, [deploymentId, fetchProgress]);
+  }, [deploymentId, refetch]);
 
   return {
     progress: Math.max(progress.visual_progress, DEFAULT_PROGRESS),
@@ -196,6 +149,6 @@ export const useDeploymentProgress = (deploymentId?: number) => {
     isLoading: progress.isLoading,
     error: progress.error,
     addProgressEvent,
-    refreshProgress: fetchProgress
+    refreshProgress: refetch
   };
 };

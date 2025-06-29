@@ -30,6 +30,7 @@ const DeploymentStatusPanel = lazy(() => import('./components/DeploymentStatusPa
 const DeploymentTemplateSelector = lazy(() => import('./components/DeploymentTemplateSelector'));
 const TemplateMarketplace = lazy(() => import('./components/TemplateMarketplace'));
 const FeatureRequestForm = lazy(() => import('./components/FeatureRequestForm'));
+const DatabaseStatsPanel = lazy(() => import('./components/DatabaseStatsPanel'));
 const ScriptRunner = lazy(() => import('./components/ScriptRunner'));
 
 interface Tab {
@@ -72,6 +73,7 @@ function App() {
   const [showDeploymentTemplates, setShowDeploymentTemplates] = useState(false);
   const [showScriptRunner, setShowScriptRunner] = useState(false);
   const [showTemplateMarketplace, setShowTemplateMarketplace] = useState(false);
+  const [showDatabaseStats, setShowDatabaseStats] = useState(false);
   const [showFeatureRequestForm, setShowFeatureRequestForm] = useState(false);
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);
   const [isCollaborationVisible, setIsCollaborationVisible] = useState(false);
@@ -556,6 +558,7 @@ console.log('Hello from ${fileName}!');`;
         onShowDeploymentTemplates={() => setShowDeploymentTemplates(true)}
         onShowDeploymentStatus={() => setShowDeploymentStatus(true)}
         onShowIntegrations={() => setShowIntegrations(true)}
+        onShowDatabaseStats={() => setShowDatabaseStats(true)}
         onShowScriptRunner={() => setShowScriptRunner(true)}
       />
       
@@ -632,6 +635,15 @@ console.log('Hello from ${fileName}!');`;
           isVisible={showIntegrations}
           onClose={() => setShowIntegrations(false)}
         />
+      )}
+      
+      {showDatabaseStats && (
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <DatabaseStatsPanel
+            isVisible={showDatabaseStats}
+            onClose={() => setShowDatabaseStats(false)}
+          />
+        </Suspense>
       )}
 
       {/* Modals */}

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase, cachedQuery, createSupabaseQueryKey } from '../lib/supabase';
 import { CACHE_EXPIRATION } from '../utils/cacheUtils';
+import { useDeploymentStats } from './useOptimizedQuery';
 
 interface DeploymentConfig {
   versionName: string;
@@ -36,6 +37,22 @@ interface UseAndroidDeploymentReturn {
 export const useAndroidDeployment = (): UseAndroidDeploymentReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Get the current user
+  const [userId, setUserId] = useState<string | undefined>(undefined);
+  
+  // Get user ID for stats
+  useEffect(() => {
+    const getUserId = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUserId(data.session?.user?.id);
+    };
+    
+    getUserId();
+  }, []);
+  
+  // Use the optimized query hook for deployment stats
+  const { data: deploymentStats } = useDeploymentStats(userId);
 
   const callDeploymentFunction = async (action: string, data: any) => {
     setLoading(true);
@@ -92,22 +109,19 @@ export const useAndroidDeployment = (): UseAndroidDeploymentReturn => {
   }, []);
 
   const getDeployments = useCallback(async () => {
-    // Use cached query for deployments list
-    const cacheKey = createSupabaseQueryKey('android_deployments', 'list');
+    // Use the optimized RPC function for better performance
+    const { data, error } = await supabase.rpc('get_user_deployments', {
+      p_user_id: userId,
+      p_limit: 20,
+      p_offset: 0
+    });
     
-    try {
-      const { data, error } = await cachedQuery(
-        () => callDeploymentFunction('get', {}),
-        cacheKey,
-        CACHE_EXPIRATION.MEDIUM
-      );
-      
-      if (error) throw error;
-      return data.deployments;
-    } catch (error) {
+    if (error) {
       console.error('Failed to get deployments:', error);
       return [];
     }
+    
+    return data || [];
   }, []);
 
   const updateProgress = useCallback(async (deploymentId: number, progress: number, step: string, message?: string) => {
@@ -139,6 +153,7 @@ export const useAndroidDeployment = (): UseAndroidDeploymentReturn => {
     getDeployments,
     loading,
     error,
-    updateProgress
+    updateProgress,
+    stats: deploymentStats
   };
 };

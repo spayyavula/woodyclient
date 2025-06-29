@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase, cachedQuery, createSupabaseQueryKey } from '../lib/supabase';
-import { getProductByPriceId } from '../stripe-config';
-import { CACHE_EXPIRATION } from '../utils/cacheUtils';
+import { useState, useEffect, useCallback } from 'react';
+import { useUserSubscription } from './useOptimizedQuery';
 
 interface Subscription {
   subscription_status: string;
@@ -22,70 +20,57 @@ interface UseSubscriptionReturn {
 }
 
 export const useSubscription = (): UseSubscriptionReturn => {
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [user, setUser] = useState<{ id: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchSubscription = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Check if user is authenticated first
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        // User not authenticated, set to null and return
-        setSubscription(null);
-        return;
-      }
-
-      // Create a cache key based on the user ID
-      const cacheKey = createSupabaseQueryKey('stripe_user_subscriptions', 'select', { user_id: session.user.id });
-      
-      // Use cached query with a longer expiration for subscription data
-      const { data, error: fetchError } = await cachedQuery(
-        () => supabase.from('stripe_user_subscriptions').select('*').maybeSingle(),
-        cacheKey,
-        CACHE_EXPIRATION.LONG
-      );
-
-      if (fetchError) {
-        // If it's an auth error, just set subscription to null
-        if (fetchError.code === '401' || fetchError.message.includes('authorization')) {
-          setSubscription(null);
-          return;
-        }
-        throw fetchError;
-      }
-
-      setSubscription(data);
-    } catch (err: any) {
-      console.error('Error fetching subscription:', err);
-      // Don't show auth errors to user, just set subscription to null
-      if (err.code === '401' || err.message.includes('authorization')) {
-        setSubscription(null);
-      } else {
-        setError(err.message || 'Failed to fetch subscription');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  
+  // Get user session
   useEffect(() => {
-    fetchSubscription();
+    const getUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+    };
+    
+    getUser();
   }, []);
+  
+  // Use the optimized query hook
+  const { 
+    data: subscriptionData,
+    isLoading: subscriptionLoading,
+    error: subscriptionError,
+    refetch
+  } = useUserSubscription(user?.id);
+  
+  // Map the subscription data to the expected format
+  const subscription: Subscription | null = subscriptionData ? {
+    subscription_status: subscriptionData.subscription_status,
+    price_id: subscriptionData.price_id,
+    current_period_end: subscriptionData.current_period_end,
+    cancel_at_period_end: subscriptionData.cancel_at_period_end,
+    payment_method_brand: subscriptionData.payment_method_brand,
+    payment_method_last4: subscriptionData.payment_method_last4
+  } : null;
+
+  // Update loading and error states
+  useEffect(() => {
+    setLoading(subscriptionLoading);
+    setError(subscriptionError ? String(subscriptionError) : null);
+  }, [subscriptionLoading, subscriptionError]);
+
+  // Memoize the refetch function
+  const fetchSubscription = useCallback(() => {
+    return refetch();
+  }, [refetch]);
 
   const hasActiveSubscription = subscription?.subscription_status === 'active';
 
   const getCurrentPlan = (): string => {
-    if (!subscription || !subscription.price_id) {
+    if (!subscriptionData) {
       return 'Free Plan';
     }
-
-    const product = getProductByPriceId(subscription.price_id);
-    return product?.name || 'Unknown Plan';
+    
+    return subscriptionData.product_name || 'Unknown Plan';
   };
 
   return {

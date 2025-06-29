@@ -15,6 +15,7 @@ import {
   Smartphone,
   Monitor,
   Code,
+  Database as DatabaseIcon,
   Tablet,
   Users,
   ShoppingCart,
@@ -35,6 +36,7 @@ import {
 const SubscriptionStatus = lazy(() => import('./SubscriptionStatus'));
 const AutomationPanel = lazy(() => import('./AutomationPanel'));
 const AndroidBuildLogs = lazy(() => import('./AndroidBuildLogs'));
+const DatabaseStatsPanel = lazy(() => import('./DatabaseStatsPanel'));
 
 interface ToolbarProps {
   user?: any;
@@ -80,6 +82,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const [showBuildLogs, setShowBuildLogs] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = React.useState('android');
   const [showDeploymentModal, setShowDeploymentModal] = React.useState(false);
+  const [showDatabaseStats, setShowDatabaseStats] = useState(false);
   const [isBuilding, setIsBuilding] = useState(false);
   const [buildOutput, setBuildOutput] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -339,6 +342,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
               <span>Build Logs</span>
             </button>
             <button 
+              onClick={() => setShowDatabaseStats(true)}
+              className="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+              title="Database Stats"
+            >
+              <DatabaseIcon className="w-4 h-4 mr-2" />
+              <span>Database Stats</span>
+            </button>
+            <button 
               onClick={() => setShowAutomationPanel(true)}
               className="flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
               title="Automation Center"
@@ -480,6 +491,16 @@ const Toolbar: React.FC<ToolbarProps> = ({
             platform={selectedPlatform}
             isVisible={showAutomationPanel}
             onClose={() => setShowAutomationPanel(false)}
+          />
+        )}
+      </Suspense>
+      
+      {/* Database Stats Panel */}
+      <Suspense fallback={null}>
+        {showDatabaseStats && (
+          <DatabaseStatsPanel
+            isVisible={showDatabaseStats}
+            onClose={() => setShowDatabaseStats(false)}
           />
         )}
       </Suspense>

@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { getCachedData, CACHE_EXPIRATION, createCacheKey } from '../utils/cacheUtils';
 
+// Database query timeout (in milliseconds)
+const QUERY_TIMEOUT = 10000;
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
@@ -26,10 +29,62 @@ export const supabase = (() => {
         console.info('Supabase not configured. Running in demo mode.');
       }
     }
-    supabaseInstance = createClient(finalUrl, finalKey);
+    
+    // Create client with optimized settings
+    supabaseInstance = createClient(finalUrl, finalKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      },
+      global: {
+        headers: {
+          'x-application-name': 'rustyclint',
+          'x-application-version': import.meta.env.VITE_APP_VERSION || '1.0.0'
+        },
+        fetch: (url, options) => {
+          // Add timeout to all fetch requests
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), QUERY_TIMEOUT);
+          
+          return fetch(url, {
+            ...options,
+            signal: controller.signal
+          }).finally(() => clearTimeout(timeoutId));
+        }
+      }
+    });
   }
   return supabaseInstance;
 })();
+
+/**
+ * Optimized Supabase query with timeout and retry logic
+ */
+export async function optimizedQuery<T>(
+  queryFn: () => Promise<{ data: T | null; error: any }>,
+  retries = 1
+): Promise<{ data: T | null; error: any }> {
+  try {
+    const result = await queryFn();
+    
+    if (result.error && retries > 0) {
+      // Wait a bit before retrying
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return optimizedQuery(queryFn, retries - 1);
+    }
+    
+    return result;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError' && retries > 0) {
+      // Query timed out, retry
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return optimizedQuery(queryFn, retries - 1);
+    }
+    
+    return { data: null, error };
+  }
+}
 
 /**
  * Enhanced Supabase query with caching
@@ -40,14 +95,16 @@ export const supabase = (() => {
 export async function cachedQuery<T>(
   queryFn: () => Promise<{ data: T | null; error: any }>,
   cacheKey: string,
-  expiration = CACHE_EXPIRATION.MEDIUM
+  expiration = CACHE_EXPIRATION.MEDIUM,
+  retries = 1
 ): Promise<{ data: T | null; error: any }> {
   try {
     // Use getCachedData to handle caching logic
     const data = await getCachedData<T>(
       cacheKey,
       async () => {
-        const { data, error } = await queryFn();
+        // Use optimized query with retry logic
+        const { data, error } = await optimizedQuery(queryFn, retries);
         if (error) throw error;
         return data as T;
       },
@@ -66,4 +123,48 @@ export async function cachedQuery<T>(
  */
 export function createSupabaseQueryKey(table: string, query: string, params?: any): string {
   return createCacheKey('supabase', table, query, params ? JSON.stringify(params) : '');
+}
+
+/**
+ * Batch multiple Supabase queries into a single request
+ * This reduces network overhead for multiple related queries
+ */
+export async function batchQueries<T>(
+  queries: Array<() => Promise<{ data: any; error: any }>>,
+  cacheKeys: string[],
+  expiration = CACHE_EXPIRATION.MEDIUM
+): Promise<T[]> {
+  try {
+    // Try to get all results from cache first
+    const cachedResults = await Promise.all(
+      cacheKeys.map(key => getCache<any>(key))
+    );
+    
+    // If all results are in cache, return them
+    if (cachedResults.every(result => result !== null)) {
+      return cachedResults as T[];
+    }
+    
+    // Otherwise, execute all queries in parallel
+    const results = await Promise.all(
+      queries.map(query => optimizedQuery(query))
+    );
+    
+    // Cache results and handle errors
+    const processedResults = results.map((result, index) => {
+      if (result.error) {
+        console.error(`Error in batch query ${index}:`, result.error);
+        return null;
+      }
+      
+      // Cache the successful result
+      setCache(cacheKeys[index], result.data, expiration);
+      return result.data;
+    });
+    
+    return processedResults as T[];
+  } catch (error) {
+    console.error('Batch query error:', error);
+    return [];
+  }
 }
