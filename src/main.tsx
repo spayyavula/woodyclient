@@ -1,14 +1,16 @@
-import { StrictMode } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
-import AndroidBuildLogs from './components/AndroidBuildLogs.tsx';
 import { StripeProvider } from './components/StripeProvider.tsx';
 import './index.css';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+// Remove StrictMode in production for better performance
+const root = createRoot(document.getElementById('root')!);
+
+root.render(
+  <React.StrictMode>
     <StripeProvider>
       <App />
     </StripeProvider>
-  </StrictMode>
+  </React.StrictMode>
 );

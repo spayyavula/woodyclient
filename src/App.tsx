@@ -1,31 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { supabase } from './lib/supabase';
 import { isSupabaseConfigured } from './lib/supabase';
-import ScriptRunner from './components/ScriptRunner';
-import LandingPage from './components/LandingPage';
-import LoginPage from './components/auth/LoginPage';
-import SignupPage from './components/auth/SignupPage';
-import SuccessPage from './components/SuccessPage';
-import PricingPage from './components/PricingPage';
-import UserProfile from './components/UserProfile';
+
+// Core components loaded immediately
 import FileExplorer from './components/FileExplorer';
 import CodeEditor from './components/CodeEditor';
 import Terminal from './components/Terminal';
 import Toolbar from './components/Toolbar';
 import TabBar from './components/TabBar';
 import StatusBar from './components/StatusBar';
-import CollaborationPanel from './components/CollaborationPanel';
-import DeveloperMarketplace from './components/DeveloperMarketplace';
-import ProjectTemplates from './components/ProjectTemplates';
-import MobilePreview from './components/MobilePreview';
-import DemoMode from './components/DemoMode';
-import StripeTestSuite from './components/StripeTestSuite';
-import IntegrationsPanel from './components/IntegrationsPanel';
-import ConfigurationChecker from './components/ConfigurationChecker';
-import DeploymentStatusPanel from './components/DeploymentStatusPanel';
-import DeploymentTemplateSelector from './components/DeploymentTemplateSelector';
-import TemplateMarketplace from './components/TemplateMarketplace';
-import FeatureRequestForm from './components/FeatureRequestForm';
+
+// Lazy-loaded components
+const LandingPage = lazy(() => import('./components/LandingPage'));
+const LoginPage = lazy(() => import('./components/auth/LoginPage'));
+const SignupPage = lazy(() => import('./components/auth/SignupPage'));
+const SuccessPage = lazy(() => import('./components/SuccessPage'));
+const PricingPage = lazy(() => import('./components/PricingPage'));
+const UserProfile = lazy(() => import('./components/UserProfile'));
+const CollaborationPanel = lazy(() => import('./components/CollaborationPanel'));
+const DeveloperMarketplace = lazy(() => import('./components/DeveloperMarketplace'));
+const ProjectTemplates = lazy(() => import('./components/ProjectTemplates'));
+const MobilePreview = lazy(() => import('./components/MobilePreview'));
+const DemoMode = lazy(() => import('./components/DemoMode'));
+const StripeTestSuite = lazy(() => import('./components/StripeTestSuite'));
+const IntegrationsPanel = lazy(() => import('./components/IntegrationsPanel'));
+const ConfigurationChecker = lazy(() => import('./components/ConfigurationChecker'));
+const DeploymentStatusPanel = lazy(() => import('./components/DeploymentStatusPanel'));
+const DeploymentTemplateSelector = lazy(() => import('./components/DeploymentTemplateSelector'));
+const TemplateMarketplace = lazy(() => import('./components/TemplateMarketplace'));
+const FeatureRequestForm = lazy(() => import('./components/FeatureRequestForm'));
+const ScriptRunner = lazy(() => import('./components/ScriptRunner'));
 
 interface Tab {
   id: string;
@@ -449,39 +453,50 @@ console.log('Hello from ${fileName}!');`;
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  if (showSuccess) {
-    return <SuccessPage onContinue={() => setShowSuccess(false)} />;
-  }
-
-  if (showScriptRunner) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex flex-col">
-        <ScriptRunner />
-        <div className="p-4 bg-gray-800 border-t border-gray-700">
-          <button 
-            onClick={() => setShowScriptRunner(false)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-          >
-            Back to IDE
-          </button>
+        <div className="text-white text-xl flex items-center space-x-2">
+          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <span>Loading...</span>
         </div>
       </div>
     );
   }
 
+  if (showSuccess) {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+        <SuccessPage onContinue={() => setShowSuccess(false)} />
+      </Suspense>
+    );
+  }
+
+  if (showScriptRunner) {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+        <div className="min-h-screen bg-gray-900 flex flex-col">
+          <ScriptRunner />
+          <div className="p-4 bg-gray-800 border-t border-gray-700">
+            <button 
+              onClick={() => setShowScriptRunner(false)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+            >
+              Back to IDE
+            </button>
+          </div>
+        </div>
+      </Suspense>
+    );
+  }
+
   if (!user) {
     return (
-      <LandingPage 
-        onLogin={handleLogin}
-        onSignup={handleSignup}
-        loading={authLoading}
-        error={authError}
-      />
+      <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+        <LandingPage 
+          onLogin={handleLogin}
+          onSignup={handleSignup}
+          loading={authLoading}
+          error={authError}
+        />
+      </Suspense>
     );
   }
 
@@ -585,52 +600,66 @@ console.log('Hello from ${fileName}!');`;
 
       {/* Modals */}
       {showPricing && (
-        <PricingPage onClose={() => setShowPricing(false)} />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <PricingPage onClose={() => setShowPricing(false)} />
+        </Suspense>
       )}
 
       {showProfile && (
-        <UserProfile 
-          user={user}
-          onClose={() => setShowProfile(false)}
-          onLogout={handleLogout}
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <UserProfile 
+            user={user}
+            onClose={() => setShowProfile(false)}
+            onLogout={handleLogout}
+          />
+        </Suspense>
       )}
 
       {showTemplates && (
-        <ProjectTemplates 
-          isVisible={showTemplates}
-          onClose={() => setShowTemplates(false)}
-          onSelectTemplate={handleSelectTemplate}
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <ProjectTemplates 
+            isVisible={showTemplates}
+            onClose={() => setShowTemplates(false)}
+            onSelectTemplate={handleSelectTemplate}
+          />
+        </Suspense>
       )}
 
       {showMobilePreview && (
-        <MobilePreview 
-          isVisible={showMobilePreview}
-          onClose={() => setShowMobilePreview(false)}
-          currentCode={currentTab?.content || ''}
-          platform="flutter"
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <MobilePreview 
+            isVisible={showMobilePreview}
+            onClose={() => setShowMobilePreview(false)}
+            currentCode={currentTab?.content || ''}
+            platform="flutter"
+          />
+        </Suspense>
       )}
 
       {isMarketplaceVisible && (
-        <DeveloperMarketplace 
-          isVisible={isMarketplaceVisible}
-          onToggle={() => setIsMarketplaceVisible(!isMarketplaceVisible)}
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <DeveloperMarketplace 
+            isVisible={isMarketplaceVisible}
+            onToggle={() => setIsMarketplaceVisible(!isMarketplaceVisible)}
+          />
+        </Suspense>
       )}
 
       {showConfigCheck && (
-        <ConfigurationChecker
-          isVisible={showConfigCheck}
-          onClose={() => setShowConfigCheck(false)}
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <ConfigurationChecker
+            isVisible={showConfigCheck}
+            onClose={() => setShowConfigCheck(false)}
+          />
+        </Suspense>
       )}
 
       {showDeploymentTemplates && (
-        <DeploymentTemplateSelector 
-          onClose={() => setShowDeploymentTemplates(false)}
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <DeploymentTemplateSelector 
+            onClose={() => setShowDeploymentTemplates(false)}
+          />
+        </Suspense>
       )}
 
       {showTemplateMarketplace && (
@@ -651,19 +680,44 @@ console.log('Hello from ${fileName}!');`;
       )}
 
       {showDeploymentStatus && (
-        <DeploymentStatusPanel
-          isVisible={showDeploymentStatus}
-          onClose={() => setShowDeploymentStatus(false)}
-          deployUrl="https://deft-cannoli-27300c.netlify.app"
-          deployId="deploy-id-123"
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <DeploymentStatusPanel
+            isVisible={showDeploymentStatus}
+            onClose={() => setShowDeploymentStatus(false)}
+            deployUrl="https://deft-cannoli-27300c.netlify.app"
+            deployId="deploy-id-123"
+          />
+        </Suspense>
       )}
 
       {showStripeTests && (
-        <StripeTestSuite 
-          isVisible={showStripeTests}
-          onClose={() => setShowStripeTests(false)}
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <StripeTestSuite 
+            isVisible={showStripeTests}
+            onClose={() => setShowStripeTests(false)}
+          />
+        </Suspense>
+      )}
+      
+      {showTemplateMarketplace && (
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <TemplateMarketplace 
+            onClose={() => setShowTemplateMarketplace(false)}
+            onSelectTemplate={(template) => {
+              console.log('Selected template:', template);
+              setShowTemplateMarketplace(false);
+            }}
+          />
+        </Suspense>
+      )}
+      
+      {showFeatureRequestForm && (
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+          <FeatureRequestForm 
+            isVisible={showFeatureRequestForm}
+            onClose={() => setShowFeatureRequestForm(false)}
+          />
+        </Suspense>
       )}
 
     </div>

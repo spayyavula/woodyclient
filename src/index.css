@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Critical styles that should load immediately */
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 @keyframes shimmer {
   0% {
     background-position: 200% 0;
@@ -20,5 +36,15 @@
   }
   100% {
     background-position: 0% 50%;
+  }
+}
+
+/* Optimize animations */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
