@@ -29,7 +29,6 @@ import {
   CheckSquare, 
   Rocket,
   XCircle,
-  Code
 } from 'lucide-react';
 import SubscriptionStatus from './SubscriptionStatus';
 import AutomationPanel from './AutomationPanel';
