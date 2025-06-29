@@ -66,6 +66,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
           status: 'building'
         };
         deploymentData = defaultData;
+        deploymentData = defaultData;
       }
       
       // Ensure we have valid deployment data
@@ -92,6 +93,7 @@ export const useDeploymentProgress = (deploymentId?: number) => {
           event_timestamp: new Date().toISOString(),
           metadata: null
         }];
+        events = defaultEvents;
         events = defaultEvents;
       }
 
