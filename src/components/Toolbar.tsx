@@ -3,7 +3,6 @@ import DeploymentModal from './DeploymentModal';
 import { 
   Play, 
   Square, 
-  PlusCircle,
   Save, 
   Folder, 
   FileText, 
@@ -15,7 +14,7 @@ import {
   Smartphone,
   Monitor,
   Code,
-  Database as DatabaseIcon,
+  Database,
   Tablet,
   Users,
   ShoppingCart,
@@ -30,6 +29,7 @@ import {
   CheckSquare, 
   Rocket,
   XCircle,
+  PlusCircle
 } from 'lucide-react';
 
 // Lazy load components that aren't needed immediately
@@ -346,7 +346,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
               className="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
               title="Database Stats"
             >
-              <DatabaseIcon className="w-4 h-4 mr-2" />
+              <Database className="w-4 h-4 mr-2" />
               <span>Database Stats</span>
             </button>
             <button 
