@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useUserSubscription } from './useOptimizedQuery';
+import { supabase } from '../lib/supabase';
 
 interface Subscription {
   subscription_status: string;
