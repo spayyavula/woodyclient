@@ -1,6 +1,7 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { supabase } from './lib/supabase';
 import { isSupabaseConfigured } from './lib/supabase';
+import { getCachedData, setCache, CACHE_EXPIRATION, createCacheKey } from './utils/cacheUtils';
 
 // Core components loaded immediately
 import FileExplorer from './components/FileExplorer';
@@ -77,7 +78,8 @@ function App() {
   const [isMarketplaceVisible, setIsMarketplaceVisible] = useState(false);
   const [authListenerEnabled, setAuthListenerEnabled] = useState(false);
   
-  const [tabs, setTabs] = useState<Tab[]>([
+  // Initial tabs state
+  const initialTabs: Tab[] = [
     {
       id: 'main.rs',
       name: 'main.rs',
@@ -201,11 +203,44 @@ mod tests {
       language: 'rust',
       isDirty: false,
     },
-  ]);
+  ];
+  
+  const [tabs, setTabs] = useState<Tab[]>(initialTabs);
   
   const [activeTab, setActiveTab] = useState('main.rs');
   const [selectedFile, setSelectedFile] = useState('mobile-rust-app/0/src/main.rs');
   const [buildStatus, setBuildStatus] = useState<'idle' | 'building' | 'success' | 'error'>('idle');
+
+  // Load tabs from cache on mount
+  useEffect(() => {
+    const loadTabs = async () => {
+      const cacheKey = createCacheKey('editor', 'tabs');
+      const cachedTabs = await getCachedData<Tab[]>(
+        cacheKey,
+        async () => initialTabs,
+        CACHE_EXPIRATION.VERY_LONG
+      );
+      
+      if (cachedTabs && cachedTabs.length > 0) {
+        setTabs(cachedTabs);
+        setActiveTab(cachedTabs[0].id);
+      }
+    };
+    
+    loadTabs();
+  }, []);
+  
+  // Save tabs to cache when they change
+  useEffect(() => {
+    const saveTabs = async () => {
+      const cacheKey = createCacheKey('editor', 'tabs');
+      await setCache(cacheKey, tabs, CACHE_EXPIRATION.VERY_LONG);
+    };
+    
+    if (tabs.length > 0) {
+      saveTabs();
+    }
+  }, [tabs]);
 
   useEffect(() => {
     // Check URL for success parameter
@@ -236,7 +271,8 @@ mod tests {
     return () => subscription.unsubscribe();
   }, [authListenerEnabled]);
 
-  const handleLogin = async (email: string, password: string) => {
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleLogin = useCallback(async (email: string, password: string) => {
     setAuthLoading(true);
     setAuthError(null);
 
@@ -279,9 +315,9 @@ mod tests {
     } finally {
       setAuthLoading(false);
     }
-  };
+  }, []);
 
-  const handleSignup = async (email: string, password: string) => {
+  const handleSignup = useCallback(async (email: string, password: string) => {
     setAuthLoading(true);
     setAuthError(null);
     
@@ -326,17 +362,17 @@ mod tests {
     } finally {
       setAuthLoading(false);
     }
-  };
+  }, []);
 
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     setAuthListenerEnabled(false);
     await supabase.auth.signOut();
     setUser(null);
     setShowProfile(false);
-  };
+  }, []);
 
-  const handleFileSelect = (filePath: string) => {
+  const handleFileSelect = useCallback((filePath: string) => {
     setSelectedFile(filePath);
     const fileName = filePath.split('/').pop() || 'unknown';
     
@@ -354,9 +390,9 @@ mod tests {
       setTabs(prev => [...prev, newTab]);
     }
     setActiveTab(fileName);
-  };
+  }, [tabs, getFileContent, getLanguageFromFileName]);
 
-  const getFileContent = (fileName: string): string => {
+  const getFileContent = useCallback((fileName: string): string => {
     // Return appropriate content based on file type
     if (fileName.endsWith('.rs')) {
       return `// Rust file: ${fileName}
@@ -376,9 +412,9 @@ fun main() {
     }
     return `// ${fileName}
 console.log('Hello from ${fileName}!');`;
-  };
+  }, []);
 
-  const getLanguageFromFileName = (fileName: string): string => {
+  const getLanguageFromFileName = useCallback((fileName: string): string => {
     if (fileName.endsWith('.rs')) return 'rust';
     if (fileName.endsWith('.dart')) return 'dart';
     if (fileName.endsWith('.kt')) return 'kotlin';
@@ -392,41 +428,41 @@ console.log('Hello from ${fileName}!');`;
     if (fileName.endsWith('.xml')) return 'xml';
     if (fileName.endsWith('.json')) return 'json';
     return 'text';
-  };
+  }, []);
 
-  const handleTabClose = (tabId: string) => {
+  const handleTabClose = useCallback((tabId: string) => {
     setTabs(prev => prev.filter(tab => tab.id !== tabId));
     if (activeTab === tabId) {
       const remainingTabs = tabs.filter(tab => tab.id !== tabId);
       setActiveTab(remainingTabs.length > 0 ? remainingTabs[0].id : '');
     }
-  };
+  }, [activeTab, tabs]);
 
-  const handleCodeChange = (content: string) => {
+  const handleCodeChange = useCallback((content: string) => {
     setTabs(prev => prev.map(tab => 
       tab.id === activeTab 
         ? { ...tab, content, isDirty: true }
         : tab
     ));
-  };
+  }, [activeTab]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     setTabs(prev => prev.map(tab => 
       tab.id === activeTab 
         ? { ...tab, isDirty: false }
         : tab
     ));
-  };
+  }, [activeTab]);
 
-  const handleRun = () => {
+  const handleRun = useCallback(() => {
     setBuildStatus('building');
     setTimeout(() => {
       setBuildStatus('success');
       setTimeout(() => setBuildStatus('idle'), 3000);
     }, 2000);
-  };
+  }, []);
 
-  const handleSelectTemplate = (template: Template) => {
+  const handleSelectTemplate = useCallback((template: Template) => {
     // Clear existing tabs
     setTabs([]);
     
@@ -445,7 +481,7 @@ console.log('Hello from ${fileName}!');`;
     }
     
     setShowTemplates(false);
-  };
+  }, []);
 
   const currentTab = tabs.find(tab => tab.id === activeTab);
   const lineCount = currentTab?.content.split('\n').length || 0;

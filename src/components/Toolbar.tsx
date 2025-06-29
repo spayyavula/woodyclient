@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import DeploymentModal from './DeploymentModal';
 import { 
   Play, 
@@ -30,9 +30,11 @@ import {
   Rocket,
   XCircle,
 } from 'lucide-react';
-import SubscriptionStatus from './SubscriptionStatus';
-import AutomationPanel from './AutomationPanel';
-import AndroidBuildLogs from './AndroidBuildLogs';
+
+// Lazy load components that aren't needed immediately
+const SubscriptionStatus = lazy(() => import('./SubscriptionStatus'));
+const AutomationPanel = lazy(() => import('./AutomationPanel'));
+const AndroidBuildLogs = lazy(() => import('./AndroidBuildLogs'));
 
 interface ToolbarProps {
   user?: any;
@@ -350,9 +352,11 @@ const Toolbar: React.FC<ToolbarProps> = ({
         <div className="flex items-center space-x-1">
           {user && (
             <>
-              <div className="mr-4">
-                <SubscriptionStatus />
-              </div>
+              <Suspense fallback={<div className="mr-4 w-20 h-5 bg-gray-700 animate-pulse rounded"></div>}>
+                <div className="mr-4">
+                  <SubscriptionStatus />
+                </div>
+              </Suspense>
               <button 
                 onClick={onShowPricing}
                 className="p-2 hover:bg-gray-700 rounded text-gray-300 hover:text-white transition-colors"
@@ -458,21 +462,27 @@ const Toolbar: React.FC<ToolbarProps> = ({
       {/* Build Logs Viewer */}
       {showBuildLogs && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-6xl">
-            <AndroidBuildLogs
-              isLive={isBuilding}
-              onClose={() => setShowBuildLogs(false)}
-            />
-          </div>
+          <Suspense fallback={<div className="w-full max-w-6xl h-96 bg-gray-800 rounded-lg flex items-center justify-center"><div className="text-white">Loading logs...</div></div>}>
+            <div className="w-full max-w-6xl">
+              <AndroidBuildLogs
+                isLive={isBuilding}
+                onClose={() => setShowBuildLogs(false)}
+              />
+            </div>
+          </Suspense>
         </div>
       )}
       
       {/* Automation Panel */}
-      <AutomationPanel
-        platform={selectedPlatform}
-        isVisible={showAutomationPanel}
-        onClose={() => setShowAutomationPanel(false)}
-      />
+      <Suspense fallback={null}>
+        {showAutomationPanel && (
+          <AutomationPanel
+            platform={selectedPlatform}
+            isVisible={showAutomationPanel}
+            onClose={() => setShowAutomationPanel(false)}
+          />
+        )}
+      </Suspense>
     </>
   );
 };
