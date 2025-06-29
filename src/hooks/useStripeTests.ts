@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabaseTest, createMockStripeData, simulateAuthenticatedSession } from '../lib/supabase-test';
 import { stripeProducts } from '../stripe-config';
+import { getCachedData, setCache, CACHE_EXPIRATION, createCacheKey } from '../utils/cacheUtils';
 
 interface TestResult {
   id: string;
@@ -64,17 +65,32 @@ export const useStripeTests = (): UseStripeTestsReturn => {
 
   const testStripeProductConfiguration = async (): Promise<void> => {
     // Validate Stripe product configuration
-    if (!stripeProducts || stripeProducts.length === 0) {
-      throw new Error('No Stripe products configured');
-    }
+    // Use cached data to avoid repeated validation
+    const cacheKey = createCacheKey('stripe-tests', 'product-config');
+    
+    try {
+      await getCachedData(
+        cacheKey,
+        async () => {
+          if (!stripeProducts || stripeProducts.length === 0) {
+            throw new Error('No Stripe products configured');
+          }
 
-    const requiredFields = ['priceId', 'name', 'mode', 'price'];
-    for (const product of stripeProducts) {
-      for (const field of requiredFields) {
-        if (!product[field as keyof typeof product]) {
-          throw new Error(`Product ${product.name} missing required field: ${field}`);
-        }
-      }
+          const requiredFields = ['priceId', 'name', 'mode', 'price'];
+          for (const product of stripeProducts) {
+            for (const field of requiredFields) {
+              if (!product[field as keyof typeof product]) {
+                throw new Error(`Product ${product.name} missing required field: ${field}`);
+              }
+            }
+          }
+          
+          return { valid: true };
+        },
+        CACHE_EXPIRATION.LONG // Cache this for a long time since product config rarely changes
+      );
+    } catch (error) {
+      throw error;
     }
   };
 

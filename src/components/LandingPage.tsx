@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   Code, 
@@ -31,9 +31,9 @@ import {
   AlertTriangle,
   GitBranch,
   Workflow,
-  Clock,
-  X
+  Clock
 } from 'lucide-react';
+import { prefetchData, CACHE_EXPIRATION, createCacheKey } from '../utils/cacheUtils';
 
 interface LandingPageProps {
   onLogin: (email: string, password: string) => Promise<void>;
@@ -48,6 +48,46 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
+
+  // Prefetch critical data when landing page loads
+  useEffect(() => {
+    const prefetchCriticalData = async () => {
+      // Prefetch features data
+      await prefetchData(
+        createCacheKey('landing', 'features'),
+        async () => features,
+        CACHE_EXPIRATION.VERY_LONG
+      );
+      
+      // Prefetch testimonials data
+      await prefetchData(
+        createCacheKey('landing', 'testimonials'),
+        async () => testimonials,
+        CACHE_EXPIRATION.VERY_LONG
+      );
+      
+      // Prefetch stats data
+      await prefetchData(
+        createCacheKey('landing', 'stats'),
+        async () => stats,
+        CACHE_EXPIRATION.VERY_LONG
+      );
+    };
+    
+    prefetchCriticalData();
+    
+    // Preload auth components when user scrolls
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        import('../components/auth/LoginPage');
+        import('../components/auth/SignupPage');
+        window.removeEventListener('scroll', handleScroll);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

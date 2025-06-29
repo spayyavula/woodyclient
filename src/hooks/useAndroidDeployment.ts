@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, cachedQuery, createSupabaseQueryKey } from '../lib/supabase';
+import { CACHE_EXPIRATION } from '../utils/cacheUtils';
 
 interface DeploymentConfig {
   versionName: string;
@@ -91,8 +92,22 @@ export const useAndroidDeployment = (): UseAndroidDeploymentReturn => {
   }, []);
 
   const getDeployments = useCallback(async () => {
-    const result = await callDeploymentFunction('get', {});
-    return result.deployments;
+    // Use cached query for deployments list
+    const cacheKey = createSupabaseQueryKey('android_deployments', 'list');
+    
+    try {
+      const { data, error } = await cachedQuery(
+        () => callDeploymentFunction('get', {}),
+        cacheKey,
+        CACHE_EXPIRATION.MEDIUM
+      );
+      
+      if (error) throw error;
+      return data.deployments;
+    } catch (error) {
+      console.error('Failed to get deployments:', error);
+      return [];
+    }
   }, []);
 
   const updateProgress = useCallback(async (deploymentId: number, progress: number, step: string, message?: string) => {

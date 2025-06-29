@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
+import { getCachedData, setCache, CACHE_EXPIRATION, createCacheKey } from '../utils/cacheUtils';
 
 interface StripeContextType {
   stripe: Stripe | null;
@@ -27,25 +28,44 @@ interface StripeProviderProps {
 
 export const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
   const [stripe, setStripe] = useState<Stripe | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeStripe = async () => {
       try {
+        setIsLoading(true);
         const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
         
         if (!stripePublishableKey) {
-          console.warn('Stripe publishable key is not configured. Stripe features will be disabled.');
+          if (import.meta.env.DEV) {
+            console.warn('Stripe publishable key is not configured. Stripe features will be disabled.');
+          }
           setError('Stripe not configured');
           setIsLoading(false);
           return;
         }
 
-        const stripeInstance = await loadStripe(stripePublishableKey);
+        // Try to get cached Stripe instance ID
+        const cacheKey = createCacheKey('stripe', 'instance-id');
+        const cachedStripeId = await getCachedData<string>(
+          cacheKey,
+          async () => '',
+          CACHE_EXPIRATION.VERY_LONG
+        );
+        
+        // Load Stripe with the cached ID if available
+        const stripeInstance = await loadStripe(stripePublishableKey, {
+          stripeAccount: cachedStripeId || undefined
+        });
         
         if (!stripeInstance) {
           throw new Error('Failed to load Stripe');
+        }
+
+        // Cache the Stripe instance ID for future use
+        if (stripeInstance._id) {
+          await setCache(cacheKey, stripeInstance._id, CACHE_EXPIRATION.VERY_LONG);
         }
 
         setStripe(stripeInstance);

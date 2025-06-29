@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, cachedQuery, createSupabaseQueryKey } from '../lib/supabase';
 import { getProductByPriceId } from '../stripe-config';
+import { CACHE_EXPIRATION } from '../utils/cacheUtils';
 
 interface Subscription {
   subscription_status: string;
@@ -39,10 +40,15 @@ export const useSubscription = (): UseSubscriptionReturn => {
         return;
       }
 
-      const { data, error: fetchError } = await supabase
-        .from('stripe_user_subscriptions')
-        .select('*')
-        .maybeSingle();
+      // Create a cache key based on the user ID
+      const cacheKey = createSupabaseQueryKey('stripe_user_subscriptions', 'select', { user_id: session.user.id });
+      
+      // Use cached query with a longer expiration for subscription data
+      const { data, error: fetchError } = await cachedQuery(
+        () => supabase.from('stripe_user_subscriptions').select('*').maybeSingle(),
+        cacheKey,
+        CACHE_EXPIRATION.LONG
+      );
 
       if (fetchError) {
         // If it's an auth error, just set subscription to null

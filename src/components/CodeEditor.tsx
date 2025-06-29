@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import LiveCursors from './LiveCursors';
 import { convertDartStringInterpolation } from '../utils/stringUtils';
+import { getCachedData, setCache, CACHE_EXPIRATION, createCacheKey } from '../utils/cacheUtils';
 
 interface CodeEditorProps {
   content: string;
@@ -17,7 +18,8 @@ interface CodeEditorProps {
   onCursorChange?: (line: number, column: number) => void;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ 
+// Memoize the component to prevent unnecessary re-renders
+const CodeEditor: React.FC<CodeEditorProps> = memo(({ 
   content, 
   onChange, 
   language, 
@@ -29,11 +31,34 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   const [cursorPosition, setCursorPosition] = useState({ line: 1, column: 1 });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
+  const [highlightedContent, setHighlightedContent] = useState<string>('');
 
   useEffect(() => {
     const lines = content.split('\n').length;
     setLineNumbers(Array.from({ length: Math.max(lines, 20) }, (_, i) => i + 1));
   }, [content]);
+  
+  // Use cached syntax highlighting to improve performance
+  useEffect(() => {
+    const getHighlightedContent = async () => {
+      const cacheKey = createCacheKey('syntax-highlight', language, content.length.toString());
+      
+      try {
+        const highlighted = await getCachedData<string>(
+          cacheKey,
+          async () => syntaxHighlight(content),
+          CACHE_EXPIRATION.LONG
+        );
+        
+        setHighlightedContent(highlighted);
+      } catch (error) {
+        // Fallback to direct highlighting if caching fails
+        setHighlightedContent(syntaxHighlight(content));
+      }
+    };
+    
+    getHighlightedContent();
+  }, [content, language]);
 
   const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
     const lineNumbersEl = document.querySelector('.line-numbers');
@@ -69,8 +94,11 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     onChange(content);
     handleCursorMove(e);
   };
+  
+  // Memoize the syntax highlighting function
+  const syntaxHighlight = useCallback((code: string) => {
+    if (!code) return '';
 
-  const syntaxHighlight = (code: string) => {
     if (language === 'rust') {
       return code
         // Comments first (VS Code: #6A9955)
@@ -250,9 +278,9 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         // Function calls (VS Code: #DCDCAA)
         .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, '<span style="color: #DCDCAA;">$1</span>');
     }
-    
+
     return code;
-  };
+  }, [language]);
 
   return (
     <div className="flex h-full bg-[#1e1e1e] text-[#d4d4d4] font-mono text-sm">
@@ -270,7 +298,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         <div 
           ref={highlightRef}
           className="absolute inset-0 p-4 pointer-events-none whitespace-pre-wrap break-words font-mono text-sm leading-6 overflow-auto"
-          dangerouslySetInnerHTML={{ __html: syntaxHighlight(content) }}
+          dangerouslySetInnerHTML={{ __html: highlightedContent }}
           style={{ 
             zIndex: 1,
             scrollbarWidth: 'none',
@@ -296,6 +324,9 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       </div>
     </div>
   );
-};
+});
+
+// Add display name for debugging
+CodeEditor.displayName = 'CodeEditor';
 
 export default CodeEditor;

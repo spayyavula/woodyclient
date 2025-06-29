@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight, File, Folder, FolderOpen } from 'lucide-react';
+import { getCachedData, setCache, CACHE_EXPIRATION, createCacheKey } from '../utils/cacheUtils';
 
 interface FileNode {
   name: string;
@@ -14,7 +15,7 @@ interface FileExplorerProps {
 }
 
 const FileExplorer: React.FC<FileExplorerProps> = ({ onFileSelect, selectedFile }) => {
-  const [fileTree, setFileTree] = useState<FileNode[]>([
+  const initialFileTree: FileNode[] = [
     {
       name: 'mobile-rust-app',
       type: 'folder',
@@ -94,7 +95,37 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ onFileSelect, selectedFile 
         { name: 'README.md', type: 'file' },
       ],
     },
-  ]);
+  ];
+  
+  const [fileTree, setFileTree] = useState<FileNode[]>(initialFileTree);
+  
+  // Load file tree from cache on mount and save on update
+  useEffect(() => {
+    const loadFileTree = async () => {
+      const cacheKey = createCacheKey('file-explorer', 'tree');
+      const cachedTree = await getCachedData<FileNode[]>(
+        cacheKey,
+        async () => initialFileTree,
+        CACHE_EXPIRATION.VERY_LONG
+      );
+      
+      if (cachedTree) {
+        setFileTree(cachedTree);
+      }
+    };
+    
+    loadFileTree();
+  }, []);
+  
+  // Save file tree to cache when it changes
+  useEffect(() => {
+    const saveFileTree = async () => {
+      const cacheKey = createCacheKey('file-explorer', 'tree');
+      await setCache(cacheKey, fileTree, CACHE_EXPIRATION.VERY_LONG);
+    };
+    
+    saveFileTree();
+  }, [fileTree]);
 
   const toggleFolder = (path: string[]) => {
     const updateNode = (nodes: FileNode[], currentPath: string[]): FileNode[] => {

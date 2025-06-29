@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, cachedQuery, createSupabaseQueryKey } from '../lib/supabase';
+import { CACHE_EXPIRATION } from '../utils/cacheUtils';
 
 // Default values for when no deployment exists
 const DEFAULT_PROGRESS = 65;
@@ -52,9 +53,15 @@ export const useDeploymentProgress = (deploymentId?: number) => {
 
     try {
       // Use the RPC function to get deployment progress with fallback
-      let { data: deploymentData, error: deploymentError } = await supabase
-        .rpc('get_deployment_progress', { p_deployment_id: deploymentId })
-        .single();
+      // Create a cache key for this specific deployment
+      const progressCacheKey = createSupabaseQueryKey('deployment_progress', deploymentId?.toString() || '');
+      
+      // Use cached query with a short expiration for real-time data
+      let { data: deploymentData, error: deploymentError } = await cachedQuery(
+        () => supabase.rpc('get_deployment_progress', { p_deployment_id: deploymentId }).single(),
+        progressCacheKey,
+        CACHE_EXPIRATION.SHORT // Short cache time for progress data
+      );
 
       if (deploymentError) {
         console.warn('Error fetching deployment:', deploymentError);
@@ -78,8 +85,15 @@ export const useDeploymentProgress = (deploymentId?: number) => {
       };
 
       // Use the RPC function to get events with fallback
-      let { data: events, error: eventsError } = await supabase
-        .rpc('get_deployment_events', { p_deployment_id: deploymentId });
+      // Create a cache key for events
+      const eventsCacheKey = createSupabaseQueryKey('deployment_events', deploymentId?.toString() || '');
+      
+      // Use cached query with a short expiration for events
+      let { data: events, error: eventsError } = await cachedQuery(
+        () => supabase.rpc('get_deployment_events', { p_deployment_id: deploymentId }),
+        eventsCacheKey,
+        CACHE_EXPIRATION.SHORT // Short cache time for events
+      );
 
       if (eventsError) {
         console.warn('Error fetching events:', eventsError);
