@@ -47,7 +47,6 @@ interface ToolbarProps {
   onShowTemplates: () => void;
   onShowTemplateMarketplace: () => void;
   onShowFeatureRequestForm: () => void;
-  onShowFeatureRequestForm: () => void;
   onShowMobilePreview: () => void;
   onShowStripeTests: () => void;
   onShowDeploymentTemplates: () => void;
@@ -69,7 +68,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onShowDeploymentStatus,
   onShowDeploymentTemplates,
   onShowTemplateMarketplace,
-  onShowFeatureRequestForm,
   onShowFeatureRequestForm,
   onShowMobilePreview,
   onShowScriptRunner,
