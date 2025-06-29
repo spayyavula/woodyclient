@@ -4,7 +4,6 @@ import {
   Play, 
   Square, 
   PlusCircle,
-  PlusCircle,
   Save, 
   Folder, 
   FileText, 
