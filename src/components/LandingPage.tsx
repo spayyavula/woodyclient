@@ -105,42 +105,55 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
 
   const features = [
     {
-      icon: <Code className="w-8 h-8" />,
+      iconName: "Code",
       title: "Ultra-Fast Analysis Engine",
       description: "Blazing-fast code analysis powered by Rust's zero-cost abstractions. Process millions of lines in seconds with memory-safe performance.",
       color: "from-orange-500 to-red-500"
     },
     {
-      icon: <Shield className="w-8 h-8" />,
+      iconName: "Shield",
       title: "Enterprise-Grade Security",
       description: "Zero-trust architecture with end-to-end encryption, secure sandboxing, and SOC 2 Type II compliance for all platforms.",
       color: "from-blue-500 to-cyan-500"
     },
     {
-      icon: <Cpu className="w-8 h-8" />,
+      iconName: "Cpu",
       title: "Multi-Platform Performance",
       description: "Native performance on Windows, macOS, Linux, and web. WebAssembly compilation for browser-native speed.",
       color: "from-purple-500 to-pink-500"
     },
     {
-      icon: <Zap className="w-8 h-8" />,
+      iconName: "Zap",
       title: "Global Developer Network",
       description: "Connect with 50,000+ expert developers across 180+ countries. 24/7 coverage with real-time collaboration tools.",
       color: "from-green-500 to-emerald-500"
     },
     {
-      icon: <GitBranch className="w-8 h-8" />,
+      iconName: "GitBranch",
       title: "Worldwide Collaboration",
       description: "Real-time code collaboration across timezones. GitHub integration, automated workflows, and global project management.",
       color: "from-gray-500 to-slate-500"
     },
     {
-      icon: <Workflow className="w-8 h-8" />,
+      iconName: "Workflow",
       title: "Global Marketplace",
       description: "Hire experts worldwide, post global requests, and access a marketplace of 50,000+ developers with verified skills and ratings.",
       color: "from-orange-500 to-amber-500"
     }
   ];
+
+  // Icon mapping for dynamic rendering
+  const getIcon = (iconName: string) => {
+    const iconMap: { [key: string]: React.ReactElement } = {
+      Code: <Code className="w-8 h-8" />,
+      Shield: <Shield className="w-8 h-8" />,
+      Cpu: <Cpu className="w-8 h-8" />,
+      Zap: <Zap className="w-8 h-8" />,
+      GitBranch: <GitBranch className="w-8 h-8" />,
+      Workflow: <Workflow className="w-8 h-8" />
+    };
+    return iconMap[iconName] || <Code className="w-8 h-8" />;
+  };
 
   const testimonials = [
     {
@@ -408,7 +421,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, loading, e
                 >
                   <div className="flex items-start space-x-4">
                     <div className={`p-3 rounded-lg bg-gradient-to-br ${feature.color}`}>
-                      {feature.icon}
+                      {getIcon(feature.iconName)}
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
