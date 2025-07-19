@@ -57,6 +57,44 @@ interface Template {
 }
 
 function App() {
+  const getFileContent = useCallback((fileName: string): string => {
+    // Return appropriate content based on file type
+    if (fileName.endsWith('.rs')) {
+      return `// Rust file: ${fileName}
+fn main() {
+    println!("Hello from {}!", "${fileName}");
+}`;
+    } else if (fileName.endsWith('.dart')) {
+      return `// Flutter/Dart file: ${fileName}
+void main() {
+  print('Hello from ${fileName}!');
+}`;
+    } else if (fileName.endsWith('.kt')) {
+      return `// Kotlin file: ${fileName}
+fun main() {
+    println("Hello from ${fileName}!")
+}`;
+    }
+    return `// ${fileName}
+console.log('Hello from ${fileName}!');`;
+  }, []);
+
+  const getLanguageFromFileName = useCallback((fileName: string): string => {
+    if (fileName.endsWith('.rs')) return 'rust';
+    if (fileName.endsWith('.dart')) return 'dart';
+    if (fileName.endsWith('.kt')) return 'kotlin';
+    if (fileName.endsWith('.ts') || fileName.endsWith('.tsx')) return 'typescript';
+    if (fileName.endsWith('.js') || fileName.endsWith('.jsx')) return 'javascript';
+    if (fileName.endsWith('.py')) return 'python';
+    if (fileName.endsWith('.java')) return 'java';
+    if (fileName.endsWith('.swift')) return 'swift';
+    if (fileName.endsWith('.m')) return 'objective-c';
+    if (fileName.endsWith('.toml')) return 'toml';
+    if (fileName.endsWith('.xml')) return 'xml';
+    if (fileName.endsWith('.json')) return 'json';
+    return 'text';
+  }, []);
+
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
@@ -372,44 +410,6 @@ mod tests {
     await supabase.auth.signOut();
     setUser(null);
     setShowProfile(false);
-  }, []);
-
-  const getFileContent = useCallback((fileName: string): string => {
-    // Return appropriate content based on file type
-    if (fileName.endsWith('.rs')) {
-      return `// Rust file: ${fileName}
-fn main() {
-    println!("Hello from {}!", "${fileName}");
-}`;
-    } else if (fileName.endsWith('.dart')) {
-      return `// Flutter/Dart file: ${fileName}
-void main() {
-  print('Hello from ${fileName}!');
-}`;
-    } else if (fileName.endsWith('.kt')) {
-      return `// Kotlin file: ${fileName}
-fun main() {
-    println("Hello from ${fileName}!")
-}`;
-    }
-    return `// ${fileName}
-console.log('Hello from ${fileName}!');`;
-  }, []);
-
-  const getLanguageFromFileName = useCallback((fileName: string): string => {
-    if (fileName.endsWith('.rs')) return 'rust';
-    if (fileName.endsWith('.dart')) return 'dart';
-    if (fileName.endsWith('.kt')) return 'kotlin';
-    if (fileName.endsWith('.ts') || fileName.endsWith('.tsx')) return 'typescript';
-    if (fileName.endsWith('.js') || fileName.endsWith('.jsx')) return 'javascript';
-    if (fileName.endsWith('.py')) return 'python';
-    if (fileName.endsWith('.java')) return 'java';
-    if (fileName.endsWith('.swift')) return 'swift';
-    if (fileName.endsWith('.m')) return 'objective-c';
-    if (fileName.endsWith('.toml')) return 'toml';
-    if (fileName.endsWith('.xml')) return 'xml';
-    if (fileName.endsWith('.json')) return 'json';
-    return 'text';
   }, []);
 
   const handleFileSelect = useCallback((filePath: string) => {
