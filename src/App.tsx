@@ -374,26 +374,6 @@ mod tests {
     setShowProfile(false);
   }, []);
 
-  const handleFileSelect = useCallback((filePath: string) => {
-    setSelectedFile(filePath);
-    const fileName = filePath.split('/').pop() || 'unknown';
-    
-    // Check if tab already exists
-    const existingTab = tabs.find(tab => tab.id === fileName);
-    if (!existingTab) {
-      // Create new tab with sample content based on file type
-      const newTab: Tab = {
-        id: fileName,
-        name: fileName,
-        content: getFileContent(fileName),
-        language: getLanguageFromFileName(fileName),
-        isDirty: false,
-      };
-      setTabs(prev => [...prev, newTab]);
-    }
-    setActiveTab(fileName);
-  }, [tabs, getFileContent, getLanguageFromFileName]);
-
   const getFileContent = useCallback((fileName: string): string => {
     // Return appropriate content based on file type
     if (fileName.endsWith('.rs')) {
@@ -431,6 +411,26 @@ console.log('Hello from ${fileName}!');`;
     if (fileName.endsWith('.json')) return 'json';
     return 'text';
   }, []);
+
+  const handleFileSelect = useCallback((filePath: string) => {
+    setSelectedFile(filePath);
+    const fileName = filePath.split('/').pop() || 'unknown';
+    
+    // Check if tab already exists
+    const existingTab = tabs.find(tab => tab.id === fileName);
+    if (!existingTab) {
+      // Create new tab with sample content based on file type
+      const newTab: Tab = {
+        id: fileName,
+        name: fileName,
+        content: getFileContent(fileName),
+        language: getLanguageFromFileName(fileName),
+        isDirty: false,
+      };
+      setTabs(prev => [...prev, newTab]);
+    }
+    setActiveTab(fileName);
+  }, [tabs, getFileContent, getLanguageFromFileName]);
 
   const handleTabClose = useCallback((tabId: string) => {
     setTabs(prev => prev.filter(tab => tab.id !== tabId));
